@@ -27,12 +27,13 @@ var dashBreakPart = parse.StringFrom(parse.Rune('-'), parse.StringFrom(parse.AtL
 var underscoreBreakPart = parse.StringFrom(parse.Rune('_'), parse.StringFrom(parse.AtLeast(0, parse.RuneIn(" \t"))))
 var asteriskBreakPart = parse.StringFrom(parse.Rune('*'), parse.StringFrom(parse.AtLeast(0, parse.RuneIn(" \t"))))
 
-var dashBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, dashBreakPart))
-var underscoreBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, underscoreBreakPart))
-var asteriskBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, asteriskBreakPart))
+
+var dashBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, dashBreakPart), parse.Times(1, parse.NewLine))
+var underscoreBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, underscoreBreakPart), parse.Times(1, parse.NewLine))
+var asteriskBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, asteriskBreakPart), parse.Times(1, parse.NewLine))
 
 
-var thematicBreakParser parse.Parser[ThematicBreak] = parse.Func(func(in *parse.Input) (ThematicBreak, bool, error) {
+var ThematicBreakParser parse.Parser[ThematicBreak] = parse.Func(func(in *parse.Input) (ThematicBreak, bool, error) {
     if _, ok, error := dashBreak.Parse(in); ok {
         if error != nil {
             return ThematicBreak{}, false, error
