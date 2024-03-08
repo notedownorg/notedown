@@ -61,10 +61,12 @@ Hello, World!
             expected: leaf.FrontMatter(""),
         },
         {
-            name: "frontmatter yaml with leading and trailing newline",
+            name: "frontmatter yaml with leading and trailing newlines",
             input: `---
 
+
 title: "Hello, World!"
+
 
 ---
 `,
