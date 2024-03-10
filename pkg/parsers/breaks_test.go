@@ -1,30 +1,26 @@
-package leaf_test
+package parsers_test
 
 import (
 	"testing"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/parsers/leaf"
+	"github.com/liamawhite/nl/pkg/parsers"
 )
 
 func TestThematicBreak(t *testing.T) {
 	tests := []struct {
 		input    string
-		expected leaf.ThematicBreak
 		notFound bool
 	}{
 		// These test cases follow the examples from the spec, in order.
 		{
 			input:    "---\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterDash},
 		},
 		{
 			input:    "___\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterUnderscore},
 		},
 		{
 			input:    "***\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterAsterisk},
 		},
 		{
 			input:    "+++\n",
@@ -48,15 +44,12 @@ func TestThematicBreak(t *testing.T) {
 		},
 		{
 			input:    " ***\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterAsterisk},
 		},
 		{
 			input:    "  ***\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterAsterisk},
 		},
 		{
 			input:    "   ***\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterAsterisk},
 		},
 		{
 			input:    "    ***\n",
@@ -65,23 +58,18 @@ func TestThematicBreak(t *testing.T) {
 		// Skip the foo one as it's more general than just thematic breaks.
 		{
 			input:    "_____________________________________\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterUnderscore},
 		},
 		{
 			input:    " - - -\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterDash},
 		},
 		{
 			input:    " **  * ** * ** * **\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterAsterisk},
 		},
 		{
 			input:    "-     -      -      -\n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterDash},
 		},
 		{
 			input:    "- - - -    \n",
-			expected: leaf.ThematicBreak{Character: leaf.ThematicBreakCharacterDash},
 		},
         {
             input:    "_ _ _ _ a\n",
@@ -106,7 +94,7 @@ func TestThematicBreak(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			in := parse.NewInput(test.input)
-			result, found, _ := leaf.ThematicBreakParser.Parse(in)
+			result, found, _ := parsers.ThematicBreak.Parse(in)
 			if test.notFound {
 				if found {
 					t.Fatal("expected not found")
@@ -118,8 +106,8 @@ func TestThematicBreak(t *testing.T) {
                 return
 			}
 
-			if result != test.expected {
-				t.Fatalf("expected %#v, but got %#v", test.expected, result)
+			if result != test.input {
+				t.Fatalf("expected %#v, but got %#v", test.input, result)
 			}
 		})
 	}

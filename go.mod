@@ -5,6 +5,7 @@ go 1.21.6
 require (
 	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a
 	github.com/stretchr/testify v1.9.0
+	github.com/teambition/rrule-go v1.8.2
 	sigs.k8s.io/yaml v1.4.0
 )
 

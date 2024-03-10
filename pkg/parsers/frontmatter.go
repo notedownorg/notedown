@@ -1,4 +1,4 @@
-package leaf
+package parsers
 
 import (
 	"encoding/json"
@@ -12,10 +12,10 @@ type FrontMatter []byte
 
 var frontMatterKeyword = parse.String("---")
 
-var frontMatterOpen = parse.StringFrom(frontMatterKeyword, parse.StringFrom(parse.AtLeast(0, parse.RuneIn(" \t"))), parse.StringFrom(parse.AtLeast(1, parse.NewLine)))
-var frontMatterClose = parse.StringFrom(parse.StringFrom(parse.AtLeast(0, parse.NewLine)), frontMatterOpen)
+var frontMatterOpen = parse.StringFrom(frontMatterKeyword, remainingInlineWhitespace, parse.StringFrom(parse.AtLeast(1, parse.NewLine)))
+var frontMatterClose = parse.StringFrom(parse.StringFrom(parse.AtLeast(0, parse.NewLine)), frontMatterKeyword, remainingInlineWhitespace)
 
-var FrontMatterParser parse.Parser[FrontMatter] = parse.Func(func(in *parse.Input) (FrontMatter, bool, error) {
+var Frontmatter parse.Parser[FrontMatter] = parse.Func(func(in *parse.Input) (FrontMatter, bool, error) {
 	// Read and discard the front matter open.
 	if _, ok, err := frontMatterOpen.Parse(in); err != nil || !ok {
 		return nil, false, err

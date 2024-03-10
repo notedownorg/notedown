@@ -1,10 +1,10 @@
-package leaf_test
+package parsers_test
 
 import (
 	"testing"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/parsers/leaf"
+	"github.com/liamawhite/nl/pkg/parsers"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,24 +12,22 @@ func TestFrontMatter(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected leaf.FrontMatter
+		expected parsers.FrontMatter
 		notFound bool
 	}{
 		{
 			name: "valid frontmatter",
 			input: `---
 title: "Hello, World!"
----
-`,
-			expected: leaf.FrontMatter(`title: "Hello, World!"`),
+---`,
+			expected: parsers.FrontMatter(`title: "Hello, World!"`),
 		},
         {
             name: "invalid yaml in frontmatter",
             input: `---
 title:
 Hello, World!
----
-`,
+---`,
             notFound: true,
         },
         {
@@ -40,25 +38,22 @@ Hello, World!
         {
             name: "empty frontmatter",
             input: `---
----
-`,
-            expected: leaf.FrontMatter(""),
+---`,
+            expected: parsers.FrontMatter(""),
         },
         {
             name: "empty frontmatter with whitespace",
             input: `---
       
----
-`,
-            expected: leaf.FrontMatter("      "), // there are 6 spaces in the input
+---`,
+            expected: parsers.FrontMatter("      "), // there are 6 spaces in the input
         },
         {
             name: "empty frontmatter with newline",
             input: `---
 
----
-`,
-            expected: leaf.FrontMatter(""),
+---`,
+            expected: parsers.FrontMatter(""),
         },
         {
             name: "frontmatter yaml with leading and trailing newlines",
@@ -68,16 +63,15 @@ Hello, World!
 title: "Hello, World!"
 
 
----
-`,
-            expected: leaf.FrontMatter(`title: "Hello, World!"`),
+---`,
+            expected: parsers.FrontMatter(`title: "Hello, World!"`),
         },
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			in := parse.NewInput(test.input)
-			fm, ok, _ := leaf.FrontMatterParser.Parse(in)
+			fm, ok, _ := parsers.Frontmatter.Parse(in)
 
 			if test.notFound {
 				if ok {
