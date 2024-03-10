@@ -177,6 +177,10 @@ var Task = parse.Func(func(in *parse.Input) (api.Task, bool, error) {
 	// Name
 	res.Name = strings.TrimSpace(name)
 
+    // Consume to the rest of the line.
+    parse.StringUntil(parse.NewLine).Parse(in)
+    parse.NewLine.Parse(in)
+
 	return res, true, nil
 })
 

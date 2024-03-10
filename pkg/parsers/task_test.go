@@ -121,6 +121,7 @@ func TestTask(t *testing.T) {
 				t.Fatal("expected found")
 			}
 			assert.Equal(t, test.expected, result)
+            assert.Equal(t, len(test.input), in.Index(), "expected to consume the entire input")
 		})
 	}
 }
