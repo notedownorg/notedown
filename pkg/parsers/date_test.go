@@ -62,3 +62,303 @@ func TestYearMonthDay(t *testing.T) {
         })
     }
 }
+
+func TestDayOfWeek(t *testing.T) {
+    tests := []struct {
+        input string
+        want  time.Weekday
+        notFound bool
+    }{
+        {
+            input: "monday",
+            want:  time.Monday,
+        },
+        {
+            input: "mon",
+            want:  time.Monday,
+        },
+        {
+            input: "tuesday",
+            want:  time.Tuesday,
+        },
+        {
+            input: "tues",
+            want:  time.Tuesday,
+        },
+        {
+            input: "tue",
+            want:  time.Tuesday,
+        },
+        {
+            input: "wednesday",
+            want:  time.Wednesday,
+        },
+        {
+            input: "weds",
+            want:  time.Wednesday,
+        },
+        {
+            input: "wed",
+            want:  time.Wednesday,
+        },
+        {
+            input: "thursday",
+            want:  time.Thursday,
+        },
+        {
+            input: "thurs",
+            want:  time.Thursday,
+        },
+        {
+            input: "thur",
+            want:  time.Thursday,
+        },
+        {
+            input: "thu",
+            want:  time.Thursday,
+        },
+        {
+            input: "friday",
+            want:  time.Friday,
+        },
+        {
+            input: "fri",
+            want:  time.Friday,
+        },
+        {
+            input: "saturday",
+            want:  time.Saturday,
+        },
+        {
+            input: "sat",
+            want:  time.Saturday,
+        },
+        {
+            input: "sunday",
+            want:  time.Sunday,
+        },
+        {
+            input: "sun",
+            want:  time.Sunday,
+        },
+        {
+            input: "foo",
+            notFound: true,
+        },
+    }
+    for _, tt := range tests {
+        t.Run(tt.input, func(t *testing.T) {
+            input := parse.NewInput(tt.input)
+            got, found, _ := parsers.DayOfWeek.Parse(input)
+            if tt.notFound {
+                if found {
+                    t.Fatalf("expected not found, got %v", got)
+                }
+                return
+            }
+            if !found {
+                t.Fatalf("expected found, got not found")
+            }
+            assert.Equal(t, tt.want, got)
+            assert.Equal(t, len(tt.input), input.Index(), "expected input to be consumed")
+        })
+    }
+}
+
+func TestDaysOfWeek(t *testing.T) {
+    tests := []struct {
+        input string
+        want  []time.Weekday
+        notFound bool
+    }{
+        {
+            input: "monday",
+            want:  []time.Weekday{time.Monday},
+        },
+        {
+            input: "mon tues wed thu fri sat sunday",
+            want:  []time.Weekday{time.Monday, time.Tuesday, time.Wednesday, time.Thursday, time.Friday, time.Saturday, time.Sunday},
+        },
+        {
+            input: "not a day",
+            notFound: true,
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.input, func(t *testing.T) {
+            input := parse.NewInput(tt.input)
+            got, found, _ := parsers.DaysOfWeek.Parse(input)
+            if tt.notFound {
+                if found {
+                    t.Fatalf("expected not found, got %v", got)
+                }
+                return
+            }
+            assert.Equal(t, tt.want, got)
+            assert.Equal(t, len(tt.input), input.Index(), "expected input to be consumed")
+        })
+    }
+}
+
+func TestMonthDay(t *testing.T) {
+    tests := []struct {
+        input string
+        want  int
+        notFound bool
+    }{
+        {
+            input: "1st",
+            want:  1,
+        },
+        {
+            input: "1",
+            want:  1,
+        },
+        {
+            input: "2nd",
+            want:  2,
+        },
+        {
+            input: "3rd",
+            want:  3,
+        },
+        {
+            input: "4th",
+            want:  4,
+        },
+    }
+    for _, tt := range tests {
+        t.Run(tt.input, func(t *testing.T) {
+            input := parse.NewInput(tt.input)
+            got, found, _ := parsers.MonthDay.Parse(input)
+            if tt.notFound {
+                if found {
+                    t.Fatalf("expected not found, got %v", got)
+                }
+                return
+            }
+            assert.Equal(t, tt.want, got)
+            assert.Equal(t, len(tt.input), input.Index(), "expected input to be consumed")
+        })
+    }
+}
+
+func TestMonthOfYear(t *testing.T) {
+    tests := []struct {
+        input string
+        want  time.Month
+        notFound bool
+    }{
+        {
+            input: "january",
+            want:  time.January,
+        },
+        {
+            input: "jan",
+            want:  time.January,
+        },
+        {
+            input: "february",
+            want:  time.February,
+        },
+        {
+            input: "feb",
+            want:  time.February,
+        },
+        {
+            input: "march",
+            want:  time.March,
+        },
+        {
+            input: "mar",
+            want:  time.March,
+        },
+        {
+            input: "april",
+            want:  time.April,
+        },
+        {
+            input: "apr",
+            want:  time.April,
+        },
+        {
+            input: "may",
+            want:  time.May,
+        },
+        {
+            input: "june",
+            want:  time.June,
+        },
+        {
+            input: "jun",
+            want:  time.June,
+        },
+        {
+            input: "july",
+            want:  time.July,
+        },
+        {
+            input: "jul",
+            want:  time.July,
+        },
+        {
+            input: "august",
+            want:  time.August,
+        },
+        {
+            input: "aug",
+            want:  time.August,
+        },
+        {
+            input: "september",
+            want:  time.September,
+        },
+        {
+            input: "sep",
+            want:  time.September,
+        },
+        {
+            input: "october",
+            want:  time.October,
+        },
+        {
+            input: "oct",
+            want:  time.October,
+        },
+        {
+            input: "november",
+            want:  time.November,
+        },
+        {
+            input: "nov",
+            want:  time.November,
+        },
+        {
+            input: "december",
+            want:  time.December,
+        },
+        {
+            input: "dec",
+            want:  time.December,
+        },
+        {
+            input: "foo",
+            notFound: true,
+        },
+    }
+    for _, tt := range tests {
+        t.Run(tt.input, func(t *testing.T) {
+            input := parse.NewInput(tt.input)
+            got, found, _ := parsers.MonthOfYear.Parse(input)
+            if tt.notFound {
+                if found {
+                    t.Fatalf("expected not found, got %v", got)
+                }
+                return
+            }
+            assert.Equal(t, tt.want, got)
+            assert.Equal(t, len(tt.input), input.Index(), "expected input to be consumed")
+        })
+    }
+}
