@@ -239,7 +239,7 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		start := in.Index()
 
 		// Start name with the rest of the line. If we find a field (i.e. theres a shorter name) we'll use that.
-		name, ok, err := parse.StringUntil(parse.NewLine).Parse(in)
+		name, ok, err := parse.StringUntil(newLineOrEOF).Parse(in)
 		if err != nil || !ok {
 			return api.Task{}, false, err
 		}
@@ -316,9 +316,8 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// Name
 		res.Name = strings.TrimSpace(name)
 
-		// Consume to the next line.
-		parse.StringUntil(parse.NewLine).Parse(in)
-		parse.NewLine.Parse(in)
+		// Consume to the next line or eof.
+		parse.StringUntil(newLineOrEOF).Parse(in)
 
 		return res, true, nil
 	})

@@ -8,3 +8,4 @@ var remainingInlineWhitespace = parse.StringFrom(parse.ZeroOrMore(inlineWhitespa
 
 var remainingWhitespace = parse.StringFrom(parse.ZeroOrMore(parse.Any(inlineWhitespaceRunes, parse.NewLine)))
 
+var newLineOrEOF = parse.Any(parse.NewLine, parse.EOF[string]())
