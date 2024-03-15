@@ -102,6 +102,11 @@ func TestTask(t *testing.T) {
 			input:    "- [ ] Task scheduled:2021-01-01",
 			expected: api.Task{Status: api.Todo, Name: "Task", Scheduled: date(2021, 1, 1)},
 		},
+        {
+            name:     "Completed date",
+            input:    "- [ ] Task completed:2021-01-01",
+            expected: api.Task{Status: api.Todo, Name: "Task", Completed: date(2021, 1, 1)},
+        },
 		{
 			name:     "Priority",
 			input:    "- [ ] Task priority:1",
@@ -119,13 +124,13 @@ func TestTask(t *testing.T) {
         },
         {
             name:     "All fields long",
-            input:    "- [ ] Task due:2021-01-01 every:mon wed fri scheduled:2021-01-01 priority:1",
-            expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
+            input:    "- [ ] Task due:2021-01-01 every:mon wed fri scheduled:2021-01-01 completed:2021-01-01 priority:1",
+            expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021,1,1), Priority: intPtr(1), Every: spacesRule},
         },
         {
             name:     "All fields short",
-            input:    "- [ ] Task d:2021-01-01 e:mon wed fri s:2021-01-01 p:1",
-            expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
+            input:    "- [ ] Task d:2021-01-01 e:mon wed fri s:2021-01-01 p:1 completed:2021-01-01",
+            expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
         },
 	}
 	for _, test := range tests {
@@ -191,6 +196,30 @@ func TestScheduledDate(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			in := parse.NewInput(test.input)
 			result, found, _ := scheduledParser.Parse(in)
+			if !found {
+				t.Fatal("expected found")
+			}
+			assert.Equal(t, test.expected, result)
+		})
+	}
+}
+
+func TestCompletedDate(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected time.Time
+	}{
+		{
+			name:     "Long",
+			input:    "completed:2021-01-01",
+			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			in := parse.NewInput(test.input)
+			result, found, _ := completedParser.Parse(in)
 			if !found {
 				t.Fatal("expected found")
 			}
@@ -530,3 +559,5 @@ func TestEvery(t *testing.T) {
         })
     }
 }
+
+

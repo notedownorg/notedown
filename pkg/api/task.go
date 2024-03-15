@@ -22,6 +22,7 @@ type Task struct {
 	Status    Status
 	Due       *time.Time
 	Scheduled *time.Time
+    Completed *time.Time
 	Priority  *int
 	Every     *rrule.RRule
 	Project   string

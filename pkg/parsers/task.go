@@ -62,9 +62,10 @@ var listItemOpen = parse.StringFrom(remainingInlineWhitespace, parse.Rune('-'), 
 
 var dueKey = parse.Any(parse.String("due:"), parse.String("d:"))
 var scheduledKey = parse.Any(parse.String("scheduled:"), parse.String("s:"))
+var completedKey = parse.Any(parse.String("completed:"))
 var everyKey = parse.Any(parse.String("every:"), parse.String("e:"))
 var priorityKey = parse.Any(parse.String("priority:"), parse.String("p:"))
-var anyFieldKey = parse.Any(dueKey, scheduledKey, everyKey, priorityKey)
+var anyFieldKey = parse.Any(dueKey, scheduledKey, everyKey, priorityKey, completedKey)
 
 var dueParser = parse.Func(func(in *parse.Input) (time.Time, bool, error) {
 	_, ok, err := dueKey.Parse(in)
@@ -80,6 +81,14 @@ var scheduledParser = parse.Func(func(in *parse.Input) (time.Time, bool, error) 
 		return time.Time{}, false, err
 	}
 	return YearMonthDay.Parse(in)
+})
+
+var completedParser = parse.Func(func(in *parse.Input) (time.Time, bool, error) {
+    _, ok, err := completedKey.Parse(in)
+    if err != nil || !ok {
+        return time.Time{}, false, err
+    }
+    return YearMonthDay.Parse(in)
 })
 
 var priorityParser = parse.Func(func(in *parse.Input) (int, bool, error) {
@@ -276,6 +285,23 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 				return api.Task{}, false, err
 			}
 			res.Scheduled = &scheduled
+			in.Seek(start)
+		}
+
+		// Completed
+		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
+		candidate, ok, err = parse.StringUntil(parse.StringFrom(parse.Rune(' '), completedKey)).Parse(in)
+		if err != nil {
+			return api.Task{}, false, err
+		}
+		name = evaluateCandidate(ok, candidate, name)
+		if ok {
+			parse.Rune(' ').Parse(in) // pop the space
+			completed, ok, err := completedParser.Parse(in)
+			if err != nil || !ok {
+				return api.Task{}, false, err
+			}
+			res.Completed = &completed
 			in.Seek(start)
 		}
 
