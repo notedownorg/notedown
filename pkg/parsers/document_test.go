@@ -66,7 +66,7 @@ This is some more text`,
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
             fmt.Println(len(tt.input))
-			got, found, _ := Document(relativeTo).Parse(input)
+			got, found, _ := DocumentParser(relativeTo).Parse(input)
 			if tt.notFound {
 				if found {
 					t.Fatalf("expected not found, got %v", got)

@@ -9,7 +9,21 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-var Document = func(relativeTo time.Time) parse.Parser[api.Document] {
+var Document = func(relativeTo time.Time) func (string) (api.Document, error) {
+    return func(input string) (api.Document, error) {
+        p := parse.NewInput(input)
+        res, ok, err := DocumentParser(relativeTo).Parse(p)
+        if err != nil {
+            return api.Document{}, fmt.Errorf("unable to parse document: %w", err)
+        }
+        if !ok {
+            return api.Document{}, fmt.Errorf("unable to parse document")
+        }
+        return res, nil
+    }
+}
+
+var DocumentParser = func(relativeTo time.Time) parse.Parser[api.Document] {
 	return parse.Func(func(in *parse.Input) (api.Document, bool, error) {
 		var res api.Document
 
