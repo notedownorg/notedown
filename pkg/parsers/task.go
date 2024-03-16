@@ -230,6 +230,8 @@ var everyParser = func(relativeTo time.Time) parse.Parser[rrule.RRule] {
 
 var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 	return parse.Func(func(in *parse.Input) (api.Task, bool, error) {
+		res := api.Task{Line: in.Position().Line}
+
 		// Read and dump the list item open
 		_, ok, err := listItemOpen.Parse(in)
 		if err != nil || !ok {
@@ -241,10 +243,10 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		if err != nil || !ok {
 			return api.Task{}, false, err
 		}
+        res.Status = status
 
 		// Attempt to parse each of the fields resetting the input index each time.
 		// Keep track of the shortest until string as that will be our name.
-		res := api.Task{Status: status}
 		start := in.Index()
 
 		// Start name with the rest of the line. If we find a field (i.e. theres a shorter name) we'll use that.

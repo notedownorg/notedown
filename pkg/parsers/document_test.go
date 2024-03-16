@@ -43,8 +43,8 @@ title: "Hello, World!"
 			want: api.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []api.Task{
-					{Name: "Task 1", Status: api.Todo},
-					{Name: "Task 2", Status: api.Doing},
+					{Name: "Task 1", Status: api.Todo, Line: 3},
+					{Name: "Task 2", Status: api.Doing, Line: 4},
 				},
 			},
 		},
@@ -56,8 +56,8 @@ This is some text
 This is some more text`,
             want: api.Document{
                 Tasks: []api.Task{
-                    {Name: "Task 1", Status: api.Todo},
-                    {Name: "Task 2", Status: api.Doing},
+                    {Name: "Task 1", Status: api.Todo, Line: 0},
+                    {Name: "Task 2", Status: api.Doing, Line: 2},
                 },
             },
         },

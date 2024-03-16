@@ -18,6 +18,7 @@ const (
 
 
 type Task struct {
+    Line        int
 	Name      string
 	Status    Status
 	Due       *time.Time
@@ -25,5 +26,4 @@ type Task struct {
     Completed *time.Time
 	Priority  *int
 	Every     *rrule.RRule
-	Project   string
 }
