@@ -346,6 +346,7 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 
 		// Consume to the next line or eof.
 		parse.StringUntil(newLineOrEOF).Parse(in)
+		newLineOrEOF.Parse(in)
 
 		return res, true, nil
 	})
