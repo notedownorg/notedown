@@ -63,19 +63,16 @@ var Block = func(relativeTo time.Time) parse.Parser[block] {
 		// Drop any leading newline
 		_, _, err := parse.NewLine.Parse(in)
 
-		// TODO: do something more correct than blindly looking for tasks in the input
-		// Read until we find a task
-		_, _, err = parse.StringUntil(Task(relativeTo)).Parse(in)
-		if err != nil {
-			return block{}, false, err
-		}
-
-		task, ok, err := Task(relativeTo).Parse(in)
-		if err != nil {
-			return block{}, false, err
-		}
-		if ok {
+		for {
+			task, ok, err := Task(relativeTo).Parse(in)
+			if err != nil {
+				return block{}, false, err
+			}
+			if !ok {
+				break
+			}
 			res.Tasks = append(res.Tasks, task)
+
 		}
 
 		// Process the input until the next newline or EOF as the current line isnt a task
