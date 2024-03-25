@@ -43,16 +43,16 @@ var DayOfWeek = parse.Func(func(in *parse.Input) (match time.Weekday, ok bool, e
 		time.Saturday:  parse.Any(parse.String("saturday"), parse.String("sat")),
 		time.Sunday:    parse.Any(parse.String("sunday"), parse.String("sun")),
 	}
-    
-    for day, parser := range m {
-        _, ok, err := parser.Parse(in)
-        if err != nil {
-            return time.Weekday(-1), false, err
-        }
-        if ok {
-            return day, true, nil
-        }
-    }
+
+	for day, parser := range m {
+		_, ok, err := parser.Parse(in)
+		if err != nil {
+			return time.Weekday(-1), false, err
+		}
+		if ok {
+			return day, true, nil
+		}
+	}
 
 	return time.Weekday(-1), false, nil
 })
@@ -120,8 +120,8 @@ var MonthOfYear = parse.Func(func(in *parse.Input) (match time.Month, ok bool, e
 		time.March:     parse.Any(parse.String("march"), parse.String("mar")),
 		time.April:     parse.Any(parse.String("april"), parse.String("apr")),
 		time.May:       parse.String("may"),
-        time.June:      parse.Any(parse.String("june"), parse.String("jun")),
-        time.July:      parse.Any(parse.String("july"), parse.String("jul")),
+		time.June:      parse.Any(parse.String("june"), parse.String("jun")),
+		time.July:      parse.Any(parse.String("july"), parse.String("jul")),
 		time.August:    parse.Any(parse.String("august"), parse.String("aug")),
 		time.September: parse.Any(parse.String("september"), parse.String("sept"), parse.String("sep")),
 		time.October:   parse.Any(parse.String("october"), parse.String("oct")),

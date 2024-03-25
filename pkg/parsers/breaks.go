@@ -15,10 +15,8 @@ var dashBreakPart = parse.StringFrom(parse.Rune('-'), remainingInlineWhitespace)
 var underscoreBreakPart = parse.StringFrom(parse.Rune('_'), remainingInlineWhitespace)
 var asteriskBreakPart = parse.StringFrom(parse.Rune('*'), remainingInlineWhitespace)
 
-
 var dashBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, dashBreakPart), parse.Times(1, parse.NewLine))
 var underscoreBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, underscoreBreakPart), parse.Times(1, parse.NewLine))
 var asteriskBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, asteriskBreakPart), parse.Times(1, parse.NewLine))
-
 
 var ThematicBreak = parse.Any(dashBreak, underscoreBreak, asteriskBreak)

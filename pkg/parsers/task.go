@@ -84,11 +84,11 @@ var scheduledParser = parse.Func(func(in *parse.Input) (time.Time, bool, error) 
 })
 
 var completedParser = parse.Func(func(in *parse.Input) (time.Time, bool, error) {
-    _, ok, err := completedKey.Parse(in)
-    if err != nil || !ok {
-        return time.Time{}, false, err
-    }
-    return YearMonthDay.Parse(in)
+	_, ok, err := completedKey.Parse(in)
+	if err != nil || !ok {
+		return time.Time{}, false, err
+	}
+	return YearMonthDay.Parse(in)
 })
 
 var priorityParser = parse.Func(func(in *parse.Input) (int, bool, error) {
@@ -243,7 +243,7 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		if err != nil || !ok {
 			return api.Task{}, false, err
 		}
-        res.Status = status
+		res.Status = status
 
 		// Attempt to parse each of the fields resetting the input index each time.
 		// Keep track of the shortest until string as that will be our name.
