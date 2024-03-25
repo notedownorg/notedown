@@ -74,7 +74,7 @@ func TestTask(t *testing.T) {
 		{
 			name:     "Leading space",
 			input:    " - [ ] Task",
-			expected: api.Task{Status: api.Todo, Name: "Task"},
+			expected: api.Task{Status: api.Todo, Name: "Task", Indent: 1},
 		},
 		{
 			name:     "Trailing space",
@@ -89,7 +89,7 @@ func TestTask(t *testing.T) {
 		{
 			name:     "Task name with lots of random spaces",
 			input:    "          - [ ]   Task   Name   ",
-			expected: api.Task{Status: api.Todo, Name: "Task   Name"},
+			expected: api.Task{Status: api.Todo, Name: "Task   Name", Indent: 10},
 		},
 		// Fields
 		{

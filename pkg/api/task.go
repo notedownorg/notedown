@@ -25,4 +25,6 @@ type Task struct {
 	Completed *time.Time
 	Priority  *int
 	Every     *rrule.RRule
+    Indent    int
+    SubTasks  []Task
 }

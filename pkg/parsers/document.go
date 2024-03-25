@@ -39,14 +39,17 @@ var DocumentParser = func(relativeTo time.Time) parse.Parser[api.Document] {
 			}
 		}
 
-		// Parse the rest of the file looking for blocks
-		blocks, ok, err := parse.Until(Block(relativeTo), parse.EOF[string]()).Parse(in)
-		if err != nil {
-			return api.Document{}, false, err
-		}
-		for _, b := range blocks {
-			res.Tasks = append(res.Tasks, b.Tasks...)
-		}
+        // Parse the rest of the file looking for blocks
+        blocks, ok, err := parse.Until(Block(relativeTo), parse.EOF[string]()).Parse(in)
+        if err != nil {
+            return api.Document{}, false, err
+        }
+        for _, b := range blocks {
+            if len(b.Tasks) > 0 {
+                fmt.Printf("adding block with %v tasks\n", len(b.Tasks))
+                res.Tasks = append(res.Tasks, b.Tasks...)
+            }
+        }
 
 		return res, true, nil
 	})
@@ -56,6 +59,7 @@ type block struct {
 	Tasks []api.Task
 }
 
+
 var Block = func(relativeTo time.Time) parse.Parser[block] {
 	return parse.Func(func(in *parse.Input) (block, bool, error) {
 		var res block
@@ -63,24 +67,72 @@ var Block = func(relativeTo time.Time) parse.Parser[block] {
 		// Drop any leading newline
 		_, _, err := parse.NewLine.Parse(in)
 
-		for {
-			task, ok, err := Task(relativeTo).Parse(in)
-			if err != nil {
-				return block{}, false, err
-			}
-			if !ok {
-				break
-			}
-			res.Tasks = append(res.Tasks, task)
+        parent := api.Task{Name: "root", Indent: -1}
+        stack := []api.Task{parent}
+        previousIndent := 0
+        for {
+            task, ok, err := Task(relativeTo).Parse(in)
+            if err != nil {
+                return block{}, false, err
+            }
+            if !ok {
+                fmt.Println("saw something not a task, breaking out of block")
+                break
+            }
+            if task.Indent == previousIndent {
+                parent.SubTasks = append(parent.SubTasks, task)
+                fmt.Printf("same indent: appending %q to %q sub tasks (%v)\n", task.Name, parent.Name, len(parent.SubTasks))
+                continue
+            }
+            if task.Indent > previousIndent {
+                fmt.Printf("increased indent: pushing %q to stack and adding to parent %q\n", task.Name, parent.Name)
+                previousIndent = task.Indent
+                stack = append(stack, task)
+                parent.SubTasks = append(parent.SubTasks, task)
+                parent = task
+                continue
+            }
+            fmt.Printf("indent decreased. parent %v (%v -> %v)\n", parent.Indent, previousIndent, task.Indent)
+            previousIndent = task.Indent
+            if task.Indent == parent.Indent {
+                // we're back to the level of the parent
+                fmt.Printf("back to parent indent level\n")
+                parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
+                parent.SubTasks = append(parent.SubTasks, task)
+                continue
+            }
+            // indent decreased below parent
+            for {
+                parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
+                fmt.Printf("new parent %q %v\n", parent.Name, parent.Indent)
+                if task.Indent >= parent.Indent {
+                    parent.SubTasks = append(parent.SubTasks, task)
+                    break
+                }
+            }
 
-		}
 
-		// Process the input until the next newline or EOF as the current line isnt a task
-		_, _, err = parse.StringUntil(newLineOrEOF).Parse(in)
-		if err != nil {
-			return block{}, false, err
-		}
+        }
 
+        for i := len(stack) - 1; i >= 1; i-- {
+            stack[i-1].SubTasks = append(stack[i-1].SubTasks, stack[i])
+        }
+        root := stack[0]
+        if len(root.SubTasks) > 0 {
+            fmt.Printf("%q %v\n", root.Name, len(root.SubTasks))
+            for _, t := range root.SubTasks {
+                fmt.Printf("\t%q\n", t.Name)
+            }
+            res.Tasks = append(res.Tasks, stack[0].SubTasks...)
+        }
+
+        // Process the input until the next newline or EOF as the current line isnt a task
+        _, _, err = parse.StringUntil(newLineOrEOF).Parse(in)
+        if err != nil {
+            return block{}, false, err
+        }
+    
+        fmt.Printf("end of block with %v tasks\n", len(res.Tasks))
 		return res, true, nil
 	})
 }

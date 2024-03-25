@@ -59,6 +59,25 @@ var statusParser = parse.Func(func(in *parse.Input) (api.Status, bool, error) {
 })
 
 var listItemOpen = parse.StringFrom(remainingInlineWhitespace, parse.Rune('-'), remainingInlineWhitespace)
+var listItemOpen2 = parse.Func(func(in *parse.Input) (int, bool, error) {
+    indent, ok, err := remainingInlineWhitespace.Parse(in)
+    if err != nil || !ok {
+        fmt.Println("at the indent")
+        return 0, false, err
+    }
+    _, ok, err = parse.Rune('-').Parse(in)
+    if err != nil || !ok {
+        fmt.Println("at searching for -")
+        return 0, false, err
+    }
+    _, ok, err = remainingInlineWhitespace.Parse(in)
+    if err != nil || !ok {
+        fmt.Println("at more whitespace")
+        return 0, false, err
+    }
+
+    return len(indent), true, nil
+})
 
 var dueKey = parse.Any(parse.String("due:"), parse.String("d:"))
 var scheduledKey = parse.Any(parse.String("scheduled:"), parse.String("s:"))
@@ -233,7 +252,7 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		res := api.Task{Line: in.Position().Line}
 
 		// Read and dump the list item open
-		_, ok, err := listItemOpen.Parse(in)
+		indent, ok, err := listItemOpen2.Parse(in)
 		if err != nil || !ok {
 			return api.Task{}, false, err
 		}
@@ -343,6 +362,8 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 
 		// Name
 		res.Name = strings.TrimSpace(name)
+
+        res.Indent = indent
 
 		// Consume to the next line or eof.
 		parse.StringUntil(newLineOrEOF).Parse(in)
