@@ -68,8 +68,8 @@ var Block = func(relativeTo time.Time) parse.Parser[block] {
 		_, _, err := parse.NewLine.Parse(in)
 
         parent := api.Task{Name: "root", Indent: -1}
-        stack := []api.Task{parent}
-        previousIndent := 0
+        // stack := []api.Task{parent}
+        // previousTask := api.Task{Name: "foo", Indent: 0}
         for {
             task, ok, err := Task(relativeTo).Parse(in)
             if err != nil {
@@ -79,51 +79,55 @@ var Block = func(relativeTo time.Time) parse.Parser[block] {
                 fmt.Println("saw something not a task, breaking out of block")
                 break
             }
-            if task.Indent == previousIndent {
-                parent.SubTasks = append(parent.SubTasks, task)
-                fmt.Printf("same indent: appending %q to %q sub tasks (%v)\n", task.Name, parent.Name, len(parent.SubTasks))
-                continue
+            if !parent.AddChild(&task) {
+                fmt.Printf("failed to add task %q %v somehow", task.Name, task.Indent)
             }
-            if task.Indent > previousIndent {
-                fmt.Printf("increased indent: pushing %q to stack and adding to parent %q\n", task.Name, parent.Name)
-                previousIndent = task.Indent
-                stack = append(stack, task)
-                parent.SubTasks = append(parent.SubTasks, task)
-                parent = task
-                continue
-            }
-            fmt.Printf("indent decreased. parent %v (%v -> %v)\n", parent.Indent, previousIndent, task.Indent)
-            previousIndent = task.Indent
-            if task.Indent == parent.Indent {
-                // we're back to the level of the parent
-                fmt.Printf("back to parent indent level\n")
-                parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
-                parent.SubTasks = append(parent.SubTasks, task)
-                continue
-            }
-            // indent decreased below parent
-            for {
-                parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
-                fmt.Printf("new parent %q %v\n", parent.Name, parent.Indent)
-                if task.Indent >= parent.Indent {
-                    parent.SubTasks = append(parent.SubTasks, task)
-                    break
-                }
-            }
+            // if task.Indent == previousTask.Indent {
+            //     parent.SubTasks = append(parent.SubTasks, task)
+            //     fmt.Printf("same indent: appending %q to %q sub tasks (%v)\n", task.Name, parent.Name, len(parent.SubTasks))
+            //     previousTask = task
+            //     continue
+            // }
+            // if task.Indent > previousTask.Indent {
+            //     fmt.Printf("increased indent: pushing %q to stack and adding to parent %q\n", task.Name, parent.Name)
+            //     stack = append(stack, previousTask)
+            //     parent = previousTask
+            //     parent.SubTasks = append(parent.SubTasks, task)
+            //     previousTask = task
+            //     continue
+            // }
+            // fmt.Printf("indent decreased. parent %v (%v -> %v)\n", parent.Indent, previousTask.Indent, task.Indent)
+            // if task.Indent == parent.Indent {
+            //     // we're back to the level of the parent
+            //     fmt.Printf("back to parent indent level\n")
+            //     parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
+            //     parent.SubTasks = append(parent.SubTasks, task)
+            //     continue
+            // }
+            // // indent decreased below parent
+            // for {
+            //     parent, stack = stack[len(stack)-1], stack[:len(stack)-1]
+            //     fmt.Printf("new parent %q %v\n", parent.Name, parent.Indent)
+            //     if task.Indent >= parent.Indent {
+            //         parent.SubTasks = append(parent.SubTasks, task)
+            //         break
+            //     }
+            // }
 
 
         }
 
-        for i := len(stack) - 1; i >= 1; i-- {
-            stack[i-1].SubTasks = append(stack[i-1].SubTasks, stack[i])
-        }
-        root := stack[0]
+        // for i := len(stack) - 1; i >= 1; i-- {
+        //     stack[i-1].SubTasks = append(stack[i-1].SubTasks, stack[i])
+        // }
+        root := parent
         if len(root.SubTasks) > 0 {
             fmt.Printf("%q %v\n", root.Name, len(root.SubTasks))
             for _, t := range root.SubTasks {
                 fmt.Printf("\t%q\n", t.Name)
+                res.Tasks = append(res.Tasks, *t)
             }
-            res.Tasks = append(res.Tasks, stack[0].SubTasks...)
+            // res.Tasks = append(res.Tasks, stack[0].SubTasks...)
         }
 
         // Process the input until the next newline or EOF as the current line isnt a task
