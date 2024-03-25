@@ -14,13 +14,13 @@ func TestThematicBreak(t *testing.T) {
 	}{
 		// These test cases follow the examples from the spec, in order.
 		{
-			input:    "---\n",
+			input: "---\n",
 		},
 		{
-			input:    "___\n",
+			input: "___\n",
 		},
 		{
-			input:    "***\n",
+			input: "***\n",
 		},
 		{
 			input:    "+++\n",
@@ -43,13 +43,13 @@ func TestThematicBreak(t *testing.T) {
 			notFound: true,
 		},
 		{
-			input:    " ***\n",
+			input: " ***\n",
 		},
 		{
-			input:    "  ***\n",
+			input: "  ***\n",
 		},
 		{
-			input:    "   ***\n",
+			input: "   ***\n",
 		},
 		{
 			input:    "    ***\n",
@@ -57,37 +57,37 @@ func TestThematicBreak(t *testing.T) {
 		},
 		// Skip the foo one as it's more general than just thematic breaks.
 		{
-			input:    "_____________________________________\n",
+			input: "_____________________________________\n",
 		},
 		{
-			input:    " - - -\n",
+			input: " - - -\n",
 		},
 		{
-			input:    " **  * ** * ** * **\n",
+			input: " **  * ** * ** * **\n",
 		},
 		{
-			input:    "-     -      -      -\n",
+			input: "-     -      -      -\n",
 		},
 		{
-			input:    "- - - -    \n",
+			input: "- - - -    \n",
 		},
-        {
-            input:    "_ _ _ _ a\n",
-            notFound: true,
-        },
-        {
-            input:    "a------\n",
-            notFound: true,
-        },
-        {
-            input:    "---a---\n",
-            notFound: true,
-        },
-        {
-            input:    "*-*\n",
-            notFound: true,
-        },
-        // Skip blank lines before and after as this is more general than just thematic breaks.
+		{
+			input:    "_ _ _ _ a\n",
+			notFound: true,
+		},
+		{
+			input:    "a------\n",
+			notFound: true,
+		},
+		{
+			input:    "---a---\n",
+			notFound: true,
+		},
+		{
+			input:    "*-*\n",
+			notFound: true,
+		},
+		// Skip blank lines before and after as this is more general than just thematic breaks.
 
 	}
 
@@ -103,7 +103,7 @@ func TestThematicBreak(t *testing.T) {
 				if in.Index() != 0 {
 					t.Fatalf("expected index to be 0, but got %d", in.Index())
 				}
-                return
+				return
 			}
 
 			if result != test.input {

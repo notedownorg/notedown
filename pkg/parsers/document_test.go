@@ -48,24 +48,24 @@ title: "Hello, World!"
 				},
 			},
 		},
-        {
-            name: "tasks with interleaved text",
-            input: `- [ ] Task 1
+		{
+			name: "tasks with interleaved text",
+			input: `- [ ] Task 1
 This is some text
 - [/] Task 2
 This is some more text`,
-            want: api.Document{
-                Tasks: []api.Task{
-                    {Name: "Task 1", Status: api.Todo, Line: 0},
-                    {Name: "Task 2", Status: api.Doing, Line: 2},
-                },
-            },
-        },
+			want: api.Document{
+				Tasks: []api.Task{
+					{Name: "Task 1", Status: api.Todo, Line: 0},
+					{Name: "Task 2", Status: api.Doing, Line: 2},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
-            fmt.Println(len(tt.input))
+			fmt.Println(len(tt.input))
 			got, found, _ := DocumentParser(relativeTo).Parse(input)
 			if tt.notFound {
 				if found {
@@ -75,7 +75,7 @@ This is some more text`,
 			}
 			assert.Equal(t, tt.want, got)
 
-            rem, _, _ := parse.StringUntil(parse.EOF[string]()).Parse(input)
+			rem, _, _ := parse.StringUntil(parse.EOF[string]()).Parse(input)
 			assert.Equal(t, "", rem, "expected input to be consumed")
 		})
 	}
