@@ -1,4 +1,4 @@
-package api
+package ast
 
 import (
 	"time"
@@ -7,22 +7,6 @@ import (
 )
 
 type Status string
-
-func OrderStatus(status Status) int {
-    switch status {
-    case Todo:
-        return 1
-    case Blocked:
-        return 2
-    case Doing:
-        return 3
-    case Done:
-        return 4
-    case Abandoned:
-        return 5
-    }
-    return 0
-}
 
 const (
 	Todo      Status = "todo"

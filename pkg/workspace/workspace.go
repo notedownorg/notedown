@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/liamawhite/nl/pkg/fsnotify"
 	"github.com/liamawhite/nl/pkg/workspace/cache"
 )
@@ -25,7 +25,7 @@ func New(root string) (*Workspace, error) {
 	ws := &Workspace{
 		root:    root,
 		watcher: watcher,
-		tasks:   make(map[string]map[int]*api.Task),
+		tasks:   make(map[string]map[int]*ast.Task),
 		mutex:   &sync.Mutex{},
 		cache:   cache.NewCache(root),
 		files:   make(chan string, 1000),
@@ -59,7 +59,7 @@ type Workspace struct {
 	// Map of tasks by the file path and the line number
 	// This is so we can quickly update the task when a file changes
 	// This is also the only truly unique identifier for a given task
-	tasks map[string]map[int]*api.Task
+	tasks map[string]map[int]*ast.Task
 
 	files chan string
 	docs  chan docChan
@@ -68,6 +68,6 @@ type Workspace struct {
 	mutex   *sync.Mutex
 }
 
-func (w Workspace) Tasks() map[string]map[int]*api.Task {
+func (w Workspace) Tasks() map[string]map[int]*ast.Task {
 	return w.tasks
 }

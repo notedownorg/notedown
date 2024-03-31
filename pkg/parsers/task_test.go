@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/stretchr/testify/assert"
 	"github.com/teambition/rrule-go"
 )
@@ -27,110 +27,110 @@ func TestTask(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		expected api.Task
+		expected ast.Task
 	}{
 		// Test each status
 		{
 			name:     "Todo",
 			input:    "- [ ] Task",
-			expected: api.Task{Status: api.Todo, Name: "Task"},
+			expected: ast.Task{Status: ast.Todo, Name: "Task"},
 		},
 		{
 			name:     "Done (lowercase)",
 			input:    "- [x] Task",
-			expected: api.Task{Status: api.Done, Name: "Task"},
+			expected: ast.Task{Status: ast.Done, Name: "Task"},
 		},
 		{
 			name:     "Done (uppercase)",
 			input:    "- [X] Task",
-			expected: api.Task{Status: api.Done, Name: "Task"},
+			expected: ast.Task{Status: ast.Done, Name: "Task"},
 		},
 		{
 			name:     "Doing",
 			input:    "- [/] Task",
-			expected: api.Task{Status: api.Doing, Name: "Task"},
+			expected: ast.Task{Status: ast.Doing, Name: "Task"},
 		},
 		{
 			name:     "Blocked (lowercase)",
 			input:    "- [b] Task",
-			expected: api.Task{Status: api.Blocked, Name: "Task"},
+			expected: ast.Task{Status: ast.Blocked, Name: "Task"},
 		},
 		{
 			name:     "Blocked (uppercase)",
 			input:    "- [B] Task",
-			expected: api.Task{Status: api.Blocked, Name: "Task"},
+			expected: ast.Task{Status: ast.Blocked, Name: "Task"},
 		},
 		{
 			name:     "Abandoned (lowercase)",
 			input:    "- [a] Task",
-			expected: api.Task{Status: api.Abandoned, Name: "Task"},
+			expected: ast.Task{Status: ast.Abandoned, Name: "Task"},
 		},
 		{
 			name:     "Abandoned (uppercase)",
 			input:    "- [A] Task",
-			expected: api.Task{Status: api.Abandoned, Name: "Task"},
+			expected: ast.Task{Status: ast.Abandoned, Name: "Task"},
 		},
 		// Whitespace tests
 		{
 			name:     "Leading space",
 			input:    " - [ ] Task",
-			expected: api.Task{Status: api.Todo, Name: "Task"},
+			expected: ast.Task{Status: ast.Todo, Name: "Task"},
 		},
 		{
 			name:     "Trailing space",
 			input:    "- [ ] Task ",
-			expected: api.Task{Status: api.Todo, Name: "Task"},
+			expected: ast.Task{Status: ast.Todo, Name: "Task"},
 		},
 		{
 			name:     "Task name with spaces",
 			input:    "- [ ] Task Name",
-			expected: api.Task{Status: api.Todo, Name: "Task Name"},
+			expected: ast.Task{Status: ast.Todo, Name: "Task Name"},
 		},
 		{
 			name:     "Task name with lots of random spaces",
 			input:    "          - [ ]   Task   Name   ",
-			expected: api.Task{Status: api.Todo, Name: "Task   Name"},
+			expected: ast.Task{Status: ast.Todo, Name: "Task   Name"},
 		},
 		// Fields
 		{
 			name:     "Due date",
 			input:    "- [ ] Task due:2021-01-01",
-			expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1)},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1)},
 		},
 		{
 			name:     "Scheduled date",
 			input:    "- [ ] Task scheduled:2021-01-01",
-			expected: api.Task{Status: api.Todo, Name: "Task", Scheduled: date(2021, 1, 1)},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Scheduled: date(2021, 1, 1)},
 		},
 		{
 			name:     "Completed date",
 			input:    "- [ ] Task completed:2021-01-01",
-			expected: api.Task{Status: api.Todo, Name: "Task", Completed: date(2021, 1, 1)},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Completed: date(2021, 1, 1)},
 		},
 		{
 			name:     "Priority",
 			input:    "- [ ] Task priority:1",
-			expected: api.Task{Status: api.Todo, Name: "Task", Priority: intPtr(1)},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Priority: intPtr(1)},
 		},
 		{
 			name:     "Every",
 			input:    "- [ ] Task every:day",
-			expected: api.Task{Status: api.Todo, Name: "Task", Every: dailyRule},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Every: dailyRule},
 		},
 		{
 			name:     "Every with spaces",
 			input:    "- [ ] Task every:mon wed fri",
-			expected: api.Task{Status: api.Todo, Name: "Task", Every: spacesRule},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Every: spacesRule},
 		},
 		{
 			name:     "All fields long",
 			input:    "- [ ] Task due:2021-01-01 every:mon wed fri scheduled:2021-01-01 completed:2021-01-01 priority:1",
-			expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
 		},
 		{
 			name:     "All fields short",
 			input:    "- [ ] Task d:2021-01-01 e:mon wed fri s:2021-01-01 p:1 completed:2021-01-01",
-			expected: api.Task{Status: api.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
 		},
 	}
 	for _, test := range tests {

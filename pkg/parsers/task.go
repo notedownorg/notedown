@@ -7,30 +7,30 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/teambition/rrule-go"
 )
 
-var statusLookup = map[string]api.Status{
-	" ": api.Todo,
-	"x": api.Done,
-	"X": api.Done,
-	"/": api.Doing,
-	"b": api.Blocked,
-	"B": api.Blocked,
-	"a": api.Abandoned,
-	"A": api.Abandoned,
+var statusLookup = map[string]ast.Status{
+	" ": ast.Todo,
+	"x": ast.Done,
+	"X": ast.Done,
+	"/": ast.Doing,
+	"b": ast.Blocked,
+	"B": ast.Blocked,
+	"a": ast.Abandoned,
+	"A": ast.Abandoned,
 }
 
-var statusRuneLookup = map[api.Status]rune{
-	api.Todo:      ' ',
-	api.Blocked:   'b',
-	api.Doing:     '/',
-	api.Done:      'x',
-	api.Abandoned: 'a',
+var statusRuneLookup = map[ast.Status]rune{
+	ast.Todo:      ' ',
+	ast.Blocked:   'b',
+	ast.Doing:     '/',
+	ast.Done:      'x',
+	ast.Abandoned: 'a',
 }
 
-var statusParser = parse.Func(func(in *parse.Input) (api.Status, bool, error) {
+var statusParser = parse.Func(func(in *parse.Input) (ast.Status, bool, error) {
 	// Read the open bracket
 	_, ok, err := parse.Rune('[').Parse(in)
 	if err != nil || !ok {
@@ -228,20 +228,20 @@ var everyParser = func(relativeTo time.Time) parse.Parser[rrule.RRule] {
 	})
 }
 
-var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
-	return parse.Func(func(in *parse.Input) (api.Task, bool, error) {
-		res := api.Task{Line: in.Position().Line}
+var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
+	return parse.Func(func(in *parse.Input) (ast.Task, bool, error) {
+		res := ast.Task{Line: in.Position().Line}
 
 		// Read and dump the list item open
 		_, ok, err := listItemOpen.Parse(in)
 		if err != nil || !ok {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 
 		// Read the task status
 		status, ok, err := statusParser.Parse(in)
 		if err != nil || !ok {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		res.Status = status
 
@@ -252,7 +252,7 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// Start name with the rest of the line. If we find a field (i.e. theres a shorter name) we'll use that.
 		name, ok, err := parse.StringUntil(newLineOrEOF).Parse(in)
 		if err != nil || !ok {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		in.Seek(start)
 
@@ -260,14 +260,14 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
 		candidate, ok, err := parse.StringUntil(parse.StringFrom(parse.Rune(' '), dueKey)).Parse(in)
 		if err != nil {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		name = evaluateCandidate(ok, candidate, name)
 		if ok {
 			parse.Rune(' ').Parse(in) // pop the space
 			due, ok, err := dueParser.Parse(in)
 			if err != nil || !ok {
-				return api.Task{}, false, err
+				return ast.Task{}, false, err
 			}
 			res.Due = &due
 			in.Seek(start)
@@ -277,14 +277,14 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
 		candidate, ok, err = parse.StringUntil(parse.StringFrom(parse.Rune(' '), scheduledKey)).Parse(in)
 		if err != nil {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		name = evaluateCandidate(ok, candidate, name)
 		if ok {
 			parse.Rune(' ').Parse(in) // pop the space
 			scheduled, ok, err := scheduledParser.Parse(in)
 			if err != nil || !ok {
-				return api.Task{}, false, err
+				return ast.Task{}, false, err
 			}
 			res.Scheduled = &scheduled
 			in.Seek(start)
@@ -294,14 +294,14 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
 		candidate, ok, err = parse.StringUntil(parse.StringFrom(parse.Rune(' '), completedKey)).Parse(in)
 		if err != nil {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		name = evaluateCandidate(ok, candidate, name)
 		if ok {
 			parse.Rune(' ').Parse(in) // pop the space
 			completed, ok, err := completedParser.Parse(in)
 			if err != nil || !ok {
-				return api.Task{}, false, err
+				return ast.Task{}, false, err
 			}
 			res.Completed = &completed
 			in.Seek(start)
@@ -311,14 +311,14 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
 		candidate, ok, err = parse.StringUntil(parse.StringFrom(parse.Rune(' '), priorityKey)).Parse(in)
 		if err != nil {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		name = evaluateCandidate(ok, candidate, name)
 		if ok {
 			parse.Rune(' ').Parse(in) // pop the space
 			priority, ok, err := priorityParser.Parse(in)
 			if err != nil || !ok {
-				return api.Task{}, false, err
+				return ast.Task{}, false, err
 			}
 			res.Priority = &priority
 			in.Seek(start)
@@ -328,14 +328,14 @@ var Task = func(relativeTo time.Time) parse.Parser[api.Task] {
 		// We need to make sure the space is there to avoid matching on the single chars that match the end of a longer one.
 		candidate, ok, err = parse.StringUntil(parse.StringFrom(parse.Rune(' '), everyKey)).Parse(in)
 		if err != nil {
-			return api.Task{}, false, err
+			return ast.Task{}, false, err
 		}
 		name = evaluateCandidate(ok, candidate, name)
 		if ok {
 			parse.Rune(' ').Parse(in) // pop the space
 			every, ok, err := everyParser(relativeTo).Parse(in)
 			if err != nil || !ok {
-				return api.Task{}, false, err
+				return ast.Task{}, false, err
 			}
 			res.Every = &every
 			in.Seek(start)
