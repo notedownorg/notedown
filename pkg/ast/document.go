@@ -1,4 +1,4 @@
-package api
+package ast
 
 type Metadata map[string]interface{}
 

@@ -6,13 +6,13 @@ import (
 	"os"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/liamawhite/nl/pkg/fsnotify"
 	"github.com/liamawhite/nl/pkg/parsers"
 )
 
 type docChan struct {
-	doc          *api.Document
+	doc          *ast.Document
 	file         string
 	lastModified time.Time
 }
@@ -45,7 +45,7 @@ func (w *Workspace) runProcessor() {
 
 		case d := <-w.docs:
 			slog.Debug("processing document", slog.String("file", d.file))
-			tasks := map[int]*api.Task{}
+			tasks := map[int]*ast.Task{}
 			for i := range d.doc.Tasks {
 				t := d.doc.Tasks[i]
 				tasks[t.Line] = &t
@@ -84,7 +84,7 @@ func (w *Workspace) handleCreateEvent(event fsnotify.Event) {
 	slog.Debug("handling file create event", slog.String("file", event.Name))
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
-	w.tasks[event.Name] = make(map[int]*api.Task)
+	w.tasks[event.Name] = make(map[int]*ast.Task)
 }
 
 func (w *Workspace) handleRemoveEvent(event fsnotify.Event) {

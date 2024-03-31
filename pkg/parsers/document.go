@@ -5,44 +5,44 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"sigs.k8s.io/yaml"
 )
 
-var Document = func(relativeTo time.Time) func(string) (api.Document, error) {
-	return func(input string) (api.Document, error) {
+var Document = func(relativeTo time.Time) func(string) (ast.Document, error) {
+	return func(input string) (ast.Document, error) {
 		p := parse.NewInput(input)
 		res, ok, err := DocumentParser(relativeTo).Parse(p)
 		if err != nil {
-			return api.Document{}, fmt.Errorf("unable to parse document: %w", err)
+			return ast.Document{}, fmt.Errorf("unable to parse document: %w", err)
 		}
 		if !ok {
-			return api.Document{}, fmt.Errorf("unable to parse document")
+			return ast.Document{}, fmt.Errorf("unable to parse document")
 		}
 		return res, nil
 	}
 }
 
-var DocumentParser = func(relativeTo time.Time) parse.Parser[api.Document] {
-	return parse.Func(func(in *parse.Input) (api.Document, bool, error) {
-		var res api.Document
+var DocumentParser = func(relativeTo time.Time) parse.Parser[ast.Document] {
+	return parse.Func(func(in *parse.Input) (ast.Document, bool, error) {
+		var res ast.Document
 
 		// Look for frontmatter
 		frontmatterTuple, ok, err := parse.SequenceOf2(parse.AtLeast(0, parse.Whitespace), Frontmatter).Parse(in)
 		if err != nil {
-			return api.Document{}, false, err
+			return ast.Document{}, false, err
 		}
 		if ok {
 			err := yaml.Unmarshal(frontmatterTuple.B, &res.Metadata)
 			if err != nil {
-				return api.Document{}, false, fmt.Errorf("unable to parse frontmatter: %w", err)
+				return ast.Document{}, false, fmt.Errorf("unable to parse frontmatter: %w", err)
 			}
 		}
 
 		// Parse the rest of the file looking for blocks
 		blocks, ok, err := parse.Until(Block(relativeTo), parse.EOF[string]()).Parse(in)
 		if err != nil {
-			return api.Document{}, false, err
+			return ast.Document{}, false, err
 		}
 		for _, b := range blocks {
 			res.Tasks = append(res.Tasks, b.Tasks...)
@@ -53,7 +53,7 @@ var DocumentParser = func(relativeTo time.Time) parse.Parser[api.Document] {
 }
 
 type block struct {
-	Tasks []api.Task
+	Tasks []ast.Task
 }
 
 var Block = func(relativeTo time.Time) parse.Parser[block] {

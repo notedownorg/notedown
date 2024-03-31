@@ -7,14 +7,14 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 )
 
 // We keep track of when documents were last modified so we can only re-parse them if they've changed
 // This is much faster than hashing the file and comparing it to a hash because we don't have to read the file
 type doc struct {
 	LastModified time.Time     `json:"lastModified"`
-	Data         *api.Document `json:"data"`
+	Data         *ast.Document `json:"data"`
 }
 
 // We dont have any custom logic for multiple client caches because the cache contents are deterministic
@@ -29,8 +29,8 @@ type cache struct {
 }
 
 type Cache interface {
-	Get(path string) (*api.Document, time.Time, bool)
-	Set(path string, lastModified time.Time, d *api.Document)
+	Get(path string) (*ast.Document, time.Time, bool)
+	Set(path string, lastModified time.Time, d *ast.Document)
 }
 
 func cacheFile(root string) string {
@@ -78,7 +78,7 @@ func (c *cache) start() *cache {
 	return c
 }
 
-func (c *cache) Get(path string) (*api.Document, time.Time, bool) {
+func (c *cache) Get(path string) (*ast.Document, time.Time, bool) {
 	d, ok := c.Docs[path]
 	if !ok {
 		return nil, time.Time{}, false
@@ -100,7 +100,7 @@ func (c *cache) Get(path string) (*api.Document, time.Time, bool) {
 	return nil, time.Time{}, false
 }
 
-func (c *cache) Set(path string, lastModified time.Time, d *api.Document) {
+func (c *cache) Set(path string, lastModified time.Time, d *ast.Document) {
 	c.Docs[path] = doc{LastModified: lastModified, Data: d}
 	c.lastUpdate = time.Now()
 }

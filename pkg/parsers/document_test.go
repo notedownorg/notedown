@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/api"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -13,20 +13,20 @@ func TestDocument(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
-		want     api.Document
+		want     ast.Document
 		notFound bool
 	}{
 		{
 			name:  "empty",
 			input: "",
-			want:  api.Document{},
+			want:  ast.Document{},
 		},
 		{
 			name: "frontmatter",
 			input: `---
 title: "Hello, World!"
 ---`,
-			want: api.Document{
+			want: ast.Document{
 				Metadata: map[string]interface{}{
 					"title": "Hello, World!",
 				},
@@ -40,11 +40,11 @@ title: "Hello, World!"
 - [ ] Task 1
 - [/] Task 2
 `,
-			want: api.Document{
+			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
-				Tasks: []api.Task{
-					{Name: "Task 1", Status: api.Todo, Line: 3},
-					{Name: "Task 2", Status: api.Doing, Line: 4},
+				Tasks: []ast.Task{
+					{Name: "Task 1", Status: ast.Todo, Line: 3},
+					{Name: "Task 2", Status: ast.Doing, Line: 4},
 				},
 			},
 		},
@@ -54,10 +54,10 @@ title: "Hello, World!"
 This is some text
 - [/] Task 2
 This is some more text`,
-			want: api.Document{
-				Tasks: []api.Task{
-					{Name: "Task 1", Status: api.Todo, Line: 0},
-					{Name: "Task 2", Status: api.Doing, Line: 2},
+			want: ast.Document{
+				Tasks: []ast.Task{
+					{Name: "Task 1", Status: ast.Todo, Line: 0},
+					{Name: "Task 2", Status: ast.Doing, Line: 2},
 				},
 			},
 		},
