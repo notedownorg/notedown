@@ -12,17 +12,25 @@ import (
 
 type Status ast.Status
 
+const (
+    Todo      Status = Status(ast.Todo)
+    Blocked   Status = Status(ast.Blocked)
+    Doing     Status = Status(ast.Doing)
+    Done      Status = Status(ast.Done)
+    Abandoned Status = Status(ast.Abandoned)
+)
+
 func OrderStatus(status Status) int {
-	switch ast.Status(status) {
-	case ast.Todo:
+	switch status {
+	case Todo:
 		return 1
-	case ast.Blocked:
+	case Blocked:
 		return 2
-	case ast.Doing:
+	case Doing:
 		return 3
-	case ast.Done:
+	case Done:
 		return 4
-	case ast.Abandoned:
+	case Abandoned:
 		return 5
 	}
 	return 0
