@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/fsnotify"
+	"github.com/liamawhite/nl/internal/fsnotify"
 	"github.com/liamawhite/nl/pkg/parsers"
 )
 

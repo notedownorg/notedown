@@ -8,8 +8,8 @@ import (
 	"sync"
 
 	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/fsnotify"
-	"github.com/liamawhite/nl/pkg/workspace/cache"
+	"github.com/liamawhite/nl/internal/fsnotify"
+	"github.com/liamawhite/nl/internal/cache"
 )
 
 func New(root string) (*Workspace, error) {
