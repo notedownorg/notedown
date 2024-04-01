@@ -5,6 +5,8 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/liamawhite/nl/internal/fsnotify"
@@ -50,8 +52,10 @@ func (w *Workspace) runProcessor() {
 			for i := range d.doc.Tasks {
 				task := d.doc.Tasks[i]
 				project := ""
-				if p, ok := d.doc.Metadata["project"].(string); ok {
-					project = p
+				if typ, ok := d.doc.Metadata["type"].(string); ok {
+					if typ == "project" {
+						project = strings.ReplaceAll(d.file, filepath.Ext(d.file), "")
+					}
 				}
 				tasks[task.Line] = &Task{
 					Id:        fmt.Sprintf("%s:%d", d.file, task.Line),
