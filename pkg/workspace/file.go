@@ -54,7 +54,7 @@ func (w *Workspace) runProcessor() {
 				project := ""
 				if typ, ok := d.doc.Metadata["type"].(string); ok {
 					if typ == "project" {
-						project = strings.ReplaceAll(d.file, filepath.Ext(d.file), "")
+						project = strings.ReplaceAll(filepath.Base(d.file), filepath.Ext(d.file), "")
 					}
 				}
 				tasks[task.Line] = &Task{
