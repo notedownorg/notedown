@@ -1,9 +1,6 @@
 package workspace
 
 import (
-	"fmt"
-	"path/filepath"
-	"strings"
 	"time"
 
 	"github.com/liamawhite/nl/pkg/ast"
@@ -13,11 +10,11 @@ import (
 type Status ast.Status
 
 const (
-    Todo      Status = Status(ast.Todo)
-    Blocked   Status = Status(ast.Blocked)
-    Doing     Status = Status(ast.Doing)
-    Done      Status = Status(ast.Done)
-    Abandoned Status = Status(ast.Abandoned)
+	Todo      Status = Status(ast.Todo)
+	Blocked   Status = Status(ast.Blocked)
+	Doing     Status = Status(ast.Doing)
+	Done      Status = Status(ast.Done)
+	Abandoned Status = Status(ast.Abandoned)
 )
 
 func OrderStatus(status Status) int {
@@ -50,19 +47,9 @@ type Task struct {
 
 func (w Workspace) ListTasks() []Task {
 	res := []Task{}
-	for path, tasks := range w.tasks {
-		for line, task := range tasks {
-			res = append(res, Task{
-				Id:        fmt.Sprintf("%s:%d", path, line),
-				Name:      task.Name,
-				Status:    Status(task.Status),
-				Due:       task.Due,
-				Scheduled: task.Scheduled,
-				Completed: task.Completed,
-				Priority:  task.Priority,
-				Every:     task.Every,
-				Project:   strings.ReplaceAll(path, filepath.Ext(path), ""),
-			})
+	for _, tasks := range w.tasks {
+		for _, task := range tasks {
+			res = append(res, *task)
 		}
 	}
 	return res
