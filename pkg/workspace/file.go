@@ -1,13 +1,14 @@
 package workspace
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/liamawhite/nl/internal/fsnotify"
+	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/liamawhite/nl/pkg/parsers"
 )
 
@@ -45,10 +46,24 @@ func (w *Workspace) runProcessor() {
 
 		case d := <-w.docs:
 			slog.Debug("processing document", slog.String("file", d.file))
-			tasks := map[int]*ast.Task{}
+			tasks := map[int]*Task{}
 			for i := range d.doc.Tasks {
-				t := d.doc.Tasks[i]
-				tasks[t.Line] = &t
+				task := d.doc.Tasks[i]
+				project := ""
+				if p, ok := d.doc.Metadata["project"].(string); ok {
+					project = p
+				}
+				tasks[task.Line] = &Task{
+					Id:        fmt.Sprintf("%s:%d", d.file, task.Line),
+					Name:      task.Name,
+					Status:    Status(task.Status),
+					Due:       task.Due,
+					Scheduled: task.Scheduled,
+					Completed: task.Completed,
+					Priority:  task.Priority,
+					Every:     task.Every,
+					Project:   project,
+				}
 			}
 			w.mutex.Lock()
 			w.tasks[d.file] = tasks
@@ -84,7 +99,7 @@ func (w *Workspace) handleCreateEvent(event fsnotify.Event) {
 	slog.Debug("handling file create event", slog.String("file", event.Name))
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
-	w.tasks[event.Name] = make(map[int]*ast.Task)
+	w.tasks[event.Name] = make(map[int]*Task)
 }
 
 func (w *Workspace) handleRemoveEvent(event fsnotify.Event) {
