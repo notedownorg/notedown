@@ -57,8 +57,13 @@ func (w *Workspace) runProcessor() {
 						project = strings.ReplaceAll(filepath.Base(d.file), filepath.Ext(d.file), "")
 					}
 				}
+				// Use paths relative to the workspace root in Ids to maintain cache portability
+				rel, err := filepath.Rel(w.root, d.file)
+				if err != nil {
+					slog.Error("error getting relative path", slog.Any("error", err), slog.String("file", d.file))
+				}
 				tasks[task.Line] = &Task{
-					Id:        fmt.Sprintf("%s:%d", d.file, task.Line),
+					Id:        fmt.Sprintf("%s:%d", rel, task.Line),
 					Name:      task.Name,
 					Status:    Status(task.Status),
 					Due:       task.Due,
