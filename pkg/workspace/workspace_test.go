@@ -2,6 +2,8 @@ package workspace_test
 
 import (
 	"os"
+	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -39,8 +41,9 @@ func TestWorkspace(t *testing.T) {
 	}
 
 	// Check the tasks were loaded correctly
-	time.Sleep(1 * time.Second) // Remove once we have a way to wait for the initial state to be built
+	time.Sleep(1 * time.Second) // remove once we have a way to wait for the initial state to be built
 	tasks := ws.ListTasks()
+	slices.SortFunc(tasks, func(a, b workspace.Task) int { return strings.Compare(a.Id, b.Id) }) // ensure determinism
 	assert.Equal(t, []workspace.Task{
 		{Name: "Project One, Task One", Id: "project-one.md:4", Project: "project-one", Status: workspace.Todo, Due: date(2024, 1, 1)},
 		{Name: "Project One, Task Two", Id: "project-one.md:5", Project: "project-one", Status: workspace.Done, Due: date(2024, 1, 1)},
