@@ -48,6 +48,8 @@ func New(root string) (*Workspace, error) {
 		}
 		return nil
 	})
+
+	// TODO: Only return once the initial state has been built
 	return ws, nil
 }
 
