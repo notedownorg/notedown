@@ -1,4 +1,7 @@
-all: format test
+all: format test dirty
+
+dirty:
+	git diff --exit-code
 
 format:
 	gofmt -w .
