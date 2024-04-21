@@ -1,4 +1,4 @@
-package workspace_test
+package workspace
 
 import (
 	"os"
@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/workspace"
 	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,21 +30,28 @@ func date(year, month, day int) *time.Time {
 	return &date
 }
 
-func TestWorkspace(t *testing.T) {
+var deterministicTasks = func(tasks []Task) []Task {
+    slices.SortFunc(tasks, func(a, b Task) int { return strings.Compare(a.Id(), b.Id()) })
+    return tasks
+}
+
+func TestWorkspace_Tasks(t *testing.T) {
 	// Copy the testdata into a temporary directory so we don't modify the original
 	tmp := copyTestData(t)
 
-	ws, err := workspace.New(tmp)
+	ws, err :=New(tmp)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Check the tasks were loaded correctly
 	time.Sleep(1 * time.Second) // remove once we have a way to wait for the initial state to be built
-	tasks := ws.ListTasks()
-	slices.SortFunc(tasks, func(a, b workspace.Task) int { return strings.Compare(a.Id, b.Id) }) // ensure determinism
-	assert.Equal(t, []workspace.Task{
-		{Name: "Project One, Task One", Id: "project-one.md:4", Project: "project-one", Status: workspace.Todo, Due: date(2024, 1, 1)},
-		{Name: "Project One, Task Two", Id: "project-one.md:5", Project: "project-one", Status: workspace.Done, Due: date(2024, 1, 1)},
+	tasks := deterministicTasks(ws.ListTasks())
+	assert.Equal(t, []Task{
+		{Name: "Project One, Task One", id: "project-one.md:4", Project: "project-one", Status:Todo, Due: date(2024, 1, 1)},
+		{Name: "Project One, Task Two", id: "project-one.md:5", Project: "project-one", Status:Done, Due: date(2024, 1, 1)},
 	}, tasks)
+
+    // Check adding tasks
+    ws.AddTask(Task{Name: "New Task", Status:Todo, Due: date(2024, 1, 1)})
 }

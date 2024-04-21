@@ -34,7 +34,7 @@ func OrderStatus(status Status) int {
 }
 
 type Task struct {
-	Id        string
+	id        string
 	Name      string
 	Status    Status
 	Due       *time.Time
@@ -43,6 +43,10 @@ type Task struct {
 	Priority  *int
 	Every     *rrule.RRule
 	Project   string
+}
+
+func (t Task) Id() string {
+    return t.id
 }
 
 func (w Workspace) ListTasks() []Task {
@@ -55,11 +59,11 @@ func (w Workspace) ListTasks() []Task {
 	return res
 }
 
-func (w *Workspace) AddTask(task *ast.Task) error {
+func (w *Workspace) AddTask(task Task) error {
 	panic("not implemented")
 }
 
-func (w *Workspace) UpdateTask(task *ast.Task) error {
+func (w *Workspace) UpdateTask(task Task) error {
 	panic("not implemented")
 }
 

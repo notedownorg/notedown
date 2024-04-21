@@ -63,7 +63,7 @@ func (w *Workspace) runProcessor() {
 					slog.Error("error getting relative path", slog.Any("error", err), slog.String("file", d.file))
 				}
 				tasks[task.Line] = &Task{
-					Id:        fmt.Sprintf("%s:%d", rel, task.Line),
+					id:        fmt.Sprintf("%s:%d", rel, task.Line),
 					Name:      task.Name,
 					Status:    Status(task.Status),
 					Due:       task.Due,
