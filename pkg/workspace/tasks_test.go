@@ -79,7 +79,7 @@ func TestWorkspace_Tasks(t *testing.T) {
 	dailyTask2 := Task{Name: "Daily Task 2", Status: Todo}
 	assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
 
-	time.Sleep(1 * time.Second) // remove once we have a way to wait for updates to be processed
+	time.Sleep(5 * time.Second) // remove once we have a way to wait for updates to be processed
 	tasks = deterministicTasks(ws.ListTasks())
 
 	assert.Equal(t, deterministicTasks([]Task{
