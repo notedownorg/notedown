@@ -1,7 +1,6 @@
 package parsers
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/a-h/parse"
@@ -30,6 +29,7 @@ title: "Hello, World!"
 				Metadata: map[string]interface{}{
 					"title": "Hello, World!",
 				},
+				Markers: ast.Markers{ContentStart: 3},
 			},
 		},
 		{
@@ -37,15 +37,16 @@ title: "Hello, World!"
 			input: `---
 title: "Hello, World!"
 ---
-- [ ] Task 1
+- [ ] Task 1 due:2021-01-01
 - [/] Task 2
 `,
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 3},
+					{Name: "Task 1", Status: ast.Todo, Line: 3, Due: date(2021, 1, 1)},
 					{Name: "Task 2", Status: ast.Doing, Line: 4},
 				},
+				Markers: ast.Markers{ContentStart: 3},
 			},
 		},
 		{
@@ -61,11 +62,28 @@ This is some more text`,
 				},
 			},
 		},
+		{
+			name: "lots of newlines",
+			input: `
+
+- [ ] Task 1
+
+- [/] Task 2 due:2021-01-01
+
+
+
+This is some text`,
+			want: ast.Document{
+				Tasks: []ast.Task{
+					{Name: "Task 1", Status: ast.Todo, Line: 2},
+					{Name: "Task 2", Status: ast.Doing, Line: 4, Due: date(2021, 1, 1)},
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
-			fmt.Println(len(tt.input))
 			got, found, _ := DocumentParser(relativeTo).Parse(input)
 			if tt.notFound {
 				if found {

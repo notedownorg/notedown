@@ -1,7 +1,6 @@
 package workspace
 
 import (
-	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -20,6 +19,13 @@ type docChan struct {
 	lastModified time.Time
 }
 
+func (w *Workspace) absolutePath(rel string) string {
+	if filepath.IsAbs(rel) {
+		return rel
+	}
+	return filepath.Join(w.root, rel)
+}
+
 func (w *Workspace) runProcessor() {
 	for {
 		select {
@@ -35,6 +41,9 @@ func (w *Workspace) runProcessor() {
 			fileInfo, err := os.Stat(file)
 			if err != nil {
 				slog.Error("error getting file info", slog.Any("error", err))
+			}
+			if fileInfo.IsDir() {
+				continue
 			}
 			contents, err := os.ReadFile(file)
 			if err != nil {
@@ -62,20 +71,12 @@ func (w *Workspace) runProcessor() {
 				if err != nil {
 					slog.Error("error getting relative path", slog.Any("error", err), slog.String("file", d.file))
 				}
-				tasks[task.Line] = &Task{
-					Id:        fmt.Sprintf("%s:%d", rel, task.Line),
-					Name:      task.Name,
-					Status:    Status(task.Status),
-					Due:       task.Due,
-					Scheduled: task.Scheduled,
-					Completed: task.Completed,
-					Priority:  task.Priority,
-					Every:     task.Every,
-					Project:   project,
-				}
+				tasks[task.Line] = fromAst(rel, project, task)
 			}
+			slog.Debug("saving metadata in workspace", slog.String("file", d.file))
 			w.mutex.Lock()
 			w.tasks[d.file] = tasks
+			w.documents[d.file] = &document{markers: d.doc.Markers}
 			w.mutex.Unlock()
 			w.cache.Set(d.file, d.lastModified, d.doc)
 		}
@@ -106,13 +107,12 @@ func (w *Workspace) runEventLoop() {
 
 func (w *Workspace) handleCreateEvent(event fsnotify.Event) {
 	slog.Debug("handling file create event", slog.String("file", event.Name))
-	w.mutex.Lock()
-	defer w.mutex.Unlock()
-	w.tasks[event.Name] = make(map[int]*Task)
+	w.files <- event.Name
 }
 
 func (w *Workspace) handleRemoveEvent(event fsnotify.Event) {
 	slog.Debug("handling file remove event", slog.String("file", event.Name))
+	w.cache.Delete(event.Name)
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	delete(w.tasks, event.Name)

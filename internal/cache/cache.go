@@ -31,6 +31,8 @@ type cache struct {
 type Cache interface {
 	Get(path string) (*ast.Document, time.Time, bool)
 	Set(path string, lastModified time.Time, d *ast.Document)
+	Delete(path string)
+	Wait(path string, timeout time.Duration) (*ast.Document, time.Time, bool)
 }
 
 func cacheFile(root string) string {
@@ -100,7 +102,44 @@ func (c *cache) Get(path string) (*ast.Document, time.Time, bool) {
 	return nil, time.Time{}, false
 }
 
+// Wait will block until the document is available in the cache or the timeout is reached
+func (c *cache) Wait(path string, timeout time.Duration) (*ast.Document, time.Time, bool) {
+	type result struct {
+		d  *ast.Document
+		t  time.Time
+		ok bool
+	}
+
+	ticker := time.NewTicker(200 * time.Millisecond)
+	channel := make(chan result, 1)
+	getter := func() {
+		d, t, ok := c.Get(path)
+		channel <- result{d, t, ok}
+	}
+
+	go getter()
+
+	for {
+		select {
+		case res := <-channel:
+			if res.ok {
+				slog.Debug("cache populated whilst waiting", slog.String("path", path))
+				return res.d, res.t, true
+			}
+		case <-time.After(timeout):
+			slog.Debug("timeout waiting for cache", slog.String("path", path))
+			return nil, time.Time{}, false
+		case <-ticker.C:
+			getter()
+		}
+	}
+}
+
 func (c *cache) Set(path string, lastModified time.Time, d *ast.Document) {
 	c.Docs[path] = doc{LastModified: lastModified, Data: d}
 	c.lastUpdate = time.Now()
+}
+
+func (c *cache) Delete(path string) {
+	delete(c.Docs, path)
 }
