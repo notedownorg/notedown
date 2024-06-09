@@ -22,7 +22,7 @@ jobs:
 
     - name: Testdata upload
       uses: actions/upload-artifact@v4
-      if: always()
+      if: failure()
       with:
         name: testdata
         path: ${{ github.workspace }}/testdata
