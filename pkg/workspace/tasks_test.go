@@ -14,17 +14,22 @@ import (
 )
 
 func copyTestData(t *testing.T, name string) string {
-	tmp, err := os.MkdirTemp("", fmt.Sprintf("nl-%v-", name))
-	if err != nil {
+	// If we're running in a CI environment, we dont want to create temp directories
+	// This ensures we can store the artifacts for debugging
+	dir := "/testdata"
+	if os.Getenv("CI") != "true" {
+        var err error
+		dir, err = os.MkdirTemp("", fmt.Sprintf("nl-%v-", name))
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+    if err := cp.Copy("testdata/workspace", dir); err != nil {
 		t.Fatal(err)
 	}
 
-	err = cp.Copy("testdata/workspace", tmp)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	return tmp
+	return dir
 }
 
 func date(year, month, day int) *time.Time {
@@ -82,7 +87,7 @@ func TestWorkspace_Tasks(t *testing.T) {
 		assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
 
 		time.Sleep(1 * time.Second) // remove once we have a way to wait for updates to be processed
-        tasks := deterministicTasks(ws.ListTasks())
+		tasks := deterministicTasks(ws.ListTasks())
 
 		assert.Equal(t, deterministicTasks([]Task{
 			taskWithData("projects/project-one.md:3", "project-one", beginningOfProject),

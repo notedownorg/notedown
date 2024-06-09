@@ -19,3 +19,8 @@ jobs:
 
     - name: Make All
       run: make
+    - uses: actions/upload-artifact@v4
+      with:
+        name: testdata
+        path: "/testdata"
+        if-no-files-found: error
