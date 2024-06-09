@@ -16,7 +16,7 @@ import (
 func copyTestData(t *testing.T, name string) string {
 	// If we're running in a CI environment, we dont want to create temp directories
 	// This ensures we can store the artifacts for debugging
-	dir := "/testdata"
+	dir := "/tmp"
 	if os.Getenv("CI") != "true" {
         var err error
 		dir, err = os.MkdirTemp("", fmt.Sprintf("nl-%v-", name))
