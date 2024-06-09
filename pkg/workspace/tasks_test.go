@@ -58,37 +58,41 @@ func TestWorkspace_Tasks(t *testing.T) {
 	ws, err := New(tmp)
 	assert.NoError(t, err)
 
-	// Check the tasks were loaded correctly
-	time.Sleep(1 * time.Second) // remove once we have a way to wait for the initial state to be built
-	tasks := deterministicTasks(ws.ListTasks())
-	assert.Equal(t, originalTasks, tasks)
+	t.Run("Workspace Load", func(t *testing.T) {
+		time.Sleep(1 * time.Second) // remove once we have a way to wait for the initial state to be built
+		tasks := deterministicTasks(ws.ListTasks())
+		assert.Equal(t, originalTasks, tasks)
+	})
 
-	// Add tasks to existing projects
-	inFrontmatter := Task{Name: "Frontmatter Task", Status: Abandoned, Due: date(2024, 1, 2)}
-	assert.NoError(t, ws.AddTask("projects/project-one.md", 1, inFrontmatter)) // Add a task to the frontmatter of a project
-	beginningOfProject := Task{Name: "Beginning Task", Status: Doing}
-	assert.NoError(t, ws.AddTask("projects/project-one.md", 0, beginningOfProject)) // Add a task to the beginning of a project
-	endOfProject := Task{Name: "End Task", Status: Todo}
-	assert.NoError(t, ws.AddTask("projects/project-one.md", -1, endOfProject)) // Add a task to the end of a project
+	t.Run("Add Tasks", func(t *testing.T) {
+		// Add tasks to existing projects
+		inFrontmatter := Task{Name: "Frontmatter Task", Status: Abandoned, Due: date(2024, 1, 2)}
+		assert.NoError(t, ws.AddTask("projects/project-one.md", 1, inFrontmatter)) // Add a task to the frontmatter of a project
+		beginningOfProject := Task{Name: "Beginning Task", Status: Doing}
+		assert.NoError(t, ws.AddTask("projects/project-one.md", 0, beginningOfProject)) // Add a task to the beginning of a project
+		endOfProject := Task{Name: "End Task", Status: Todo}
+		assert.NoError(t, ws.AddTask("projects/project-one.md", -1, endOfProject)) // Add a task to the end of a project
 
-	// Add tasks without a project (should be added to the daily note)
-	// For the first one the note wont exist yet so make sure it's created
-	dailyNotePath, _ := ws.DailyNotePath(*date(2021, 1, 1))
-	dailyTask1 := Task{Name: "Daily Task 1", Status: Done}
-	assert.NoError(t, ws.AddTask(dailyNotePath, 0, dailyTask1)) // Add a task to a non-existent daily note (will be created)
-	dailyTask2 := Task{Name: "Daily Task 2", Status: Todo}
-	assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
+		// Add tasks without a project (should be added to the daily note)
+		// For the first one the note wont exist yet so make we ensure it's created
+		dailyNotePath, _ := ws.DailyNotePath(*date(2021, 1, 1))
+		dailyTask1 := Task{Name: "Daily Task 1", Status: Done}
+		assert.NoError(t, ws.AddTask(dailyNotePath, 0, dailyTask1)) // Add a task to a non-existent daily note (will be created)
+		dailyTask2 := Task{Name: "Daily Task 2", Status: Todo}
+		assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
 
-	time.Sleep(5 * time.Second) // remove once we have a way to wait for updates to be processed
-	tasks = deterministicTasks(ws.ListTasks())
+		time.Sleep(1 * time.Second) // remove once we have a way to wait for updates to be processed
+        tasks := deterministicTasks(ws.ListTasks())
 
-	assert.Equal(t, deterministicTasks([]Task{
-		taskWithData("projects/project-one.md:3", "project-one", beginningOfProject),
-		taskWithData("projects/project-one.md:4", "project-one", inFrontmatter),
-		taskWithData("projects/project-one.md:6", "project-one", originalTasks[0]),
-		taskWithData("projects/project-one.md:7", "project-one", originalTasks[1]),
-		taskWithData("projects/project-one.md:10", "project-one", endOfProject),
-		taskWithData("daily/2021-01-01.md:0", "", dailyTask1),
-		taskWithData("daily/2021-01-01.md:2", "", dailyTask2),
-	}), tasks)
+		assert.Equal(t, deterministicTasks([]Task{
+			taskWithData("projects/project-one.md:3", "project-one", beginningOfProject),
+			taskWithData("projects/project-one.md:4", "project-one", inFrontmatter),
+			taskWithData("projects/project-one.md:6", "project-one", originalTasks[0]),
+			taskWithData("projects/project-one.md:7", "project-one", originalTasks[1]),
+			taskWithData("projects/project-one.md:10", "project-one", endOfProject),
+			taskWithData("daily/2021-01-01.md:0", "", dailyTask1),
+			taskWithData("daily/2021-01-01.md:2", "", dailyTask2),
+		}), tasks)
+
+	})
 }
