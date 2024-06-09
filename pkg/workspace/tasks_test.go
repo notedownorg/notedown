@@ -17,13 +17,15 @@ func copyTestData(t *testing.T, name string) string {
 	// If we're running in a CI environment, we dont want to create temp directories
 	// This ensures we can store the artifacts for debugging
 	dir := os.Getenv("GITHUB_WORKSPACE")
-	if dir != "" {
+	if dir == "" {
         var err error
 		dir, err = os.MkdirTemp("", fmt.Sprintf("nl-%v-", name))
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
+	} else {
+        dir = fmt.Sprintf("%v/testdata", dir)
+    }
 
     if err := cp.Copy("testdata/workspace", dir); err != nil {
 		t.Fatal(err)
