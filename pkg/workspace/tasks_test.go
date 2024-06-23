@@ -67,12 +67,14 @@ func TestWorkspace_Tasks(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
 	t.Run("Workspace Load", func(t *testing.T) {
+		t.Parallel()
 		ws := loadWorkspace(t)
 		tasks := deterministicTasks(ws.ListTasks())
 		assert.Equal(t, originalTasks, tasks)
 	})
 
 	t.Run("Add Tasks", func(t *testing.T) {
+		t.Parallel()
 		ws := loadWorkspace(t)
 
 		// Add tasks to existing projects
@@ -91,9 +93,7 @@ func TestWorkspace_Tasks(t *testing.T) {
 		dailyTask2 := Task{Name: "Daily Task 2", Status: Todo}
 		assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
 
-		time.Sleep(1 * time.Second) // remove once we have a way to wait for updates to be processed
 		tasks := deterministicTasks(ws.ListTasks())
-
 		assert.Equal(t, deterministicTasks([]Task{
 			taskWithData("projects/project-one.md:3", "project-one", beginningOfProject),
 			taskWithData("projects/project-one.md:4", "project-one", inFrontmatter),
