@@ -84,7 +84,13 @@ func (p *Persistor) readLines(document string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return strings.Split(string(bytes), "\n"), nil
+	lines := strings.Split(string(bytes), "\n")
+
+	// Remove the last line if it's empty to prevent adding additional whitespace
+	if len(lines) > 0 && lines[len(lines)-1] == "" {
+		lines = lines[:len(lines)-1]
+	}
+	return lines, nil
 }
 
 func (p *Persistor) writeLines(document string, lines []string) error {
