@@ -19,3 +19,11 @@ jobs:
 
     - name: Make All
       run: make
+
+    - name: Testdata upload
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: testdata
+        path: ${{ github.workspace }}/testdata
+        if-no-files-found: error

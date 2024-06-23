@@ -1,10 +1,11 @@
 package workspace
 
 import (
+	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/teambition/rrule-go"
 )
 
 type Status ast.Status
@@ -16,6 +17,33 @@ const (
 	Done      Status = Status(ast.Done)
 	Abandoned Status = Status(ast.Abandoned)
 )
+
+func fromAst(relativePath string, project string, task ast.Task) *Task {
+	return &Task{
+		id:        fmt.Sprintf("%s:%d", relativePath, task.Line),
+		Name:      task.Name,
+		Status:    Status(task.Status),
+		Due:       task.Due,
+		Scheduled: task.Scheduled,
+		Completed: task.Completed,
+		Priority:  task.Priority,
+		Every:     task.Every,
+		Project:   project,
+	}
+}
+
+func toAst(line int, task Task) ast.Task {
+	return ast.Task{
+		Name:      task.Name,
+		Line:      line,
+		Status:    ast.Status(task.Status),
+		Due:       task.Due,
+		Scheduled: task.Scheduled,
+		Completed: task.Completed,
+		Priority:  task.Priority,
+		Every:     task.Every,
+	}
+}
 
 func OrderStatus(status Status) int {
 	switch status {
@@ -34,15 +62,19 @@ func OrderStatus(status Status) int {
 }
 
 type Task struct {
-	Id        string
+	id        string
 	Name      string
 	Status    Status
 	Due       *time.Time
 	Scheduled *time.Time
 	Completed *time.Time
 	Priority  *int
-	Every     *rrule.RRule
+	Every     *ast.Every
 	Project   string
+}
+
+func (t Task) Id() string {
+	return t.id
 }
 
 func (w Workspace) ListTasks() []Task {
@@ -55,11 +87,31 @@ func (w Workspace) ListTasks() []Task {
 	return res
 }
 
-func (w *Workspace) AddTask(task *ast.Task) error {
-	panic("not implemented")
+// AddTask adds a task to the workspace in the passed document at the passed line number.
+// If the line number is -1, the task will be added to the end of the document.
+// If the line number is 0 or would be placed before the end of the front matter, the task will be added just after the front matter.
+func (w *Workspace) AddTask(documentPath string, line int, task Task) error {
+	slog.Debug("adding task", slog.String("file", documentPath), slog.String("task", task.Name))
+	abs := w.absolutePath(documentPath)
+	if _, ok := w.documents[abs]; !ok {
+		return fmt.Errorf("document %s not found", documentPath)
+	}
+
+	if line >= 0 && line < w.documents[abs].markers.ContentStart {
+		line = w.documents[abs].markers.ContentStart
+	}
+
+	if err := w.persistor.AddLine(abs, line, toAst(line, task).String()); err != nil {
+		return err
+	}
+
+	// TODO: Are there forced cache invalidations that need to happen here?
+	// TODO: Maybe we should just wait until the cache is updated before returning?
+	// TODO: Or maybe enventual consistency is fine?
+	return nil
 }
 
-func (w *Workspace) UpdateTask(task *ast.Task) error {
+func (w *Workspace) UpdateTask(task Task) error {
 	panic("not implemented")
 }
 

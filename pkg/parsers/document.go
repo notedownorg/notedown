@@ -37,6 +37,7 @@ var DocumentParser = func(relativeTo time.Time) parse.Parser[ast.Document] {
 			if err != nil {
 				return ast.Document{}, false, fmt.Errorf("unable to parse frontmatter: %w", err)
 			}
+			res.Markers.ContentStart = in.Position().Line + 1
 		}
 
 		// Parse the rest of the file looking for blocks

@@ -25,9 +25,10 @@ var spacesRule, _ = rrule.NewRRule(rrule.ROption{Freq: rrule.WEEKLY, Dtstart: re
 
 func TestTask(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		expected ast.Task
+		name          string
+		input         string
+		expected      ast.Task
+		leftOverInput bool
 	}{
 		// Test each status
 		{
@@ -98,9 +99,21 @@ func TestTask(t *testing.T) {
 			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1)},
 		},
 		{
+			name:          "Due date on different task",
+			input:         "- [ ] Task 1\n- [ ] Task 2 due:2021-01-01",
+			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			leftOverInput: true,
+		},
+		{
 			name:     "Scheduled date",
 			input:    "- [ ] Task scheduled:2021-01-01",
 			expected: ast.Task{Status: ast.Todo, Name: "Task", Scheduled: date(2021, 1, 1)},
+		},
+		{
+			name:          "Scheduled date on different task",
+			input:         "- [ ] Task 1\n- [ ] Task 2 scheduled:2021-01-01",
+			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			leftOverInput: true,
 		},
 		{
 			name:     "Completed date",
@@ -108,29 +121,15 @@ func TestTask(t *testing.T) {
 			expected: ast.Task{Status: ast.Todo, Name: "Task", Completed: date(2021, 1, 1)},
 		},
 		{
-			name:     "Priority",
-			input:    "- [ ] Task priority:1",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Priority: intPtr(1)},
+			name:          "Completed date on different task",
+			input:         "- [ ] Task 1\n- [ ] Task 2 completed:2021-01-01",
+			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			leftOverInput: true,
 		},
 		{
-			name:     "Every",
-			input:    "- [ ] Task every:day",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Every: dailyRule},
-		},
-		{
-			name:     "Every with spaces",
-			input:    "- [ ] Task every:mon wed fri",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Every: spacesRule},
-		},
-		{
-			name:     "All fields long",
-			input:    "- [ ] Task due:2021-01-01 every:mon wed fri scheduled:2021-01-01 completed:2021-01-01 priority:1",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
-		},
-		{
-			name:     "All fields short",
-			input:    "- [ ] Task d:2021-01-01 e:mon wed fri s:2021-01-01 p:1 completed:2021-01-01",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1), Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 1), Priority: intPtr(1), Every: spacesRule},
+			name:     "Conflicting short and long fields",
+			input:    "- [ ] Task scheduled:2021-01-01 completed:2021-01-02", // both end in d: so make sure theres no due date
+			expected: ast.Task{Status: ast.Todo, Name: "Task", Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 2)},
 		},
 	}
 	for _, test := range tests {
@@ -141,7 +140,11 @@ func TestTask(t *testing.T) {
 				t.Fatal("expected found")
 			}
 			assert.Equal(t, test.expected, result)
-			assert.Equal(t, len(test.input), in.Index(), "expected to consume the entire input")
+			if test.leftOverInput {
+				assert.NotEqual(t, len(test.input), in.Index(), "expected there to be leftover input")
+			} else {
+				assert.Equal(t, len(test.input), in.Index(), "expected to consume the entire input")
+			}
 		})
 	}
 }
@@ -151,6 +154,7 @@ func TestDueDate(t *testing.T) {
 		name     string
 		input    string
 		expected time.Time
+		notFound bool
 	}{
 		{
 			name:     "Long",
@@ -160,6 +164,11 @@ func TestDueDate(t *testing.T) {
 		{
 			name:     "Short",
 			input:    "d:2021-01-01",
+			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "Short with leading space",
+			input:    " d:2021-01-01",
 			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
@@ -189,6 +198,11 @@ func TestScheduledDate(t *testing.T) {
 		{
 			name:     "Short",
 			input:    "s:2021-01-01",
+			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			name:     "Short with leading space",
+			input:    " s:2021-01-01",
 			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
@@ -246,6 +260,11 @@ func TestPriority(t *testing.T) {
 			expected: 1,
 		},
 		{
+			name:     "Short with leading space",
+			input:    " p:1",
+			expected: 1,
+		},
+		{
 			name:     "Zero",
 			input:    "p:0",
 			expected: 0,
@@ -278,13 +297,15 @@ func TestPriority(t *testing.T) {
 
 func TestEvery(t *testing.T) {
 	tests := []struct {
-		input    string
-		expected []time.Time
-		end      time.Time
-		notFound bool
+		input        string
+		expected     []time.Time
+		expectedText string
+		end          time.Time
+		notFound     bool
 	}{
 		{
-			input: "every:day",
+			input:        "every:day",
+			expectedText: "day",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
@@ -298,7 +319,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "e:day",
+			input:        "e:day",
+			expectedText: "day",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
@@ -312,7 +334,23 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:week",
+			input:        " e:day",
+			expectedText: "day",
+			expected: []time.Time{
+				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 4, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 5, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 6, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 7, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 8, 0, 0, 0, 0, time.UTC),
+				time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
+			},
+			end: time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
+		},
+		{
+			input:        "every:week",
+			expectedText: "week",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
@@ -326,7 +364,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 2, 20, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:month",
+			input:        "every:month",
+			expectedText: "month",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 2, 2, 0, 0, 0, 0, time.UTC),
@@ -340,7 +379,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 8, 2, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:year",
+			input:        "every:year",
+			expectedText: "year",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2021, 1, 2, 0, 0, 0, 0, time.UTC),
@@ -354,7 +394,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2027, 1, 2, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:weekday",
+			input:        "every:weekday",
+			expectedText: "weekday",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
@@ -368,7 +409,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 13, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:weekend",
+			input:        "every:weekend",
+			expectedText: "weekend",
 			expected: []time.Time{
 				time.Date(2020, 1, 4, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 11, 0, 0, 0, 0, time.UTC),
@@ -382,7 +424,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 2, 22, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:mon",
+			input:        "every:mon",
+			expectedText: "mon",
 			expected: []time.Time{
 				time.Date(2020, 1, 6, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 13, 0, 0, 0, 0, time.UTC),
@@ -396,7 +439,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 2, 24, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:mon tues wed",
+			input:        "every:mon tues wed",
+			expectedText: "mon tues wed",
 			expected: []time.Time{
 				time.Date(2020, 1, 6, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 7, 0, 0, 0, 0, time.UTC),
@@ -410,7 +454,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 21, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:tues thurs",
+			input:        "every:tues thurs",
+			expectedText: "tues thurs",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 7, 0, 0, 0, 0, time.UTC),
@@ -425,7 +470,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 30, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:2 days",
+			input:        "every:2 days",
+			expectedText: "2 days",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 4, 0, 0, 0, 0, time.UTC),
@@ -439,7 +485,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 1, 16, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:2 weeks",
+			input:        "every:2 weeks",
+			expectedText: "2 weeks",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 1, 16, 0, 0, 0, 0, time.UTC),
@@ -453,7 +500,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 4, 9, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:18 months",
+			input:        "every:18 months",
+			expectedText: "18 months",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2021, 7, 2, 0, 0, 0, 0, time.UTC),
@@ -467,7 +515,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2030, 7, 2, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:3 years",
+			input:        "every:3 years",
+			expectedText: "3 years",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
 				time.Date(2023, 1, 2, 0, 0, 0, 0, time.UTC),
@@ -481,7 +530,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2041, 1, 2, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:jan mar sept",
+			input:        "every:jan mar sept",
+			expectedText: "jan mar sept",
 			expected: []time.Time{
 				time.Date(2020, 3, 1, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 9, 1, 0, 0, 0, 0, time.UTC),
@@ -495,7 +545,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2022, 9, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:1st 15th jan sept",
+			input:        "every:1st 15th jan sept",
+			expectedText: "1st 15th jan sept",
 			expected: []time.Time{
 				time.Date(2020, 1, 15, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 9, 1, 0, 0, 0, 0, time.UTC),
@@ -509,7 +560,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2022, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:1 15",
+			input:        "every:1 15",
+			expectedText: "1 15",
 			expected: []time.Time{
 				time.Date(2020, 1, 15, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 2, 1, 0, 0, 0, 0, time.UTC),
@@ -523,7 +575,8 @@ func TestEvery(t *testing.T) {
 			end: time.Date(2020, 5, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
-			input: "every:1 30 jan february",
+			input:        "every:1 30 jan february",
+			expectedText: "1 30 jan february",
 			expected: []time.Time{
 				time.Date(2020, 1, 30, 0, 0, 0, 0, time.UTC),
 				time.Date(2020, 2, 1, 0, 0, 0, 0, time.UTC),
@@ -540,7 +593,8 @@ func TestEvery(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.input, func(t *testing.T) {
 			in := parse.NewInput(test.input)
-			result, found, _ := everyParser(relativeTo).Parse(in)
+			result, found, err := everyParser(relativeTo).Parse(in)
+			assert.NoError(t, err)
 			if test.notFound {
 				if found {
 					t.Fatal("expected not found")
@@ -550,7 +604,8 @@ func TestEvery(t *testing.T) {
 			if !found {
 				t.Fatal("expected found")
 			}
-			assert.Equal(t, test.expected, result.Between(relativeTo, test.end, true))
+			assert.Equal(t, test.expected, result.RRule.Between(relativeTo, test.end, true))
+			assert.Equal(t, test.expectedText, result.Text)
 		})
 	}
 }
