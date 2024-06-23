@@ -125,7 +125,7 @@ func (w *Workspace) handleRenameEvent(event fsnotify.Event) {
 
 func (w *Workspace) handleWriteEvent(event fsnotify.Event) {
 	slog.Debug("handling file write event", slog.String("file", event.Name))
-	delete(w.tasks, event.Name)
+	// Invalidate the cache before doing the update
 	w.cache.Delete(event.Name)
 	w.files <- event.Name
 }
