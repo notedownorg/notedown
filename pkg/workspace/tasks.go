@@ -78,7 +78,7 @@ func (t Task) Id() string {
 }
 
 func (w Workspace) ListTasks() []Task {
-    w.synchronize()
+	w.synchronize()
 	res := []Task{}
 	for _, tasks := range w.tasks {
 		for _, task := range tasks {

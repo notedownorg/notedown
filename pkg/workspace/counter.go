@@ -20,12 +20,12 @@ func (c *AtomicCounter) Increment() {
 }
 
 func (c *AtomicCounter) Decrement() {
-    for {
-        v := c.Read()
-        if atomic.CompareAndSwapUint64(&c.number, v, v-1) {
-            return
-        }
-    }
+	for {
+		v := c.Read()
+		if atomic.CompareAndSwapUint64(&c.number, v, v-1) {
+			return
+		}
+	}
 }
 
 func (c *AtomicCounter) Read() uint64 {
