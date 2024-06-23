@@ -44,19 +44,19 @@ func New(root string) (*Workspace, error) {
 			DailyNotes: filepath.Join(root, dailyDir),
 			Projects:   filepath.Join(root, projectsDir),
 		},
-		tasks:     make(map[string]map[int]*Task),
-		documents: make(map[string]*document),
-		mutex:     &sync.Mutex{},
-		cache:     cache.NewCache(root),
-		persistor: persistor.NewPersistor(),
-		files:     make(chan string, 1000),
-		docs:      make(chan docChan, 1000),
+		tasks:             make(map[string]map[int]*Task),
+		documents:         make(map[string]*document),
+		mutex:             &sync.Mutex{},
+		cache:             cache.NewCache(root),
+		persistor:         persistor.NewPersistor(),
+		processingCounter: NewAtomicCounter(),
+		files:             make(chan string, 1000),
+		docs:              make(chan docChan, 1000),
 	}
 	go ws.runProcessor() // Handles updating the cache
 	go ws.runEventLoop() // Handles watching for file changes
 
 	// Recurse through the root directory and process all the files to build the initial state
-	expectedInitialSize := 0
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -68,22 +68,15 @@ func New(root string) (*Workspace, error) {
 			return nil
 		}
 		if strings.HasSuffix(path, ".md") {
-			expectedInitialSize++
+			ws.processingCounter.Increment()
 			ws.files <- path
 		}
 		return nil
 	})
 
 	// Wait for the initial state to be built
-	// Note:
-	// There is a slight chance of a race condition here as a file could be added whilst we are initializing
-	// This is a very small chance and the impact is minimal so we are not going to worry about it for now.
-	for {
-		if len(ws.documents) >= expectedInitialSize {
-			slog.Debug("initial state built", slog.Int("files", len(ws.documents)))
-			break
-		}
-	}
+	ws.synchronize()
+	slog.Debug("initial state built", slog.Int("files", len(ws.documents)))
 
 	return ws, nil
 }
@@ -98,9 +91,10 @@ type document struct {
 }
 
 type Workspace struct {
-	root      string
-	cache     cache.Cache
-	persistor *persistor.Persistor
+	root              string
+	cache             cache.Cache
+	persistor         *persistor.Persistor
+	processingCounter *AtomicCounter
 
 	directories directories
 

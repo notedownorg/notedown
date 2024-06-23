@@ -41,17 +41,24 @@ func (w *Workspace) runProcessor() {
 			fileInfo, err := os.Stat(file)
 			if err != nil {
 				slog.Error("error getting file info", slog.Any("error", err))
+				w.processingCounter.Decrement()
+				continue
 			}
 			if fileInfo.IsDir() {
+				w.processingCounter.Decrement()
 				continue
 			}
 			contents, err := os.ReadFile(file)
 			if err != nil {
 				slog.Error("error reading file", slog.Any("error", err), slog.String("file", file))
+				w.processingCounter.Decrement()
+				continue
 			}
 			d, err := parsers.Document(time.Now())(string(contents))
 			if err != nil {
 				slog.Error("error parsing file", slog.Any("error", err), slog.String("file", file))
+				w.processingCounter.Decrement()
+				continue
 			}
 			w.docs <- docChan{doc: &d, file: file, lastModified: fileInfo.ModTime()}
 
@@ -70,6 +77,8 @@ func (w *Workspace) runProcessor() {
 				rel, err := filepath.Rel(w.root, d.file)
 				if err != nil {
 					slog.Error("error getting relative path", slog.Any("error", err), slog.String("file", d.file))
+					w.processingCounter.Decrement()
+					continue
 				}
 				tasks[task.Line] = fromAst(rel, project, task)
 			}
@@ -79,9 +88,23 @@ func (w *Workspace) runProcessor() {
 			w.documents[d.file] = &document{markers: d.doc.Markers}
 			w.mutex.Unlock()
 			w.cache.Set(d.file, d.lastModified, d.doc)
+			w.processingCounter.Decrement()
 		}
 	}
+}
 
+// Ensure that there are no currently pending files
+// TODO: maybe we should think about a timeout here?
+//
+// Note:
+// We cant use channel length to determine if the processing is done because this doesn't account for the
+// item currently being processed.
+func (w *Workspace) synchronize() {
+	for {
+		if w.processingCounter.Read() == 0 {
+			break
+		}
+	}
 }
 
 func (w *Workspace) runEventLoop() {
@@ -107,6 +130,7 @@ func (w *Workspace) runEventLoop() {
 
 func (w *Workspace) handleCreateEvent(event fsnotify.Event) {
 	slog.Debug("handling file create event", slog.String("file", event.Name))
+	w.processingCounter.Increment()
 	w.files <- event.Name
 }
 
@@ -127,5 +151,6 @@ func (w *Workspace) handleWriteEvent(event fsnotify.Event) {
 	slog.Debug("handling file write event", slog.String("file", event.Name))
 	// Invalidate the cache before doing the update
 	w.cache.Delete(event.Name)
+	w.processingCounter.Increment()
 	w.files <- event.Name
 }
