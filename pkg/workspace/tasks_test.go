@@ -84,7 +84,7 @@ func TestWorkspace_Tasks(t *testing.T) {
 		// For the first one the note wont exist yet so make we ensure it's created
 		dailyNotePath, _ := ws.DailyNotePath(*date(2021, 1, 1))
 		dailyTask1 := Task{Name: "Daily Task 1", Status: Done}
-		assert.NoError(t, ws.AddTask(dailyNotePath, 0, dailyTask1)) // Add a task to a non-existent daily note (will be created)
+		assert.NoError(t, ws.AddTask(dailyNotePath, 0, dailyTask1)) // Add a task to the newly created daily note
 		dailyTask2 := Task{Name: "Daily Task 2", Status: Todo}
 		assert.NoError(t, ws.AddTask(dailyNotePath, -1, dailyTask2)) // Add a task to an existing note
 
@@ -96,9 +96,9 @@ func TestWorkspace_Tasks(t *testing.T) {
 			taskWithData("projects/project-one.md:4", "project-one", inFrontmatter),
 			taskWithData("projects/project-one.md:6", "project-one", originalTasks[0]),
 			taskWithData("projects/project-one.md:7", "project-one", originalTasks[1]),
-			taskWithData("projects/project-one.md:10", "project-one", endOfProject),
+			taskWithData("projects/project-one.md:8", "project-one", endOfProject),
 			taskWithData("daily/2021-01-01.md:0", "", dailyTask1),
-			taskWithData("daily/2021-01-01.md:2", "", dailyTask2),
+			taskWithData("daily/2021-01-01.md:1", "", dailyTask2),
 		}), tasks)
 
 	})
