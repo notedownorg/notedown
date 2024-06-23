@@ -2,6 +2,7 @@ package workspace
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -55,6 +56,7 @@ func New(root string) (*Workspace, error) {
 	go ws.runEventLoop() // Handles watching for file changes
 
 	// Recurse through the root directory and process all the files to build the initial state
+	expectedInitialSize := 0
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -66,12 +68,23 @@ func New(root string) (*Workspace, error) {
 			return nil
 		}
 		if strings.HasSuffix(path, ".md") {
+			expectedInitialSize++
 			ws.files <- path
 		}
 		return nil
 	})
 
-	// TODO: Only return once the initial state has been built
+	// Wait for the initial state to be built
+	// Note:
+	// There is a slight chance of a race condition here as a file could be added whilst we are initializing
+	// This is a very small chance and the impact is minimal so we are not going to worry about it for now.
+	for {
+		if len(ws.documents) >= expectedInitialSize {
+			slog.Debug("initial state built", slog.Int("files", len(ws.documents)))
+			break
+		}
+	}
+
 	return ws, nil
 }
 

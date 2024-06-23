@@ -55,23 +55,26 @@ func taskWithData(id string, project string, task Task) Task {
 	return task
 }
 
+func loadWorkspace(t *testing.T) *Workspace {
+	tmp := copyTestData(t, "tasks")
+	fmt.Println("Created temp dir: ", tmp)
+	ws, err := New(tmp) // Copy the testdata into a temporary directory so we don't modify the original
+	assert.NoError(t, err)
+	return ws
+}
+
 func TestWorkspace_Tasks(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
-	// Copy the testdata into a temporary directory so we don't modify the original
-	tmp := copyTestData(t, "tasks")
-	fmt.Println("Created temp dir: ", tmp)
-
-	ws, err := New(tmp)
-	assert.NoError(t, err)
-
 	t.Run("Workspace Load", func(t *testing.T) {
-		time.Sleep(1 * time.Second) // remove once we have a way to wait for the initial state to be built
+		ws := loadWorkspace(t)
 		tasks := deterministicTasks(ws.ListTasks())
 		assert.Equal(t, originalTasks, tasks)
 	})
 
 	t.Run("Add Tasks", func(t *testing.T) {
+		ws := loadWorkspace(t)
+
 		// Add tasks to existing projects
 		inFrontmatter := Task{Name: "Frontmatter Task", Status: Abandoned, Due: date(2024, 1, 2)}
 		assert.NoError(t, ws.AddTask("projects/project-one.md", 1, inFrontmatter)) // Add a task to the frontmatter of a project
@@ -100,6 +103,6 @@ func TestWorkspace_Tasks(t *testing.T) {
 			taskWithData("daily/2021-01-01.md:0", "", dailyTask1),
 			taskWithData("daily/2021-01-01.md:1", "", dailyTask2),
 		}), tasks)
-
 	})
+
 }
