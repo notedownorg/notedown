@@ -10,6 +10,7 @@ import (
 )
 
 func (c *Client) processFile(path string) {
+	slog.Debug("processing file", slog.String("file", path))
 	// If we have already processed this file and it is up to date, we can skip it
 	if c.isUpToDate(path) {
 		return
@@ -19,6 +20,7 @@ func (c *Client) processFile(path string) {
 	c.processors.Add(1)
 	c.threadLimit.Acquire(context.Background(), 1) // acquire semaphore as we will be making a blocking syscall
 	go func() {
+		slog.Debug("parsing file", slog.String("file", path))
 		defer c.processors.Done()
 		defer c.threadLimit.Release(1)
 		contents, err := os.ReadFile(path)
