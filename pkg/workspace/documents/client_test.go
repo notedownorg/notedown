@@ -31,8 +31,9 @@ func loadtestDocuments_Client(count int, t *testing.T) {
 }
 
 // Load test rather than benchmark as we are testing the ability to handle a large number of files not the speed (for now)
-func TestDocuments_Client_Loadtest_10(t *testing.T) { loadtestDocuments_Client(10, t) }
-func TestDocuments_Client_Loadtest_100(t *testing.T) { loadtestDocuments_Client(100, t) }
+func TestDocuments_Client_Loadtest_10(t *testing.T)   { loadtestDocuments_Client(10, t) }
+func TestDocuments_Client_Loadtest_100(t *testing.T)  { loadtestDocuments_Client(100, t) }
 func TestDocuments_Client_Loadtest_1000(t *testing.T) { loadtestDocuments_Client(1000, t) }
+
 // func TestDocuments_Client_Loadtest_10000(t *testing.T) { loadtestDocuments_Client(10000, t) }
 // func TestDocuments_Client_Loadtest_50000(t *testing.T) { loadtestDocuments_Client(50000, t) }

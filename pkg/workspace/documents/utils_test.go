@@ -8,7 +8,6 @@ import (
 	cp "github.com/otiai10/copy"
 )
 
-
 func setupTestDir(name string) (string, error) {
 	// If we're running in a CI environment, we dont want to create temp directories
 	// This ensures we can store the artifacts for debugging
@@ -43,7 +42,7 @@ func generateTestData(name string, fileCount int) (string, error) {
 	}
 	for i := 0; i < fileCount; i++ {
 		content := fmt.Sprintf("# Test Document %v", i) // maybe put more meaningful content here
-        if err := writeFile(dir, fmt.Sprintf("%v.md", i), content); err != nil {
+		if err := writeFile(dir, fmt.Sprintf("%v.md", i), content); err != nil {
 			return "", err
 		}
 	}
@@ -51,5 +50,5 @@ func generateTestData(name string, fileCount int) (string, error) {
 }
 
 func writeFile(dir string, name string, content string) error {
-    return os.WriteFile(path.Join(dir, name), []byte(content), 0644)
+	return os.WriteFile(path.Join(dir, name), []byte(content), 0644)
 }

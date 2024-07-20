@@ -29,8 +29,8 @@ type Client struct {
 	watcher    *fsnotify.RecursiveWatcher
 	processors sync.WaitGroup
 
-    // Everytime a goroutine makes a blocking syscall (in our case file i/o) it uses a new thread so to avoid
-    // large workspaces exhausting the thread limit we use a semaphore to limit the number of concurrent goroutines
+	// Everytime a goroutine makes a blocking syscall (in our case file i/o) it uses a new thread so to avoid
+	// large workspaces exhausting the thread limit we use a semaphore to limit the number of concurrent goroutines
 	threadLimit *semaphore.Weighted
 }
 
@@ -49,7 +49,7 @@ func NewClient(root string, clientId string) (*Client, error) {
 		threadLimit: semaphore.NewWeighted(1000), // Avoid exhausting golang max threads
 	}
 
-    go client.fileWatcher()
+	go client.fileWatcher()
 
 	// Recurse through the root directory and process all the files to build the initial state
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

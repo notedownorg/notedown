@@ -17,10 +17,10 @@ func (c *Client) processFile(path string) {
 
 	// Do the rest in a goroutine so we can continue doing other things
 	c.processors.Add(1)
-    c.threadLimit.Acquire(context.Background(), 1) // acquire semaphore as we will be making a blocking syscall
+	c.threadLimit.Acquire(context.Background(), 1) // acquire semaphore as we will be making a blocking syscall
 	go func() {
 		defer c.processors.Done()
-        defer c.threadLimit.Release(1)
+		defer c.threadLimit.Release(1)
 		contents, err := os.ReadFile(path)
 		if err != nil {
 			slog.Error("failed to read file", slog.String("file", path), slog.String("error", err.Error()))
@@ -60,8 +60,8 @@ func (c *Client) isUpToDate(file string) bool {
 		slog.Error("Failed to get relative path", slog.String("file", file), slog.String("error", err.Error()))
 		return false
 	}
-    c.mutex.RLock()
+	c.mutex.RLock()
 	doc, ok := c.documents[rel]
-    c.mutex.RUnlock()
+	c.mutex.RUnlock()
 	return ok && doc.lastUpdated >= info.ModTime().Unix()
 }
