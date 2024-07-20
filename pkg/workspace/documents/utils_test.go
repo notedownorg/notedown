@@ -20,7 +20,7 @@ func setupTestDir(name string) (string, error) {
 		}
 	} else {
 		dir = fmt.Sprintf("%v/testdata/%v", dir, name)
-		if err := os.Mkdir(dir, 0644); err != nil {
+		if err := os.MkdirAll(dir, 0644); err != nil {
 			return "", err
 		}
 	}
