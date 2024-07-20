@@ -15,7 +15,7 @@ import (
 
 func TestDocuments_Client_FileEvents(t *testing.T) {
 	// Do the setup and ensure its correct
-	dir, err := copyTestData("client")
+	dir, err := copyTestData(t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func TestDocuments_Client_FileEvents_Fuzz(t *testing.T) {
 	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
 
 	// Do the setup and ensure its correct
-	dir, err := copyTestData("client")
+	dir, err := copyTestData(t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}

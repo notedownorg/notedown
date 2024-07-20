@@ -7,7 +7,7 @@ import (
 )
 
 func TestDocuments_Client(t *testing.T) {
-	dir, err := copyTestData("client")
+	dir, err := copyTestData(t.Name())
 	if err != nil {
 		t.Fatal(err)
 	}

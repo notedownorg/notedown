@@ -19,7 +19,7 @@ func setupTestDir(name string) (string, error) {
 			return "", err
 		}
 	} else {
-		dir = fmt.Sprintf("%v/testdata", dir)
+		dir = fmt.Sprintf("%v/testdata/%v", dir, name)
 	}
 	return dir, nil
 }
