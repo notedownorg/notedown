@@ -1,6 +1,7 @@
 package documents
 
 import (
+	"fmt"
 	"log"
 	"log/slog"
 
@@ -35,21 +36,21 @@ func (c *Client) handleCreateEvent(event fsnotify.Event) {
 
 func (c *Client) handleRemoveEvent(event fsnotify.Event) {
 	slog.Debug("handling file remove event", slog.String("file", event.Name))
-	c.mutex.Lock()
-	defer c.mutex.Unlock()
 	rel, err := c.relative(event.Name)
 	if err != nil {
 		slog.Error("failed to get relative path", slog.String("file", event.Name), slog.String("error", err.Error()))
+		c.errors <- fmt.Errorf("failed to get relative path: %w", err)
 		return
 	}
+	c.docMutex.Lock()
+	defer c.docMutex.Unlock()
 	delete(c.documents, rel)
+	c.events <- Event{Op: Delete, Document: document{}, Key: rel}
 }
 
 func (c *Client) handleRenameEvent(event fsnotify.Event) {
 	slog.Debug("handling file rename event", slog.String("file", event.Name))
-	// This should probably be a transaction?
-	c.handleRemoveEvent(event)
-	c.handleCreateEvent(event)
+	c.handleRemoveEvent(event) // rename sends the name of the old file, presumably it sends a create event for the new file
 }
 
 func (c *Client) handleWriteEvent(event fsnotify.Event) {

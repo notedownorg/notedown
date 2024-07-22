@@ -24,14 +24,19 @@ type Client struct {
 
 	// Documents indexed by their relative path
 	documents map[string]document
+	docMutex  sync.RWMutex
 
-	mutex      sync.RWMutex
 	watcher    *fsnotify.RecursiveWatcher
 	processors sync.WaitGroup
 
-	// Everytime a goroutine makes a blocking syscall (in our case file i/o) it uses a new thread so to avoid
+	subscribers []chan Event
+
+	// Everytime a goroutine makes a blocking syscall (in our case usually file i/o) it uses a new thread so to avoid
 	// large workspaces exhausting the thread limit we use a semaphore to limit the number of concurrent goroutines
 	threadLimit *semaphore.Weighted
+
+	errors chan error
+	events chan Event
 }
 
 func NewClient(root string, clientId string) (*Client, error) {
@@ -44,12 +49,16 @@ func NewClient(root string, clientId string) (*Client, error) {
 		root:        root,
 		clientId:    clientId,
 		documents:   make(map[string]document),
-		mutex:       sync.RWMutex{},
+		docMutex:    sync.RWMutex{},
 		watcher:     watcher,
+		subscribers: make([]chan Event, 0),
 		threadLimit: semaphore.NewWeighted(1000), // Avoid exhausting golang max threads
+		errors:      make(chan error),
+		events:      make(chan Event),
 	}
 
 	go client.fileWatcher()
+	go client.eventDispatcher()
 
 	// Recurse through the root directory and process all the files to build the initial state
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {

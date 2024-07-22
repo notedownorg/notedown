@@ -2,6 +2,7 @@ package documents
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os"
 	"time"
@@ -13,6 +14,7 @@ func (c *Client) processFile(path string) {
 	slog.Debug("processing file", slog.String("file", path))
 	// If we have already processed this file and it is up to date, we can skip it
 	if c.isUpToDate(path) {
+		slog.Debug("file is up to date, stopping short", slog.String("file", path))
 		return
 	}
 
@@ -26,23 +28,29 @@ func (c *Client) processFile(path string) {
 		contents, err := os.ReadFile(path)
 		if err != nil {
 			slog.Error("failed to read file", slog.String("file", path), slog.String("error", err.Error()))
+			c.errors <- fmt.Errorf("failed to read file: %w", err)
 			return
 		}
 		d, err := parsers.Document(time.Now())(string(contents))
 		if err != nil {
 			slog.Error("failed to parse document", slog.String("file", path), slog.String("error", err.Error()))
+			c.errors <- fmt.Errorf("failed to parse document: %w", err)
 			return
 		}
 		rel, err := c.relative(path)
 		if err != nil {
 			slog.Error("failed to get relative path", slog.String("file", path), slog.String("error", err.Error()))
+			c.errors <- fmt.Errorf("failed to get relative path: %w", err)
 			return
 		}
 
-		c.mutex.Lock()
 		slog.Debug("updating document in cache", slog.String("file", path), slog.String("relative", rel))
-		c.documents[rel] = document{document: d, lastUpdated: time.Now().Unix()}
-		c.mutex.Unlock()
+		doc := document{document: d, lastUpdated: time.Now().Unix()}
+
+		c.docMutex.Lock()
+		c.documents[rel] = doc
+		c.docMutex.Unlock()
+		c.events <- Event{Op: Change, Document: doc, Key: rel}
 	}()
 }
 
@@ -55,15 +63,17 @@ func (c *Client) isUpToDate(file string) bool {
 	info, err := os.Stat(file)
 	if err != nil {
 		slog.Error("Failed to get file info", slog.String("file", file), slog.String("error", err.Error()))
+		c.errors <- fmt.Errorf("failed to get file info: %w", err)
 		return false
 	}
 	rel, err := c.relative(file)
 	if err != nil {
 		slog.Error("Failed to get relative path", slog.String("file", file), slog.String("error", err.Error()))
+		c.errors <- fmt.Errorf("failed to get relative path: %w", err)
 		return false
 	}
-	c.mutex.RLock()
+	c.docMutex.RLock()
 	doc, ok := c.documents[rel]
-	c.mutex.RUnlock()
+	c.docMutex.RUnlock()
 	return ok && doc.lastUpdated >= info.ModTime().Unix()
 }
