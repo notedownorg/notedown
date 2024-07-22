@@ -1,19 +1,16 @@
 package documents
 
 import (
-	"fmt"
 	"log/slog"
 	"math/rand"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDocuments_Client_FileEvents(t *testing.T) {
+func TestDocuments_Client_Watcher(t *testing.T) {
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())
 	if err != nil {
@@ -23,6 +20,7 @@ func TestDocuments_Client_FileEvents(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	go ensureNoErrors(t, client.Errors())
 	assert.Len(t, client.documents, 1)
 
 	// Throw a bunch of events at the client and ensure the documents are updated correctly
@@ -38,11 +36,11 @@ func TestDocuments_Client_FileEvents(t *testing.T) {
 	os.Remove(dir + "/3.md") // doc count: 3
 
 	// As file watching has to be done async theres no way to deterministically wait for the events to be processed
-	assert.Eventually(t, func() bool { return len(client.documents) == 3 }, time.Second, time.Millisecond*100)
+	assert.Eventually(t, func() bool { return len(client.documents) == 3 }, time.Second, time.Millisecond*100, "expected %v documents got %v", 3, len(client.documents))
 }
 
-func TestDocuments_Client_FileEvents_Fuzz(t *testing.T) {
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
+func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
 
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())
@@ -54,53 +52,53 @@ func TestDocuments_Client_FileEvents_Fuzz(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Len(t, client.documents, 1)
+	go ensureNoErrors(t, client.Errors())
+
+	prexistingDocs := map[string]bool{}
+	for k := range client.documents {
+		prexistingDocs[k] = true
+	}
 
 	// Throw a bunch of events at the client and ensure the documents are updated correctly
-	var wg sync.WaitGroup
-	c, u, d := 0, 0, 0
+	errChan := make(chan error)
+	go ensureNoErrors(t, errChan)
+	wantAbs := map[string]bool{}
+	wantRel := map[string]bool{}
+
 	for i := 0; i < 1000; i++ {
-		switch rand.Intn(3) {
+		switch rand.Intn(4) {
 		case 0:
-			c++
-			go createFile(&wg, dir, "# Test Document")
+			wantAbs[createFile(dir, "# Test Document", errChan)] = true
 		case 1:
-			u++
-			go createThenUpdateFile(&wg, dir, "# Test Document Updated")
+			wantAbs[createThenUpdateFile(dir, "# Test Document Updated", errChan)] = true
 		case 2:
-			d++
-			go createThenDeleteFile(&wg, dir)
+			createThenDeleteFile(dir, errChan)
+		case 3:
+			wantAbs[createThenRenameFile(dir, "# Test Document", errChan)] = true
 		}
 	}
-	wg.Wait()
-	slog.Info("all file events have been sent", slog.Int("create", c), slog.Int("update", u), slog.Int("delete", d))
-	assert.Eventually(t, func() bool { return len(client.documents) == 1+c+u }, time.Second, time.Millisecond*100)
-}
 
-func createFile(wg *sync.WaitGroup, dir string, content string) (string, error) {
-	wg.Add(1)
-	defer wg.Done()
-	filename := uuid.New().String()
-	path := fmt.Sprintf("%v/%v.md", dir, filename)
-	return path, os.WriteFile(path, []byte(content), 0644)
-}
-
-func createThenDeleteFile(wg *sync.WaitGroup, dir string) error {
-	wg.Add(1)
-	defer wg.Done()
-	content := "some random text"
-	path, err := createFile(wg, dir, content)
-	if err != nil {
-		return err
+	// We have to make the keys relative...
+	for k := range wantAbs {
+		rel, _ := client.relative(k)
+		if err == nil {
+			wantRel[rel] = true
+		}
 	}
-	return os.Remove(path)
-}
 
-func createThenUpdateFile(wg *sync.WaitGroup, dir string, content string) error {
-	wg.Add(1)
-	defer wg.Done()
-	path, err := createFile(wg, dir, content)
-	if err != nil {
-		return err
+	// Add prexisting docs to the wantRel map
+	for k := range prexistingDocs {
+		wantRel[k] = true
 	}
-	return os.WriteFile(path, []byte("some random updated text"), 0644)
+
+	// Wait for all files to finish processing
+	assert.Eventually(t, func() bool { return len(wantRel) == len(client.documents) }, 2*time.Second, time.Millisecond*100, "expected %v documents got %v", len(wantRel), len(client.documents))
+
+	// Ensure the documents paths are correct
+	got := map[string]bool{}
+	for k := range client.documents {
+		got[k] = true
+	}
+	assert.Equal(t, wantRel, got)
+
 }
