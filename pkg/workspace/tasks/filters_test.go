@@ -15,27 +15,27 @@ func TestFilters(t *testing.T) {
 	tests := []struct {
 		name      string
 		filter    tasks.TaskFilter
-		wantTasks []tasks.Task
+		wantTasks []ast.Task
 	}{
 		{
 			name:      "Filter by single priority",
 			filter:    tasks.FilterByPriority(1),
-			wantTasks: []tasks.Task{toTask(events[0].Document.Tasks[1], events[0].Document.Hash)},
+			wantTasks: []ast.Task{events[0].Document.Tasks[1]},
 		},
 		{
 			name:      "Filter by multiple priorities",
 			filter:    tasks.FilterByPriority(1, 2),
-			wantTasks: []tasks.Task{toTask(events[0].Document.Tasks[1], events[0].Document.Hash), toTask(events[1].Document.Tasks[0], events[1].Document.Hash)},
+			wantTasks: []ast.Task{events[0].Document.Tasks[1], events[1].Document.Tasks[0]},
 		},
 		{
 			name:      "Filter by status",
 			filter:    tasks.FilterByStatus(ast.Done),
-			wantTasks: []tasks.Task{toTask(events[1].Document.Tasks[0], events[1].Document.Hash)},
+			wantTasks: []ast.Task{events[1].Document.Tasks[0]},
 		},
 		{
 			name:      "Filter by multiple statuses",
 			filter:    tasks.FilterByStatus(ast.Todo, ast.Done),
-			wantTasks: []tasks.Task{toTask(events[0].Document.Tasks[0], events[0].Document.Hash), toTask(events[1].Document.Tasks[0], events[1].Document.Hash)},
+			wantTasks: []ast.Task{events[0].Document.Tasks[0], events[1].Document.Tasks[0]},
 		},
 	}
 	for _, tt := range tests {
