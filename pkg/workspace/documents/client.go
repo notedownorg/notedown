@@ -7,14 +7,8 @@ import (
 	"sync"
 
 	"github.com/liamawhite/nl/internal/fsnotify"
-	"github.com/liamawhite/nl/pkg/ast"
 	"golang.org/x/sync/semaphore"
 )
-
-type document struct {
-	lastUpdated int64
-	document    ast.Document
-}
 
 // The document client is responsible for maintaining a cache of parsed files from the workspace.
 // These documents can either be updated directly by the client or other instances of the client.
@@ -23,7 +17,7 @@ type Client struct {
 	clientId string
 
 	// Documents indexed by their relative path
-	documents map[string]document
+	documents map[string]Document
 	docMutex  sync.RWMutex
 
 	watcher    *fsnotify.RecursiveWatcher
@@ -48,7 +42,7 @@ func NewClient(root string, clientId string) (*Client, error) {
 	client := &Client{
 		root:        root,
 		clientId:    clientId,
-		documents:   make(map[string]document),
+		documents:   make(map[string]Document),
 		docMutex:    sync.RWMutex{},
 		watcher:     watcher,
 		subscribers: make([]chan Event, 0),
@@ -78,7 +72,7 @@ func NewClient(root string, clientId string) (*Client, error) {
 	})
 
 	// Wait for all the processors to finish
-	client.WaitForProcessingCompletion()
+	client.Wait()
 
 	return client, nil
 }

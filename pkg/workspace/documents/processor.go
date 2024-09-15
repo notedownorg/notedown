@@ -45,7 +45,7 @@ func (c *Client) processFile(path string) {
 		}
 
 		slog.Debug("updating document in cache", slog.String("file", path), slog.String("relative", rel))
-		doc := document{document: d, lastUpdated: time.Now().Unix()}
+		doc := Document{Document: d, lastUpdated: time.Now().Unix()}
 
 		c.docMutex.Lock()
 		c.documents[rel] = doc
@@ -55,7 +55,7 @@ func (c *Client) processFile(path string) {
 }
 
 // Wait for all files to finish processing
-func (c *Client) WaitForProcessingCompletion() {
+func (c *Client) Wait() {
 	c.processors.Wait()
 }
 

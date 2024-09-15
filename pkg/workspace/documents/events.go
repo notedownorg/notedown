@@ -3,7 +3,7 @@ package documents
 type Event struct {
 	Op       Op
 	Key      string
-	Document document
+	Document Document
 }
 
 type Op uint32

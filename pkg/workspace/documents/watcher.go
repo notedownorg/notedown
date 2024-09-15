@@ -45,7 +45,7 @@ func (c *Client) handleRemoveEvent(event fsnotify.Event) {
 	c.docMutex.Lock()
 	defer c.docMutex.Unlock()
 	delete(c.documents, rel)
-	c.events <- Event{Op: Delete, Document: document{}, Key: rel}
+	c.events <- Event{Op: Delete, Document: Document{}, Key: rel}
 }
 
 func (c *Client) handleRenameEvent(event fsnotify.Event) {
