@@ -4,7 +4,7 @@ import (
 	"sync"
 
 	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/documents"
+	"github.com/liamawhite/nl/pkg/workspace/documents/reader"
 )
 
 type Client struct {
@@ -14,7 +14,7 @@ type Client struct {
 	mutex sync.RWMutex
 }
 
-func NewClient(feed <-chan documents.Event) *Client {
+func NewClient(feed <-chan reader.Event) *Client {
 	client := &Client{
 		cache: make(map[string]map[int]*ast.Task),
 	}
@@ -22,16 +22,16 @@ func NewClient(feed <-chan documents.Event) *Client {
 	return client
 }
 
-func (c *Client) processDocuments(feed <-chan documents.Event) {
+func (c *Client) processDocuments(feed <-chan reader.Event) {
 	for {
 		select {
 		case event := <-feed:
 			switch event.Op {
-			case documents.Delete:
+			case reader.Delete:
 				c.mutex.Lock()
 				delete(c.cache, event.Key)
 				c.mutex.Unlock()
-			case documents.Change:
+			case reader.Change:
 				if event.Document.Tasks == nil || len(event.Document.Tasks) == 0 {
 					break
 				}

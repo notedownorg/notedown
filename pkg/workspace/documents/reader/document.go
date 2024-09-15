@@ -1,4 +1,4 @@
-package documents
+package reader
 
 import (
 	"github.com/liamawhite/nl/pkg/ast"
