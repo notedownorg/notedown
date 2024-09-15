@@ -1,6 +1,7 @@
 package parsers
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"time"
 
@@ -19,6 +20,12 @@ var Document = func(relativeTo time.Time) func(string) (ast.Document, error) {
 		if !ok {
 			return ast.Document{}, fmt.Errorf("unable to parse document")
 		}
+
+		// Calculate and set the hash of the input
+		hash := sha256.New()
+		hash.Write([]byte(input))
+		res.Hash = fmt.Sprintf("%x", hash.Sum(nil))
+
 		return res, nil
 	}
 }

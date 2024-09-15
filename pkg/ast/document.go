@@ -7,6 +7,7 @@ type Markers struct {
 }
 
 type Document struct {
+	Hash     string
 	Metadata Metadata
 	Markers  Markers
 	Tasks    []Task
