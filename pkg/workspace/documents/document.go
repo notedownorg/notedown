@@ -6,5 +6,6 @@ import (
 
 type Document struct {
 	lastUpdated int64
+	Hash        string
 	ast.Document
 }
