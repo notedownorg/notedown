@@ -1,4 +1,4 @@
-package documents
+package reader
 
 type Event struct {
 	Op       Op

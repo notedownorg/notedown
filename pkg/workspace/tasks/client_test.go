@@ -4,12 +4,12 @@ import (
 	"time"
 
 	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/documents"
+	"github.com/liamawhite/nl/pkg/workspace/documents/reader"
 	"github.com/liamawhite/nl/pkg/workspace/tasks"
 )
 
-func buildClient(events ...documents.Event) (*tasks.Client, chan documents.Event) {
-	feed := make(chan documents.Event)
+func buildClient(events ...reader.Event) (*tasks.Client, chan reader.Event) {
+	feed := make(chan reader.Event)
 	client := tasks.NewClient(feed)
 	for _, event := range events {
 		feed <- event
@@ -28,12 +28,12 @@ func intPtr(i int) *int {
 	return &i
 }
 
-func defaultEvents() []documents.Event {
-	return []documents.Event{
+func defaultEvents() []reader.Event {
+	return []reader.Event{
 		{
-			Op:  documents.Change,
+			Op:  reader.Change,
 			Key: "one.md",
-			Document: documents.Document{
+			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
 						{
@@ -52,9 +52,9 @@ func defaultEvents() []documents.Event {
 			},
 		},
 		{
-			Op:  documents.Change,
+			Op:  reader.Change,
 			Key: "two.md",
-			Document: documents.Document{
+			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
 						{
