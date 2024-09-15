@@ -7,22 +7,16 @@ import (
 	"github.com/liamawhite/nl/pkg/workspace/documents"
 )
 
-type Task struct {
-	// Required to determine if operations are acting on stale data
-	DocumentHash string
-	ast.Task
-}
-
 type Client struct {
 	// cache maps between file paths and line numbers to tasks it should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
-	cache map[string]map[int]*Task
+	cache map[string]map[int]*ast.Task
 	mutex sync.RWMutex
 }
 
 func NewClient(feed <-chan documents.Event) *Client {
 	client := &Client{
-		cache: make(map[string]map[int]*Task),
+		cache: make(map[string]map[int]*ast.Task),
 	}
 	go client.processDocuments(feed)
 	return client
@@ -41,9 +35,9 @@ func (c *Client) processDocuments(feed <-chan documents.Event) {
 				if event.Document.Tasks == nil || len(event.Document.Tasks) == 0 {
 					break
 				}
-				tasks := make(map[int]*Task)
+				tasks := make(map[int]*ast.Task)
 				for i := range event.Document.Tasks {
-					task := Task{Task: event.Document.Tasks[i], DocumentHash: event.Document.Hash}
+					task := event.Document.Tasks[i]
 					tasks[task.Line] = &task
 				}
 				c.mutex.Lock()
@@ -65,7 +59,7 @@ func (c *Client) ListDocuments() []string {
 	return documents
 }
 
-func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) ([]Task, error) {
+func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) ([]ast.Task, error) {
 	tasks, err := fetcher(c)
 	if err != nil {
 		return nil, err
@@ -77,8 +71,8 @@ func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) ([]Task, 
 
 	return tasks, nil
 }
-func filterTasks(tasks []Task, filter TaskFilter) []Task {
-	var filtered []Task
+func filterTasks(tasks []ast.Task, filter TaskFilter) []ast.Task {
+	var filtered []ast.Task
 	for _, task := range tasks {
 		if filter(task) {
 			filtered = append(filtered, task)
