@@ -28,6 +28,18 @@ func intPtr(i int) *int {
 	return &i
 }
 
+func tasksBuilder(doc documents.Document) []tasks.Task {
+	res := make([]tasks.Task, len(doc.Tasks))
+	for i, t := range doc.Tasks {
+		res[i] = toTask(t, doc.Hash)
+	}
+	return res
+}
+
+func toTask(t ast.Task, documentHash string) tasks.Task {
+	return tasks.Task{Task: t, DocumentHash: documentHash}
+}
+
 func defaultEvents() []documents.Event {
 	return []documents.Event{
 		{

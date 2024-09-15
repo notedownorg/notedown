@@ -2,6 +2,8 @@ package documents
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log/slog"
 	"os"
@@ -44,8 +46,14 @@ func (c *Client) processFile(path string) {
 			return
 		}
 
+		// Work out the hash of the contents
+		hash := sha256.New()
+		hash.Write(contents)
+		hashSum := hash.Sum(nil)
+		hashStr := hex.EncodeToString(hashSum)
+
 		slog.Debug("updating document in cache", slog.String("file", path), slog.String("relative", rel))
-		doc := Document{Document: d, lastUpdated: time.Now().Unix()}
+		doc := Document{Document: d, lastUpdated: time.Now().Unix(), Hash: hashStr}
 
 		c.docMutex.Lock()
 		c.documents[rel] = doc
