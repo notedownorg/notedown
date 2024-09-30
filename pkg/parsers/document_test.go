@@ -66,8 +66,8 @@ func TestDocumentParser(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 3, Due: date(2021, 1, 1)},
-					{Name: "Task 2", Status: ast.Doing, Line: 4},
+					ast.NewTask("Task 1", ast.Todo, 3, ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask("Task 2", ast.Doing, 4),
 				},
 				Markers: ast.Markers{ContentStart: 3},
 			},
@@ -77,8 +77,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 0},
-					{Name: "Task 2", Status: ast.Doing, Line: 2},
+					ast.NewTask("Task 1", ast.Todo, 0),
+					ast.NewTask("Task 2", ast.Doing, 2),
 				},
 			},
 		},
@@ -87,8 +87,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 2},
-					{Name: "Task 2", Status: ast.Doing, Line: 4, Due: date(2021, 1, 1)},
+					ast.NewTask("Task 1", ast.Todo, 2),
+					ast.NewTask("Task 2", ast.Doing, 4, ast.WithDue(date(2021, 1, 1))),
 				},
 			},
 		},
@@ -139,8 +139,8 @@ func TestDocument(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 3, Due: date(2021, 1, 1)},
-					{Name: "Task 2", Status: ast.Doing, Line: 4},
+					ast.NewTask("Task 1", ast.Todo, 3, ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask("Task 2", ast.Doing, 4),
 				},
 				Markers: ast.Markers{ContentStart: 3},
 				Hash:    "1ac564f7760bf58243fb4967ca5aaedb1122c3dbcb2006ed877aa3518d643850",
@@ -151,8 +151,8 @@ func TestDocument(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 0},
-					{Name: "Task 2", Status: ast.Doing, Line: 2},
+					ast.NewTask("Task 1", ast.Todo, 0),
+					ast.NewTask("Task 2", ast.Doing, 2),
 				},
 				Hash: "1b48378d61de419fde23e6ed991e81c759bd223526dd21bb667a2b273d20e637",
 			},
@@ -162,8 +162,8 @@ func TestDocument(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					{Name: "Task 1", Status: ast.Todo, Line: 2},
-					{Name: "Task 2", Status: ast.Doing, Line: 4, Due: date(2021, 1, 1)},
+					ast.NewTask("Task 1", ast.Todo, 2),
+					ast.NewTask("Task 2", ast.Doing, 4, ast.WithDue(date(2021, 1, 1))),
 				},
 				Hash: "eabda4800e028ae2ab063083ea2e33e25a1583f12825f15be9080349fd8c1e2a",
 			},

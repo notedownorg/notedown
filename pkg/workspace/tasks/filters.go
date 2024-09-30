@@ -8,7 +8,8 @@ type TaskFilter func(ast.Task) bool
 func FilterByPriority(priority ...int) TaskFilter {
 	return func(task ast.Task) bool {
 		for _, p := range priority {
-			if task.Priority != nil && *task.Priority == p {
+			taskPriority := task.Priority()
+			if taskPriority != nil && *taskPriority == p {
 				return true
 			}
 		}
@@ -19,7 +20,7 @@ func FilterByPriority(priority ...int) TaskFilter {
 func FilterByStatus(status ...ast.Status) TaskFilter {
 	return func(task ast.Task) bool {
 		for _, s := range status {
-			if task.Status == s {
+			if task.Status() == s {
 				return true
 			}
 		}
