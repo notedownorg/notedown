@@ -346,7 +346,7 @@ var everyParser = func(relativeTo time.Time) parse.Parser[ast.Every] {
 
 var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 	return parse.Func(func(in *parse.Input) (ast.Task, bool, error) {
-		res := ast.Task{Line: in.Position().Line}
+		line, taskOpts := in.Position().Line, []ast.TaskOption{}
 
 		// Read and dump the list item open
 		_, ok, err := listItemOpen.Parse(in)
@@ -359,14 +359,13 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 		if err != nil || !ok {
 			return ast.Task{}, false, err
 		}
-		res.Status = status
 
 		// Read until we hit a key, newline or eof to get the name.
 		name, ok, err := parse.StringUntil(parse.Any[string](anyFieldKey, newLineOrEOF)).Parse(in)
 		if err != nil || !ok {
 			return ast.Task{}, false, err
 		}
-		res.Name = strings.TrimSpace(name)
+		name = strings.TrimSpace(name)
 
 		// Parse the fields
 		start := in.Index()
@@ -382,7 +381,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 				return ast.Task{}, false, err
 			}
 			if ok {
-				res.Due = &due
+				taskOpts = append(taskOpts, ast.WithDue(due))
 			}
 		}
 		in.Seek(start)
@@ -398,7 +397,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 				return ast.Task{}, false, err
 			}
 			if ok {
-				res.Scheduled = &scheduled
+				taskOpts = append(taskOpts, ast.WithScheduled(scheduled))
 			}
 		}
 		in.Seek(start)
@@ -414,7 +413,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 				return ast.Task{}, false, err
 			}
 			if ok {
-				res.Completed = &completed
+				taskOpts = append(taskOpts, ast.WithCompleted(completed))
 			}
 		}
 		in.Seek(start)
@@ -430,7 +429,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 				return ast.Task{}, false, err
 			}
 			if ok {
-				res.Priority = &priority
+				taskOpts = append(taskOpts, ast.WithPriority(priority))
 			}
 		}
 		in.Seek(start)
@@ -446,7 +445,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 				return ast.Task{}, false, err
 			}
 			if ok {
-				res.Every = &every
+				taskOpts = append(taskOpts, ast.WithEvery(every))
 			}
 		}
 		in.Seek(start)
@@ -455,7 +454,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 		parse.StringUntil(newLineOrEOF).Parse(in)
 		newLineOrEOF.Parse(in)
 
-		return res, true, nil
+		return ast.NewTask(name, status, line, taskOpts...), true, nil
 	})
 }
 

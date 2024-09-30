@@ -5,6 +5,7 @@ import (
 
 	"github.com/liamawhite/nl/pkg/ast"
 	"github.com/liamawhite/nl/pkg/workspace/documents/reader"
+	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
 )
 
 type Client struct {
@@ -12,6 +13,8 @@ type Client struct {
 	// to events from the docuuments client and should otherwise be read-only.
 	cache map[string]map[int]*ast.Task
 	mutex sync.RWMutex
+
+	writer writer.LineWriter
 }
 
 func NewClient(feed <-chan reader.Event) *Client {
@@ -38,7 +41,7 @@ func (c *Client) processDocuments(feed <-chan reader.Event) {
 				tasks := make(map[int]*ast.Task)
 				for i := range event.Document.Tasks {
 					task := event.Document.Tasks[i]
-					tasks[task.Line] = &task
+					tasks[task.Line()] = &task
 				}
 				c.mutex.Lock()
 				c.cache[event.Key] = tasks

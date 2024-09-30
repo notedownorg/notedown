@@ -10,9 +10,8 @@ import (
 	"github.com/teambition/rrule-go"
 )
 
-func date(y, m, d int) *time.Time {
-	t := time.Date(y, time.Month(m), d, 0, 0, 0, 0, time.UTC)
-	return &t
+func date(y, m, d int) time.Time {
+	return time.Date(y, time.Month(m), d, 0, 0, 0, 0, time.UTC)
 }
 
 func intPtr(i int) *int {
@@ -34,102 +33,102 @@ func TestTask(t *testing.T) {
 		{
 			name:     "Todo",
 			input:    "- [ ] Task",
-			expected: ast.Task{Status: ast.Todo, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Todo, 0),
 		},
 		{
 			name:     "Done (lowercase)",
 			input:    "- [x] Task",
-			expected: ast.Task{Status: ast.Done, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Done, 0),
 		},
 		{
 			name:     "Done (uppercase)",
 			input:    "- [X] Task",
-			expected: ast.Task{Status: ast.Done, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Done, 0),
 		},
 		{
 			name:     "Doing",
 			input:    "- [/] Task",
-			expected: ast.Task{Status: ast.Doing, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Doing, 0),
 		},
 		{
 			name:     "Blocked (lowercase)",
 			input:    "- [b] Task",
-			expected: ast.Task{Status: ast.Blocked, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Blocked, 0),
 		},
 		{
 			name:     "Blocked (uppercase)",
 			input:    "- [B] Task",
-			expected: ast.Task{Status: ast.Blocked, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Blocked, 0),
 		},
 		{
 			name:     "Abandoned (lowercase)",
 			input:    "- [a] Task",
-			expected: ast.Task{Status: ast.Abandoned, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Abandoned, 0),
 		},
 		{
 			name:     "Abandoned (uppercase)",
 			input:    "- [A] Task",
-			expected: ast.Task{Status: ast.Abandoned, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Abandoned, 0),
 		},
 		// Whitespace tests
 		{
 			name:     "Leading space",
 			input:    " - [ ] Task",
-			expected: ast.Task{Status: ast.Todo, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Todo, 0),
 		},
 		{
 			name:     "Trailing space",
 			input:    "- [ ] Task ",
-			expected: ast.Task{Status: ast.Todo, Name: "Task"},
+			expected: ast.NewTask("Task", ast.Todo, 0),
 		},
 		{
 			name:     "Task name with spaces",
 			input:    "- [ ] Task Name",
-			expected: ast.Task{Status: ast.Todo, Name: "Task Name"},
+			expected: ast.NewTask("Task Name", ast.Todo, 0),
 		},
 		{
 			name:     "Task name with lots of random spaces",
 			input:    "          - [ ]   Task   Name   ",
-			expected: ast.Task{Status: ast.Todo, Name: "Task   Name"},
+			expected: ast.NewTask("Task   Name", ast.Todo, 0),
 		},
 		// Fields
 		{
 			name:     "Due date",
 			input:    "- [ ] Task due:2021-01-01",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Due: date(2021, 1, 1)},
+			expected: ast.NewTask("Task", ast.Todo, 0, ast.WithDue(date(2021, 1, 1))),
 		},
 		{
 			name:          "Due date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 due:2021-01-01",
-			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			expected:      ast.NewTask("Task 1", ast.Todo, 0),
 			leftOverInput: true,
 		},
 		{
 			name:     "Scheduled date",
 			input:    "- [ ] Task scheduled:2021-01-01",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Scheduled: date(2021, 1, 1)},
+			expected: ast.NewTask("Task", ast.Todo, 0, ast.WithScheduled(date(2021, 1, 1))),
 		},
 		{
 			name:          "Scheduled date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 scheduled:2021-01-01",
-			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			expected:      ast.NewTask("Task 1", ast.Todo, 0),
 			leftOverInput: true,
 		},
 		{
 			name:     "Completed date",
 			input:    "- [ ] Task completed:2021-01-01",
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Completed: date(2021, 1, 1)},
+			expected: ast.NewTask("Task", ast.Todo, 0, ast.WithCompleted(date(2021, 1, 1))),
 		},
 		{
 			name:          "Completed date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 completed:2021-01-01",
-			expected:      ast.Task{Status: ast.Todo, Name: "Task 1"},
+			expected:      ast.NewTask("Task 1", ast.Todo, 0),
 			leftOverInput: true,
 		},
 		{
 			name:     "Conflicting short and long fields",
 			input:    "- [ ] Task scheduled:2021-01-01 completed:2021-01-02", // both end in d: so make sure theres no due date
-			expected: ast.Task{Status: ast.Todo, Name: "Task", Scheduled: date(2021, 1, 1), Completed: date(2021, 1, 2)},
+			expected: ast.NewTask("Task", ast.Todo, 0, ast.WithScheduled(date(2021, 1, 1)), ast.WithCompleted(date(2021, 1, 2))),
 		},
 	}
 	for _, test := range tests {

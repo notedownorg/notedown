@@ -2,6 +2,8 @@ package writer
 
 import "path/filepath"
 
+var _ LineWriter = &Client{}
+
 type Client struct {
 	root string
 }

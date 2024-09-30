@@ -24,10 +24,6 @@ func buildClient(events ...reader.Event) (*tasks.Client, chan reader.Event) {
 	return client, feed
 }
 
-func intPtr(i int) *int {
-	return &i
-}
-
 func defaultEvents() []reader.Event {
 	return []reader.Event{
 		{
@@ -36,17 +32,8 @@ func defaultEvents() []reader.Event {
 			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
-						{
-							Name:   "Task 1",
-							Line:   1,
-							Status: ast.Todo,
-						},
-						{
-							Name:     "Task 2",
-							Line:     2,
-							Priority: intPtr(1),
-							Status:   ast.Doing,
-						},
+						ast.NewTask("Task 1", ast.Todo, 1),
+						ast.NewTask("Task 2", ast.Doing, 2, ast.WithPriority(1)),
 					},
 				},
 			},
@@ -57,24 +44,9 @@ func defaultEvents() []reader.Event {
 			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
-						{
-							Name:     "Task 3",
-							Line:     1,
-							Priority: intPtr(2),
-							Status:   ast.Done,
-						},
-						{
-							Name:     "Task 4",
-							Line:     2,
-							Priority: intPtr(3),
-							Status:   ast.Abandoned,
-						},
-						{
-							Name:     "Task 5",
-							Line:     3,
-							Priority: intPtr(10),
-							Status:   ast.Blocked,
-						},
+						ast.NewTask("Task 3", ast.Done, 1, ast.WithPriority(2)),
+						ast.NewTask("Task 4", ast.Abandoned, 2, ast.WithPriority(3)),
+						ast.NewTask("Task 5", ast.Blocked, 3, ast.WithPriority(10)),
 					},
 				},
 			},
