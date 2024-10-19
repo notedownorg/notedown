@@ -2,6 +2,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/teambition/rrule-go"
@@ -17,15 +18,42 @@ const (
 	Abandoned Status = "a"
 )
 
+type Identifier struct {
+	path    string
+	line    *int
+	version string
+}
+
+// Don't expose line as this should only be used via the thing the identifier belongs to
+// This hides it from things where line number doesn't make sense (like a full document)
+func NewIdentifier(path string, version string) Identifier {
+	return Identifier{path: path, version: version}
+}
+
+func (i Identifier) String() string {
+	// Pipe separators are good enough for now but may need to be changed as pipes
+	// are technically valid (although unlikely to actually be used) in unix file paths
+	// We may want to consider an actual encoding scheme for this in the future.
+	var builder strings.Builder
+	builder.WriteString(i.path)
+	builder.WriteString("|")
+	builder.WriteString(i.version)
+	if i.line != nil {
+		builder.WriteString("|")
+		builder.WriteString(fmt.Sprintf("%v", *i.line))
+	}
+	return builder.String()
+}
+
 type Task struct {
-	line      int
-	name      string
-	status    Status
-	due       *time.Time
-	scheduled *time.Time
-	completed *time.Time
-	priority  *int
-	every     *Every
+	identifier Identifier
+	name       string
+	status     Status
+	due        *time.Time
+	scheduled  *time.Time
+	completed  *time.Time
+	priority   *int
+	every      *Every
 }
 
 type Every struct {
@@ -35,11 +63,11 @@ type Every struct {
 
 type TaskOption func(*Task)
 
-func NewTask(name string, status Status, line int, options ...TaskOption) Task {
+func NewTask(identifier Identifier, name string, status Status, options ...TaskOption) Task {
 	task := Task{
-		line:   line,
-		name:   name,
-		status: status,
+		identifier: identifier,
+		name:       name,
+		status:     status,
 	}
 	for _, option := range options {
 		option(&task)
@@ -47,16 +75,17 @@ func NewTask(name string, status Status, line int, options ...TaskOption) Task {
 	return task
 }
 
+// Used if you want to mutate/update a task
 func NewTaskFromTask(t Task, options ...TaskOption) Task {
 	task := Task{
-		line:      t.line,
-		name:      t.name,
-		status:    t.status,
-		due:       t.due,
-		scheduled: t.scheduled,
-		completed: t.completed,
-		priority:  t.priority,
-		every:     t.every,
+		identifier: t.identifier,
+		name:       t.name,
+		status:     t.status,
+		due:        t.due,
+		scheduled:  t.scheduled,
+		completed:  t.completed,
+		priority:   t.priority,
+		every:      t.every,
 	}
 	for _, option := range options {
 		option(&task)
@@ -66,7 +95,7 @@ func NewTaskFromTask(t Task, options ...TaskOption) Task {
 
 func WithLine(line int) TaskOption {
 	return func(t *Task) {
-		t.line = line
+		t.identifier.line = &line
 	}
 }
 
@@ -112,8 +141,20 @@ func WithEvery(every Every) TaskOption {
 	}
 }
 
+func (t Task) Identifier() Identifier {
+	return t.identifier
+}
+
 func (t Task) Line() int {
-	return t.line
+	return *t.Identifier().line
+}
+
+func (t Task) Path() string {
+	return t.Identifier().path
+}
+
+func (t Task) Version() string {
+	return t.Identifier().version
 }
 
 func (t Task) Name() string {

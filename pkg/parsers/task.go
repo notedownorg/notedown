@@ -344,9 +344,10 @@ var everyParser = func(relativeTo time.Time) parse.Parser[ast.Every] {
 	})
 }
 
-var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
+var Task = func(path string, version string, relativeTo time.Time) parse.Parser[ast.Task] {
 	return parse.Func(func(in *parse.Input) (ast.Task, bool, error) {
 		line, taskOpts := in.Position().Line, []ast.TaskOption{}
+		taskOpts = append(taskOpts, ast.WithLine(line))
 
 		// Read and dump the list item open
 		_, ok, err := listItemOpen.Parse(in)
@@ -454,7 +455,7 @@ var Task = func(relativeTo time.Time) parse.Parser[ast.Task] {
 		parse.StringUntil(newLineOrEOF).Parse(in)
 		newLineOrEOF.Parse(in)
 
-		return ast.NewTask(name, status, line, taskOpts...), true, nil
+		return ast.NewTask(ast.NewIdentifier(path, version), name, status, taskOpts...), true, nil
 	})
 }
 

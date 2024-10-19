@@ -66,8 +66,8 @@ func TestDocumentParser(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 3, ast.WithDue(date(2021, 1, 1))),
-					ast.NewTask("Task 2", ast.Doing, 4),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithDue(date(2021, 1, 1)), ast.WithLine(3)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(4)),
 				},
 				Markers: ast.Markers{ContentStart: 3},
 			},
@@ -77,8 +77,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 0),
-					ast.NewTask("Task 2", ast.Doing, 2),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(0)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(2)),
 				},
 			},
 		},
@@ -87,8 +87,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 2),
-					ast.NewTask("Task 2", ast.Doing, 4, ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(2)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(4)),
 				},
 			},
 		},
@@ -96,7 +96,7 @@ func TestDocumentParser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			input := parse.NewInput(tt.input)
-			got, found, _ := DocumentParser(relativeTo).Parse(input)
+			got, found, _ := DocumentParser("p", "v", relativeTo).Parse(input)
 			if tt.notFound {
 				if found {
 					t.Fatalf("expected not found, got %v", got)
@@ -120,7 +120,7 @@ func TestDocument(t *testing.T) {
 		{
 			name:  "empty",
 			input: inputs["empty"],
-			want:  ast.Document{Hash: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+			want:  ast.Document{},
 		},
 		{
 			name:  "frontmatter",
@@ -130,7 +130,6 @@ func TestDocument(t *testing.T) {
 					"title": "Hello, World!",
 				},
 				Markers: ast.Markers{ContentStart: 3},
-				Hash:    "e1e3896328c141650e534fae42b886c0ea332f57b48b90492f38ef269596a026",
 			},
 		},
 		{
@@ -139,11 +138,10 @@ func TestDocument(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 3, ast.WithDue(date(2021, 1, 1))),
-					ast.NewTask("Task 2", ast.Doing, 4),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(3), ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(4)),
 				},
 				Markers: ast.Markers{ContentStart: 3},
-				Hash:    "1ac564f7760bf58243fb4967ca5aaedb1122c3dbcb2006ed877aa3518d643850",
 			},
 		},
 		{
@@ -151,10 +149,9 @@ func TestDocument(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 0),
-					ast.NewTask("Task 2", ast.Doing, 2),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(0)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(2)),
 				},
-				Hash: "1b48378d61de419fde23e6ed991e81c759bd223526dd21bb667a2b273d20e637",
 			},
 		},
 		{
@@ -162,16 +159,15 @@ func TestDocument(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask("Task 1", ast.Todo, 2),
-					ast.NewTask("Task 2", ast.Doing, 4, ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(2)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(4)),
 				},
-				Hash: "eabda4800e028ae2ab063083ea2e33e25a1583f12825f15be9080349fd8c1e2a",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := Document(relativeTo)(tt.input)
+			got, err := Document("p", "v", relativeTo)(tt.input)
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
 		})
