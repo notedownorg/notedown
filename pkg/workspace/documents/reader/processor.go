@@ -2,6 +2,7 @@ package reader
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"log/slog"
 	"os"
@@ -31,16 +32,22 @@ func (c *Client) processFile(path string) {
 			c.errors <- fmt.Errorf("failed to read file: %w", err)
 			return
 		}
-		d, err := parsers.Document(time.Now())(string(contents))
-		if err != nil {
-			slog.Error("failed to parse document", slog.String("file", path), slog.String("error", err.Error()))
-			c.errors <- fmt.Errorf("failed to parse document: %w", err)
-			return
-		}
 		rel, err := c.relative(path)
 		if err != nil {
 			slog.Error("failed to get relative path", slog.String("file", path), slog.String("error", err.Error()))
 			c.errors <- fmt.Errorf("failed to get relative path: %w", err)
+			return
+		}
+
+		// Calculate and set the hash of the contents to use as the version
+		hash := sha256.New()
+		hash.Write(contents)
+		version := fmt.Sprintf("%x", hash.Sum(nil))
+
+		d, err := parsers.Document(rel, version, time.Now())(string(contents))
+		if err != nil {
+			slog.Error("failed to parse document", slog.String("file", path), slog.String("error", err.Error()))
+			c.errors <- fmt.Errorf("failed to parse document: %w", err)
 			return
 		}
 

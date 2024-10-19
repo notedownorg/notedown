@@ -10,7 +10,7 @@ import (
 
 func TestFilters(t *testing.T) {
 	events := defaultEvents()
-	c, _ := buildClient(events...)
+	c, _ := buildClient(events)
 
 	tests := []struct {
 		name      string

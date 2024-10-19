@@ -17,9 +17,10 @@ type Client struct {
 	writer writer.LineWriter
 }
 
-func NewClient(feed <-chan reader.Event) *Client {
+func NewClient(writer writer.LineWriter, feed <-chan reader.Event) *Client {
 	client := &Client{
-		cache: make(map[string]map[int]*ast.Task),
+		cache:  make(map[string]map[int]*ast.Task),
+		writer: writer,
 	}
 	go client.processDocuments(feed)
 	return client

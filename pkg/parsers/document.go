@@ -1,7 +1,6 @@
 package parsers
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"time"
 
@@ -10,10 +9,10 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-var Document = func(relativeTo time.Time) func(string) (ast.Document, error) {
+var Document = func(path string, version string, relativeTo time.Time) func(string) (ast.Document, error) {
 	return func(input string) (ast.Document, error) {
 		p := parse.NewInput(input)
-		res, ok, err := DocumentParser(relativeTo).Parse(p)
+		res, ok, err := DocumentParser(path, version, relativeTo).Parse(p)
 		if err != nil {
 			return ast.Document{}, fmt.Errorf("unable to parse document: %w", err)
 		}
@@ -21,16 +20,11 @@ var Document = func(relativeTo time.Time) func(string) (ast.Document, error) {
 			return ast.Document{}, fmt.Errorf("unable to parse document")
 		}
 
-		// Calculate and set the hash of the input
-		hash := sha256.New()
-		hash.Write([]byte(input))
-		res.Hash = fmt.Sprintf("%x", hash.Sum(nil))
-
 		return res, nil
 	}
 }
 
-var DocumentParser = func(relativeTo time.Time) parse.Parser[ast.Document] {
+var DocumentParser = func(path, version string, relativeTo time.Time) parse.Parser[ast.Document] {
 	return parse.Func(func(in *parse.Input) (ast.Document, bool, error) {
 		var res ast.Document
 
@@ -48,7 +42,7 @@ var DocumentParser = func(relativeTo time.Time) parse.Parser[ast.Document] {
 		}
 
 		// Parse the rest of the file looking for blocks
-		blocks, ok, err := parse.Until(Block(relativeTo), parse.EOF[string]()).Parse(in)
+		blocks, ok, err := parse.Until(Block(path, version, relativeTo), parse.EOF[string]()).Parse(in)
 		if err != nil {
 			return ast.Document{}, false, err
 		}
@@ -64,7 +58,7 @@ type block struct {
 	Tasks []ast.Task
 }
 
-var Block = func(relativeTo time.Time) parse.Parser[block] {
+var Block = func(path, version string, relativeTo time.Time) parse.Parser[block] {
 	return parse.Func(func(in *parse.Input) (block, bool, error) {
 		var res block
 
@@ -72,7 +66,7 @@ var Block = func(relativeTo time.Time) parse.Parser[block] {
 		_, _, err := parse.NewLine.Parse(in)
 
 		for {
-			task, ok, err := Task(relativeTo).Parse(in)
+			task, ok, err := Task(path, version, relativeTo).Parse(in)
 			if err != nil {
 				return block{}, false, err
 			}
