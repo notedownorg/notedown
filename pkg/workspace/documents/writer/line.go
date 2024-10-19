@@ -15,6 +15,10 @@ const (
 
 // AddLine adds a line of text to a document at the specified line number.
 func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
+	if doc.Hash == "" && line != AtEnd && line != AtBeginning {
+		return fmt.Errorf("hash must be provided when adding a line in the middle of a document")
+	}
+
 	err := validateLine(obj.String())
 	if err != nil {
 		return fmt.Errorf("invalid text: %w", err)
@@ -54,6 +58,10 @@ func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
 
 // RemoveLine removes a line of text from a document at the specified line number.
 func (c Client) RemoveLine(doc Document, line int) error {
+	if doc.Hash == "" {
+		return fmt.Errorf("hash must be provided when removing a line to avoid stale writes")
+	}
+
 	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Hash)
 	if err != nil {
 		return fmt.Errorf("failed to open document: %w", err)
@@ -84,6 +92,10 @@ func (c Client) RemoveLine(doc Document, line int) error {
 
 // UpdateLine updates a line of text in a document at the specified line number.
 func (c Client) UpdateLine(doc Document, line int, obj fmt.Stringer) error {
+	if doc.Hash == "" {
+		return fmt.Errorf("hash must be provided when updating a line to avoid stale writes")
+	}
+
 	err := validateLine(obj.String())
 	if err != nil {
 		return fmt.Errorf("invalid text: %w", err)
@@ -141,10 +153,13 @@ func readAndValidateFile(path string, hash string) ([]string, int, error) {
 		return nil, -1, err
 	}
 
-	algo := sha256.New()
-	algo.Write(bytes)
-	if hash != fmt.Sprintf("%x", algo.Sum(nil)) {
-		return nil, -1, fmt.Errorf("file has been modified since last read, unable to write with stale data")
+	// Ensure file hasn't been modified only if a hash is provided
+	if hash != "" {
+		algo := sha256.New()
+		algo.Write(bytes)
+		if hash != fmt.Sprintf("%x", algo.Sum(nil)) {
+			return nil, -1, fmt.Errorf("file has been modified since last read, unable to write with stale data")
+		}
 	}
 
 	lines := strings.Split(string(bytes), "\n")
