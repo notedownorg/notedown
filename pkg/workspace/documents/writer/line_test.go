@@ -105,5 +105,16 @@ func TestLines_StaleWrites(t *testing.T) {
 	assert.NoError(t, client.AddLine(basic.Document, writer.AtEnd, Text("This line was added at the end")))
 
 	// Now when we go to write using the original document/hash, we should get an error
-	assert.Error(t, client.AddLine(basic.Document, writer.AtEnd, Text("This line is being written to a stale document")))
+	assert.Error(t, client.AddLine(basic.Document, 20, Text("This line is being written to a stale document")))
+
+	// But if we provide and empty hash/version we can still override the file
+	// This should only be used if you don't care if the file is out of date e.g. you're appending to the end
+	basic.Document.Hash = ""
+	assert.NoError(t, client.AddLine(basic.Document, writer.AtEnd, Text("This line is being written to a stale document")))
+	assert.NoError(t, client.AddLine(basic.Document, writer.AtBeginning, Text("This line is being written to a stale document")))
+
+	// Empty hashes with updates, deletes and line adds not at beginning/end should still be rejected though
+	assert.Error(t, client.AddLine(basic.Document, 20, Text("This line is being written to a stale document")))
+	assert.Error(t, client.UpdateLine(basic.Document, 20, Text("This line is being written to a stale document")))
+	assert.Error(t, client.RemoveLine(basic.Document, 20))
 }
