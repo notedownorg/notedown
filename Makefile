@@ -20,11 +20,11 @@ dirty:
 mod:
 	go mod tidy
 
-format: license
+format: licenser
 	gofmt -w .
 
 test:
 	go test -v ./...
 
-license:
+licenser:
 	licenser apply -r "Notedown Authors"
