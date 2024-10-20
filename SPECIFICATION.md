@@ -1,14 +1,10 @@
 # Specification [WIP]
 
-`nl` (NoteLang) is a markdown derivative specifically adapted for use with Knowledge Management (personal or otherwise). The goal of the language is to optimize for IDE/text editor and terminal based interaction with your notes.
-
 This specification is a work in progress as features are added to the language. For now, assume that all Markdown is valid and any extensions that are not part of the [CommonMark specification](https://spec.commonmark.org/0.31.2/) will be detailed below. Until 1.0, there are no guarantees that all CommonMark will be valid. However, unless you're doing something uncommon (pun not intented) it will likely work.
-
-A markdown superset was specifically chosen to allow for easy integration with existing markdown tools and to allow us to focus on the features that are unique to `nl`.
 
 ## Frontmatter
 
-Frontmatter is a 1-1 mapping with [Obsidian properties](https://help.obsidian.md/Editing+and+formatting/Properties). Certain fields in frontmatter con be configured to allow `nl` to infer structure, for example `type: project`, these are optional.
+Frontmatter is a 1-1 mapping with [Obsidian properties](https://help.obsidian.md/Editing+and+formatting/Properties). Certain fields in frontmatter con be configured to allow Notedown to infer structure, for example `type: project`, these are optional.
 
 ## Types
 
@@ -19,7 +15,7 @@ TODO: think through how note types could be defined/extended. Do built-in types 
 Tasks can be created in any note using the following format:
 
 ```
-- [ ] Write the nl specification
+- [ ] Write the Notedown specification
 ```
 
 ### Status
