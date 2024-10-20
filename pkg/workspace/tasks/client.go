@@ -17,9 +17,9 @@ package tasks
 import (
 	"sync"
 
-	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/documents/reader"
-	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 )
 
 type Client struct {

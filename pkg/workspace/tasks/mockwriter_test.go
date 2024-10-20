@@ -17,7 +17,7 @@ package tasks_test
 import (
 	"fmt"
 
-	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 )
 
 var _ writer.LineWriter = &MockLineWriter{}

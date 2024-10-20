@@ -14,7 +14,7 @@
 
 package tasks
 
-import "github.com/liamawhite/nl/pkg/ast"
+import "github.com/notedownorg/notedown/pkg/ast"
 
 type TaskFilter func(ast.Task) bool
 

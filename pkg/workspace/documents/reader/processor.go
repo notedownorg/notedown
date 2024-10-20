@@ -22,7 +22,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/parsers"
+	"github.com/notedownorg/notedown/pkg/parsers"
 )
 
 func (c *Client) processFile(path string) {

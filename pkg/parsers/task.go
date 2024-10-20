@@ -21,7 +21,7 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/teambition/rrule-go"
 )
 

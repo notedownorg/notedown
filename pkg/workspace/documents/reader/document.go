@@ -15,7 +15,7 @@
 package reader
 
 import (
-	"github.com/liamawhite/nl/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/ast"
 )
 
 type Document struct {

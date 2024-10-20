@@ -1,4 +1,4 @@
-module github.com/liamawhite/nl
+module github.com/notedownorg/notedown
 
 go 1.21.6
 

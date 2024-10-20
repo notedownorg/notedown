@@ -17,8 +17,8 @@ package tasks_test
 import (
 	"testing"
 
-	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -17,6 +17,9 @@ jobs:
       with:
         go-version: '1.21'
 
+    - name: Install Licenser
+      run: go install github.com/liamawhite/licenser@21016ac7e79acc475e3b11f71aac7499a21790a5
+
     - name: Make All
       run: make
 

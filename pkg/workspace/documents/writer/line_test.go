@@ -17,7 +17,7 @@ package writer_test
 import (
 	"testing"
 
-	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 	"github.com/stretchr/testify/assert"
 )
 

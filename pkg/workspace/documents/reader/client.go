@@ -20,7 +20,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/liamawhite/nl/internal/fsnotify"
+	"github.com/notedownorg/notedown/internal/fsnotify"
 	"golang.org/x/sync/semaphore"
 )
 

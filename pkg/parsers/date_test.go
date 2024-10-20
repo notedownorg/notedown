@@ -21,7 +21,7 @@ import (
 	"github.com/a-h/parse"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/liamawhite/nl/pkg/parsers"
+	"github.com/notedownorg/notedown/pkg/parsers"
 )
 
 func TestYearMonthDay(t *testing.T) {

@@ -17,8 +17,8 @@ package tasks
 import (
 	"fmt"
 
-	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 )
 
 func (c *Client) Create(path string, name string, status ast.Status, options ...ast.TaskOption) error {

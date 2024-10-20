@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/liamawhite/nl/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/ast"
 )
 
 // We keep track of when documents were last modified so we can only re-parse them if they've changed

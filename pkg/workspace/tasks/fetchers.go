@@ -14,7 +14,7 @@
 
 package tasks
 
-import "github.com/liamawhite/nl/pkg/ast"
+import "github.com/notedownorg/notedown/pkg/ast"
 
 type TaskFetcher func(c *Client) ([]ast.Task, error)
 

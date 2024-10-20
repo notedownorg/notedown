@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/ast"
 	"sigs.k8s.io/yaml"
 )
 

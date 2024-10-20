@@ -19,7 +19,7 @@ import (
 	"log"
 	"log/slog"
 
-	"github.com/liamawhite/nl/internal/fsnotify"
+	"github.com/notedownorg/notedown/internal/fsnotify"
 )
 
 func (c *Client) fileWatcher() {

@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/a-h/parse"
-	"github.com/liamawhite/nl/pkg/parsers"
+	"github.com/notedownorg/notedown/pkg/parsers"
 	"github.com/stretchr/testify/assert"
 )
 

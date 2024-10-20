@@ -17,9 +17,9 @@ package tasks_test
 import (
 	"time"
 
-	"github.com/liamawhite/nl/pkg/ast"
-	"github.com/liamawhite/nl/pkg/workspace/documents/reader"
-	"github.com/liamawhite/nl/pkg/workspace/tasks"
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
+	"github.com/notedownorg/notedown/pkg/workspace/tasks"
 )
 
 func buildClient(events []reader.Event, validators ...validator) (*tasks.Client, chan reader.Event) {

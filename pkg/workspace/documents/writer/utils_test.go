@@ -22,7 +22,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/liamawhite/nl/pkg/workspace/documents/writer"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/writer"
 	cp "github.com/otiai10/copy"
 )
 
