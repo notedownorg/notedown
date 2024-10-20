@@ -96,10 +96,10 @@ func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
 
 	// Ensure the documents paths are correct
 	got := map[string]bool{}
-    client.docMutex.Lock()
+	client.docMutex.Lock()
 	for k := range client.documents {
 		got[k] = true
 	}
-    client.docMutex.Unlock()
+	client.docMutex.Unlock()
 	assert.Equal(t, wantRel, got)
 }
