@@ -18,11 +18,85 @@ import (
 	"log/slog"
 	"math/rand"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 )
+
+func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Sync(t *testing.T) {
+	// change to debug if you want to see the events, too noisy to leave on permanently though
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
+
+	// Do the setup and ensure its correct
+	dir, err := copyTestData(t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := NewClient(dir, "testclient")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Len(t, client.documents, 1)
+	go ensureNoErrors(t, client.Errors())
+
+	sub := make(chan Event)
+	wg := sync.WaitGroup{}
+
+	go func() {
+		for {
+			select {
+			case ev := <-sub:
+				if ev.Op == Load {
+					wg.Done()
+				}
+			}
+		}
+	}()
+
+	// Hook them up to the client
+	client.Subscribe(sub, WithInitialDocuments(&wg))
+
+	// Ensure the waitgroup is done
+	waiter := func(wg *sync.WaitGroup) func() bool { return func() bool { wg.Wait(); return true } }(&wg)
+	assert.Eventually(t, waiter, 3*time.Second, time.Millisecond*200, "wg didn't finish in time")
+}
+
+func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Async(t *testing.T) {
+	// change to debug if you want to see the events, too noisy to leave on permanently though
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
+
+	// Do the setup and ensure its correct
+	dir, err := copyTestData(t.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	client, err := NewClient(dir, "testclient")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Len(t, client.documents, 1)
+	go ensureNoErrors(t, client.Errors())
+
+	sub := make(chan Event)
+	got := map[string]bool{}
+
+	go func() {
+		for {
+			select {
+			case ev := <-sub:
+				if ev.Op == Load {
+					got[ev.Key] = true
+				}
+			}
+		}
+	}()
+
+	// Hook them up to the client and ensure we eventually receive all the initial documents
+	client.Subscribe(sub, WithInitialDocuments(nil))
+	assert.Eventually(t, func() bool { return len(client.documents) == len(got) }, 3*time.Second, time.Millisecond*200, "sub finished with %v documents, expected %v", len(got), len(client.documents))
+}
 
 func TestDocuments_Client_Events_Fuzz(t *testing.T) {
 	// change to debug if you want to see the events, too noisy to leave on permanently though
@@ -46,8 +120,8 @@ func TestDocuments_Client_Events_Fuzz(t *testing.T) {
 	}
 
 	// Create two subscribers
-	sub1 := client.Subscribe()
-	sub2 := client.Subscribe()
+	sub1 := make(chan Event)
+	sub2 := make(chan Event)
 
 	got1, got2 := map[string]bool{}, map[string]bool{}
 	go func() {
@@ -70,6 +144,10 @@ func TestDocuments_Client_Events_Fuzz(t *testing.T) {
 			}
 		}
 	}()
+
+	// Hook them up to the client
+	client.Subscribe(sub1)
+	client.Subscribe(sub2)
 
 	// Throw a bunch of events at the client and ensure the subscribers are notified correctly
 	errChan := make(chan error)

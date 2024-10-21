@@ -105,7 +105,9 @@ func NewClient(root string, application string) (*Client, error) {
 			return nil
 		}
 		if strings.HasSuffix(path, ".md") {
-			client.processFile(path)
+			// Don't broadcast the initial documents to ensure subscribers control when they are ready
+			// to receive events and to opt into all initial documents to be sent to them
+			client.processFile(path, false)
 		}
 		return nil
 	})

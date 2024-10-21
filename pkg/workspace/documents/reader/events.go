@@ -14,6 +14,10 @@
 
 package reader
 
+import (
+	"sync"
+)
+
 type Event struct {
 	Op       Op
 	Key      string
@@ -23,15 +27,36 @@ type Event struct {
 type Op uint32
 
 const (
-	// Use change rather then create/update to promote idempotency
-	Change Op = iota
+	Load   Op = iota
+	Change    // Use change rather then create/update to promote idempotency
 	Delete
 )
 
-func (c *Client) Subscribe() <-chan Event {
-	sub := make(chan Event)
-	c.subscribers = append(c.subscribers, sub)
-	return sub
+type subscribeOptions func(*Client, chan Event)
+
+// Load all existing documents as events to the new subscriber (events will be of Op Load).
+// If a waitgroup is provided, it will be incremented by one for each document
+// This way the caller can choose if/when/how to wait for all initial documents to be sent
+func WithInitialDocuments(wg *sync.WaitGroup) subscribeOptions {
+	return func(client *Client, sub chan Event) {
+		for key, doc := range client.documents {
+			if wg != nil {
+				wg.Add(1)
+			}
+			go func(s chan Event, d Document, k string) {
+				s <- Event{Op: Load, Document: d, Key: k}
+			}(sub, doc, key)
+		}
+	}
+}
+
+func (c *Client) Subscribe(ch chan Event, opts ...subscribeOptions) {
+	c.subscribers = append(c.subscribers, ch)
+
+	// Apply any subscribeOptions
+	for _, opt := range opts {
+		opt(c, ch)
+	}
 }
 
 func (c *Client) eventDispatcher() {
