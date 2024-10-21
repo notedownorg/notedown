@@ -15,20 +15,45 @@
 package reader
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/notedownorg/notedown/internal/fsnotify"
 	"golang.org/x/sync/semaphore"
 )
 
+type identifier struct {
+	application string
+	hostname    string
+	pid         int
+}
+
+func (i identifier) String() string {
+	return fmt.Sprintf("%s-%s-%d", i.application, i.hostname, i.pid)
+}
+
+func newIdentifier(application string) identifier {
+	hostname, err := os.Hostname()
+	if err != nil {
+		hostname = fmt.Sprintf("unknown_%d", time.Now().Unix())
+	}
+	pid := os.Getpid()
+	return identifier{
+		application: application,
+		hostname:    hostname,
+		pid:         pid,
+	}
+}
+
 // The document client is responsible for maintaining a cache of parsed files from the workspace.
 // These documents can either be updated directly by the client or other instances of the client.
 type Client struct {
 	root     string
-	clientId string
+	clientId identifier
 
 	// Documents indexed by their relative path
 	documents map[string]Document
@@ -47,7 +72,7 @@ type Client struct {
 	events chan Event
 }
 
-func NewClient(root string, clientId string) (*Client, error) {
+func NewClient(root string, application string) (*Client, error) {
 	watcher, err := fsnotify.NewRecursiveWatcher(root)
 	if err != nil {
 		return nil, err
@@ -55,7 +80,7 @@ func NewClient(root string, clientId string) (*Client, error) {
 
 	client := &Client{
 		root:        root,
-		clientId:    clientId,
+		clientId:    newIdentifier(application),
 		documents:   make(map[string]Document),
 		docMutex:    sync.RWMutex{},
 		watcher:     watcher,
