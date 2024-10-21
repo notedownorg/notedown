@@ -25,7 +25,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/parsers"
 )
 
-func (c *Client) processFile(path string) {
+func (c *Client) processFile(path string, broadcast bool) {
 	slog.Debug("processing file", slog.String("file", path))
 	// If we have already processed this file and it is up to date, we can skip it
 	if c.isUpToDate(path) {
@@ -71,7 +71,9 @@ func (c *Client) processFile(path string) {
 		c.docMutex.Lock()
 		c.documents[rel] = doc
 		c.docMutex.Unlock()
-		c.events <- Event{Op: Change, Document: doc, Key: rel}
+		if broadcast {
+			c.events <- Event{Op: Change, Document: doc, Key: rel}
+		}
 	}()
 }
 
