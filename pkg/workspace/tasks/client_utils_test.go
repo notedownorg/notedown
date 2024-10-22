@@ -38,6 +38,35 @@ func buildClient(events []reader.Event, validators ...validator) (*tasks.Client,
 	return client, feed
 }
 
+func loadEvents() []reader.Event {
+	return []reader.Event{
+		{
+			Op:  reader.Load,
+			Key: "one.md",
+			Document: reader.Document{
+				Document: ast.Document{
+					Tasks: []ast.Task{
+						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 1", ast.Todo, ast.WithLine(1)),
+						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 2", ast.Doing, ast.WithLine(2), ast.WithPriority(1)),
+					},
+				},
+			},
+		},
+		{
+			Op:  reader.Load,
+			Key: "two.md",
+			Document: reader.Document{
+				Document: ast.Document{
+					Tasks: []ast.Task{
+						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 3", ast.Done, ast.WithLine(1), ast.WithPriority(2)),
+						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 4", ast.Abandoned, ast.WithLine(2), ast.WithPriority(3)),
+					},
+				},
+			},
+		},
+	}
+}
+
 func defaultEvents() []reader.Event {
 	return []reader.Event{
 		{
