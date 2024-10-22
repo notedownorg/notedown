@@ -45,7 +45,7 @@ func (c *Client) fileWatcher() {
 
 func (c *Client) handleCreateEvent(event fsnotify.Event) {
 	slog.Debug("handling file create event", slog.String("file", event.Name))
-	c.processFile(event.Name, true)
+	c.processFile(event.Name, false)
 }
 
 func (c *Client) handleRemoveEvent(event fsnotify.Event) {
@@ -69,5 +69,5 @@ func (c *Client) handleRenameEvent(event fsnotify.Event) {
 
 func (c *Client) handleWriteEvent(event fsnotify.Event) {
 	slog.Debug("handling file write event", slog.String("file", event.Name))
-	c.processFile(event.Name, true)
+	c.processFile(event.Name, false)
 }
