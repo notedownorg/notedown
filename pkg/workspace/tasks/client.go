@@ -16,6 +16,7 @@ package tasks
 
 import (
 	"sync"
+	"time"
 
 	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
@@ -28,32 +29,33 @@ type Client struct {
 	cache map[string]map[int]*ast.Task
 	mutex sync.RWMutex
 
-	initialLoaderWaiter *sync.WaitGroup
+	initialLoadComplete bool
 
 	writer writer.LineWriter
 }
 
 type clientOptions func(*Client)
 
-func WithInitialLoadWaiter(wg *sync.WaitGroup) clientOptions {
+// Inform NewClient to wait for the initial load to complete before returning
+func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	return func(client *Client) {
-		client.initialLoaderWaiter = wg
+		for !client.initialLoadComplete {
+			time.Sleep(tick)
+		}
 	}
 }
 
 func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
-		cache:  make(map[string]map[int]*ast.Task),
-		writer: writer,
+		cache:               make(map[string]map[int]*ast.Task),
+		writer:              writer,
+		initialLoadComplete: false,
 	}
+
 	go client.processDocuments(feed)
 
 	for _, opt := range opts {
 		opt(client)
-	}
-
-	if client.initialLoaderWaiter != nil {
-		client.initialLoaderWaiter.Wait()
 	}
 
 	return client
@@ -80,10 +82,8 @@ func (c *Client) processDocuments(feed <-chan reader.Event) {
 				c.mutex.Lock()
 				c.cache[event.Key] = tasks
 				c.mutex.Unlock()
-
-				if event.Op == reader.Load && c.initialLoaderWaiter != nil {
-					c.initialLoaderWaiter.Done()
-				}
+			case reader.SubscriberLoadComplete:
+				c.initialLoadComplete = true
 			}
 
 		}

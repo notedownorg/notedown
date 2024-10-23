@@ -15,7 +15,6 @@
 package tasks_test
 
 import (
-	"sync"
 	"testing"
 	"time"
 
@@ -43,21 +42,15 @@ func TestClient(t *testing.T) {
 
 func TestClient_InitialLoadWaiter(t *testing.T) {
 	ch := make(chan reader.Event)
-	var wg sync.WaitGroup
 	events := loadEvents()
 	go func() {
 		for _, event := range events {
-			wg.Add(1)
 			ch <- event
 		}
+		ch <- reader.Event{Op: reader.SubscriberLoadComplete}
 	}()
 
-	client := tasks.NewClient(&MockLineWriter{}, ch, tasks.WithInitialLoadWaiter(&wg))
-
-	// Assert that we eventually complete the initial load
-	waitFor, tick := 3*time.Second, 200*time.Millisecond
-	waiter := func(wg *sync.WaitGroup) func() bool { return func() bool { wg.Wait(); return true } }(&wg)
-	assert.Eventually(t, waiter, waitFor, tick)
+	client := tasks.NewClient(&MockLineWriter{}, ch, tasks.WithInitialLoadWaiter(100*time.Millisecond))
 
 	// Assert that the client has the correct number of documents and tasks
 	assert.Equal(t, len(events), len(client.ListDocuments()))
