@@ -14,10 +14,6 @@
 
 package reader
 
-import (
-	"sync"
-)
-
 type Event struct {
 	Op       Op
 	Key      string
@@ -27,36 +23,47 @@ type Event struct {
 type Op uint32
 
 const (
-	Load   Op = iota
-	Change    // Use change rather then create/update to promote idempotency
+	// Signal that this document was present when the client was created or when the subscriber subscribed
+	Load Op = iota
+
+	// Signal that this document has been updated or created
+	Change
+
+	// Signal that this document has been deleted
 	Delete
+
+	// Signal that the subscriber has received all existing documents present at the time of subscription
+	SubscriberLoadComplete
 )
 
 type subscribeOptions func(*Client, chan Event)
 
-// Load all existing documents as events to the new subscriber (events will be of Op Load).
-// If a waitgroup is provided, it will be incremented by one for each document
-// This way the caller can choose if/when/how to wait for all initial documents to be sent
-func WithInitialDocuments(wg *sync.WaitGroup) subscribeOptions {
+// Load all existing documents as events to the new subscriber.
+// Once all events have been sent, the a LoadComplete event is sent.
+func WithInitialDocuments() subscribeOptions {
 	return func(client *Client, sub chan Event) {
-		for key, doc := range client.documents {
-			if wg != nil {
-				wg.Add(1)
+		go func(s chan Event) {
+			for key, doc := range client.documents {
+				s <- Event{Op: Load, Document: doc, Key: key}
 			}
-			go func(s chan Event, d Document, k string) {
-				s <- Event{Op: Load, Document: d, Key: k}
-			}(sub, doc, key)
-		}
+			s <- Event{Op: SubscriberLoadComplete}
+		}(sub)
 	}
 }
 
-func (c *Client) Subscribe(ch chan Event, opts ...subscribeOptions) {
+func (c *Client) Subscribe(ch chan Event, opts ...subscribeOptions) int {
 	c.subscribers = append(c.subscribers, ch)
+	index := len(c.subscribers) - 1
 
 	// Apply any subscribeOptions
 	for _, opt := range opts {
 		opt(c, ch)
 	}
+	return index
+}
+
+func (c *Client) Unsubscribe(index int) {
+	c.subscribers = append(c.subscribers[:index], c.subscribers[index+1:]...)
 }
 
 func (c *Client) eventDispatcher() {

@@ -15,10 +15,7 @@
 package reader
 
 import (
-	"log/slog"
 	"math/rand"
-	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -26,9 +23,6 @@ import (
 )
 
 func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Sync(t *testing.T) {
-	// change to debug if you want to see the events, too noisy to leave on permanently though
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
-
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())
 	if err != nil {
@@ -41,31 +35,30 @@ func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Sync(t *testing.T
 	assert.Len(t, client.documents, 1)
 	go ensureNoErrors(t, client.Errors())
 
+	// Create a subscriber and ensure it receives the load complete event
 	sub := make(chan Event)
-	wg := sync.WaitGroup{}
-
+	done := false
+	loaded := 0
 	go func() {
-		for {
-			select {
-			case ev := <-sub:
-				if ev.Op == Load {
-					wg.Done()
-				}
+		for ev := range sub {
+			if ev.Op == SubscriberLoadComplete {
+				done = true
+			}
+			if ev.Op == Load {
+				loaded++
 			}
 		}
 	}()
 
-	// Hook them up to the client
-	client.Subscribe(sub, WithInitialDocuments(&wg))
+	client.Subscribe(sub, WithInitialDocuments())
 
-	// Ensure the waitgroup is done
-	waiter := func(wg *sync.WaitGroup) func() bool { return func() bool { wg.Wait(); return true } }(&wg)
+	// Ensure we eventually receive the load complete event and that an event was received for each document
+	waiter := func(d bool) func() bool { return func() bool { return done } }(done)
 	assert.Eventually(t, waiter, 3*time.Second, time.Millisecond*200, "wg didn't finish in time")
+	assert.Len(t, client.documents, loaded)
 }
 
 func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Async(t *testing.T) {
-	// change to debug if you want to see the events, too noisy to leave on permanently though
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
 
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())
@@ -94,13 +87,11 @@ func TestDocuments_Client_Events_SubscribeWithInitialDocuments_Async(t *testing.
 	}()
 
 	// Hook them up to the client and ensure we eventually receive all the initial documents
-	client.Subscribe(sub, WithInitialDocuments(nil))
+	client.Subscribe(sub, WithInitialDocuments())
 	assert.Eventually(t, func() bool { return len(client.documents) == len(got) }, 3*time.Second, time.Millisecond*200, "sub finished with %v documents, expected %v", len(got), len(client.documents))
 }
 
 func TestDocuments_Client_Events_Fuzz(t *testing.T) {
-	// change to debug if you want to see the events, too noisy to leave on permanently though
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
 
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())

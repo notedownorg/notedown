@@ -16,6 +16,7 @@ package reader
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -59,8 +60,7 @@ type Client struct {
 	documents map[string]Document
 	docMutex  sync.RWMutex
 
-	watcher    *fsnotify.RecursiveWatcher
-	processors sync.WaitGroup
+	watcher *fsnotify.RecursiveWatcher
 
 	subscribers []chan Event
 
@@ -90,10 +90,26 @@ func NewClient(root string, application string) (*Client, error) {
 		events:      make(chan Event),
 	}
 
+	// Create a subscription so we can listen for the initial load events
+	sub := make(chan Event)
+	subscriberIndex := client.Subscribe(sub)
+
+	// For each file we process on intial load, a load event is emitted
+	// Therefore if our subscriber has received a load event for each file we have finished the initial load
+	var wg sync.WaitGroup
+	go func() {
+		for ev := range sub {
+			if ev.Op == Load {
+				wg.Done()
+			}
+		}
+	}()
+
 	go client.fileWatcher()
 	go client.eventDispatcher()
 
 	// Recurse through the root directory and process all the files to build the initial state
+	slog.Debug("walking workspace to build initial state")
 	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -105,15 +121,17 @@ func NewClient(root string, application string) (*Client, error) {
 			return nil
 		}
 		if strings.HasSuffix(path, ".md") {
-			// Don't broadcast the initial documents to ensure subscribers control when they are ready
-			// to receive events and to opt into all initial documents to be sent to them
-			client.processFile(path, false)
+			wg.Add(1) // Increment the wait group for each file we process
+			client.processFile(path, true)
 		}
 		return nil
 	})
 
-	// Wait for all the processors to finish
-	client.Wait()
+	// Wait for all initial loads to finish, unsubscribe and close the channel
+	slog.Debug("waiting for initial load to complete")
+	wg.Wait()
+	client.Unsubscribe(subscriberIndex)
+	close(sub)
 
 	return client, nil
 }

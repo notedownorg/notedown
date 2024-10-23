@@ -25,7 +25,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/parsers"
 )
 
-func (c *Client) processFile(path string, broadcast bool) {
+func (c *Client) processFile(path string, load bool) {
 	slog.Debug("processing file", slog.String("file", path))
 	// If we have already processed this file and it is up to date, we can skip it
 	if c.isUpToDate(path) {
@@ -34,11 +34,9 @@ func (c *Client) processFile(path string, broadcast bool) {
 	}
 
 	// Do the rest in a goroutine so we can continue doing other things
-	c.processors.Add(1)
 	c.threadLimit.Acquire(context.Background(), 1) // acquire semaphore as we will be making a blocking syscall
 	go func() {
 		slog.Debug("parsing file", slog.String("file", path))
-		defer c.processors.Done()
 		defer c.threadLimit.Release(1)
 		contents, err := os.ReadFile(path)
 		if err != nil {
@@ -71,15 +69,15 @@ func (c *Client) processFile(path string, broadcast bool) {
 		c.docMutex.Lock()
 		c.documents[rel] = doc
 		c.docMutex.Unlock()
-		if broadcast {
-			c.events <- Event{Op: Change, Document: doc, Key: rel}
-		}
+		op := func() Op {
+			if load {
+				return Load
+			} else {
+				return Change
+			}
+		}()
+		c.events <- Event{Op: op, Document: doc, Key: rel}
 	}()
-}
-
-// Wait for all files to finish processing
-func (c *Client) Wait() {
-	c.processors.Wait()
 }
 
 func (c *Client) isUpToDate(file string) bool {
