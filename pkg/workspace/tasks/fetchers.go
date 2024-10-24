@@ -16,10 +16,10 @@ package tasks
 
 import "github.com/notedownorg/notedown/pkg/ast"
 
-type TaskFetcher func(c *Client) ([]ast.Task, error)
+type TaskFetcher func(c *Client) []ast.Task
 
 func FetchAllTasks() TaskFetcher {
-	return func(c *Client) ([]ast.Task, error) {
+	return func(c *Client) []ast.Task {
 		var tasks []ast.Task
 		c.mutex.RLock()
 		for _, document := range c.cache {
@@ -28,18 +28,18 @@ func FetchAllTasks() TaskFetcher {
 			}
 		}
 		c.mutex.RUnlock()
-		return tasks, nil
+		return tasks
 	}
 }
 
 func FetchTasksForDocument(document string) TaskFetcher {
-	return func(c *Client) ([]ast.Task, error) {
+	return func(c *Client) []ast.Task {
 		var tasks []ast.Task
 		c.mutex.RLock()
 		for _, task := range c.cache[document] {
 			tasks = append(tasks, *task)
 		}
 		c.mutex.RUnlock()
-		return tasks, nil
+		return tasks
 	}
 }

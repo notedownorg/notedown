@@ -37,7 +37,7 @@ func TestClient(t *testing.T) {
 	// Assert that we eventually get the correct number of documents and tasks
 	waitFor, tick := 3*time.Second, 200*time.Millisecond
 	assert.Eventually(t, func() bool { return len(client.ListDocuments()) == len(events) }, waitFor, tick)
-	assert.Eventually(t, func() bool { t, _ := client.ListTasks(tasks.FetchAllTasks()); return len(t) == 4 }, waitFor, tick)
+	assert.Eventually(t, func() bool { return len(client.ListTasks(tasks.FetchAllTasks())) == 4 }, waitFor, tick)
 }
 
 func TestClient_InitialLoadWaiter(t *testing.T) {
@@ -54,6 +54,5 @@ func TestClient_InitialLoadWaiter(t *testing.T) {
 
 	// Assert that the client has the correct number of documents and tasks
 	assert.Equal(t, len(events), len(client.ListDocuments()))
-	tasks, _ := client.ListTasks(tasks.FetchAllTasks())
-	assert.Equal(t, 4, len(tasks))
+	assert.Equal(t, 4, len(client.ListTasks(tasks.FetchAllTasks())))
 }

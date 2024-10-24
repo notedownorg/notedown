@@ -100,17 +100,12 @@ func (c *Client) ListDocuments() []string {
 	return documents
 }
 
-func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) ([]ast.Task, error) {
-	tasks, err := fetcher(c)
-	if err != nil {
-		return nil, err
-	}
-
+func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) []ast.Task {
+	tasks := fetcher(c)
 	for _, filter := range filters {
 		tasks = filterTasks(tasks, filter)
 	}
-
-	return tasks, nil
+	return tasks
 }
 func filterTasks(tasks []ast.Task, filter TaskFilter) []ast.Task {
 	var filtered []ast.Task
