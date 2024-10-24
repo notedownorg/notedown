@@ -26,7 +26,7 @@ import (
 
 func TestWrite(t *testing.T) {
 
-	client, _ := buildClient([]reader.Event{},
+	client, _ := buildClient([]reader.Event{{Op: reader.SubscriberLoadComplete}},
 		// Create
 		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
 			assert.Equal(t, "add", method)

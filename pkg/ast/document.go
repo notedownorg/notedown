@@ -16,6 +16,8 @@ package ast
 
 type Metadata map[string]interface{}
 
+const MetadataType = "type"
+
 type Markers struct {
 	ContentStart int
 }

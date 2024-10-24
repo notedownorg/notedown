@@ -24,27 +24,29 @@ import (
 
 func buildClient(events []reader.Event, validators ...validator) (*tasks.Client, chan reader.Event) {
 	feed := make(chan reader.Event)
-	client := tasks.NewClient(&MockLineWriter{validators: validators}, feed)
-	for _, event := range events {
-		feed <- event
-	}
+	go func() {
+		for _, event := range events {
+			feed <- event
+		}
+	}()
 
-	// Wait for the events to be processed
-	// NOTE: This assumes that all events are document creation events
-	for len(client.ListDocuments()) != len(events) {
-		time.Sleep(100 * time.Millisecond)
-	}
-
+	client := tasks.NewClient(
+		&MockLineWriter{validators: validators},
+		feed,
+		tasks.WithInitialLoadWaiter(100*time.Millisecond),
+	)
 	return client, feed
 }
 
 func loadEvents() []reader.Event {
 	return []reader.Event{
+		// Project with tasks
 		{
 			Op:  reader.Load,
 			Key: "one.md",
 			Document: reader.Document{
 				Document: ast.Document{
+					Metadata: ast.Metadata{ast.MetadataType: "project"},
 					Tasks: []ast.Task{
 						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 1", ast.Todo, ast.WithLine(1)),
 						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 2", ast.Doing, ast.WithLine(2), ast.WithPriority(1)),
@@ -52,6 +54,7 @@ func loadEvents() []reader.Event {
 				},
 			},
 		},
+		// Document with tasks
 		{
 			Op:  reader.Load,
 			Key: "two.md",
@@ -64,16 +67,38 @@ func loadEvents() []reader.Event {
 				},
 			},
 		},
+		// Document with no tasks
+		{
+			Op:       reader.Load,
+			Key:      "three.md",
+			Document: reader.Document{Document: ast.Document{}},
+		},
+		// Project with no tasks
+		{
+			Op:  reader.Load,
+			Key: "four.md",
+			Document: reader.Document{
+				Document: ast.Document{
+					Metadata: ast.Metadata{ast.MetadataType: "project"},
+				},
+			},
+		},
+		// Load complete
+		{
+			Op: reader.SubscriberLoadComplete,
+		},
 	}
 }
 
 func defaultEvents() []reader.Event {
 	return []reader.Event{
+		// Project with tasks
 		{
 			Op:  reader.Change,
 			Key: "one.md",
 			Document: reader.Document{
 				Document: ast.Document{
+					Metadata: ast.Metadata{ast.MetadataType: "project"},
 					Tasks: []ast.Task{
 						ast.NewTask(ast.NewIdentifier("one.md", "version"), "Task 1", ast.Todo, ast.WithLine(1)),
 						ast.NewTask(ast.NewIdentifier("one.md", "version"), "Task 2", ast.Doing, ast.WithLine(2), ast.WithPriority(1)),
@@ -81,6 +106,7 @@ func defaultEvents() []reader.Event {
 				},
 			},
 		},
+		// Document with tasks
 		{
 			Op:  reader.Change,
 			Key: "two.md",
@@ -91,6 +117,22 @@ func defaultEvents() []reader.Event {
 						ast.NewTask(ast.NewIdentifier("two.md", "version"), "Task 4", ast.Abandoned, ast.WithLine(2), ast.WithPriority(3)),
 						ast.NewTask(ast.NewIdentifier("two.md", "version"), "Task 5", ast.Blocked, ast.WithLine(3), ast.WithPriority(10)),
 					},
+				},
+			},
+		},
+		// Document with no tasks
+		{
+			Op:       reader.Change,
+			Key:      "three.md",
+			Document: reader.Document{Document: ast.Document{}},
+		},
+		// Project with no tasks
+		{
+			Op:  reader.Change,
+			Key: "four.md",
+			Document: reader.Document{
+				Document: ast.Document{
+					Metadata: ast.Metadata{ast.MetadataType: "project"},
 				},
 			},
 		},

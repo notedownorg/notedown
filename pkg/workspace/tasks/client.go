@@ -24,10 +24,15 @@ import (
 )
 
 type Client struct {
-	// cache maps between file paths and line numbers to tasks it should ONLY be updated in response
+	// tasks maps between file paths and line numbers to tasks it should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
-	cache map[string]map[int]*ast.Task
-	mutex sync.RWMutex
+	tasks      map[string]map[int]*ast.Task
+	tasksMutex sync.RWMutex
+
+	// documents maps between file paths and documents it should ONLY be updated in response
+	// to events from the docuuments client and should otherwise be read-only.
+	documents      map[string]*reader.Document
+	documentsMutex sync.RWMutex
 
 	initialLoadComplete bool
 
@@ -47,7 +52,8 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 
 func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
-		cache:               make(map[string]map[int]*ast.Task),
+		tasks:               make(map[string]map[int]*ast.Task),
+		documents:           make(map[string]*reader.Document),
 		writer:              writer,
 		initialLoadComplete: false,
 	}
@@ -67,21 +73,24 @@ func (c *Client) processDocuments(feed <-chan reader.Event) {
 		case event := <-feed:
 			switch event.Op {
 			case reader.Delete:
-				c.mutex.Lock()
-				delete(c.cache, event.Key)
-				c.mutex.Unlock()
+				c.documentsMutex.Lock()
+				delete(c.documents, event.Key)
+				c.documentsMutex.Unlock()
+				c.tasksMutex.Lock()
+				delete(c.tasks, event.Key)
+				c.tasksMutex.Unlock()
 			case reader.Change, reader.Load:
-				if event.Document.Tasks == nil || len(event.Document.Tasks) == 0 {
-					break
-				}
 				tasks := make(map[int]*ast.Task)
 				for i := range event.Document.Tasks {
 					task := event.Document.Tasks[i]
 					tasks[task.Line()] = &task
 				}
-				c.mutex.Lock()
-				c.cache[event.Key] = tasks
-				c.mutex.Unlock()
+				c.tasksMutex.Lock()
+				c.tasks[event.Key] = tasks
+				c.tasksMutex.Unlock()
+				c.documentsMutex.Lock()
+				c.documents[event.Key] = &event.Document
+				c.documentsMutex.Unlock()
 			case reader.SubscriberLoadComplete:
 				c.initialLoadComplete = true
 			}
@@ -90,14 +99,22 @@ func (c *Client) processDocuments(feed <-chan reader.Event) {
 	}
 }
 
-func (c *Client) ListDocuments() []string {
-	var documents []string
-	c.mutex.RLock()
-	for document := range c.cache {
-		documents = append(documents, document)
+func (c *Client) ListDocuments(fetcher DocumentFetcher, filters ...DocumentFilter) map[string]reader.Document {
+	documents := fetcher(c)
+	for _, filter := range filters {
+		documents = filterDocuments(documents, filter)
 	}
-	c.mutex.RUnlock()
 	return documents
+}
+
+func filterDocuments(documents map[string]reader.Document, filter DocumentFilter) map[string]reader.Document {
+	filtered := make(map[string]reader.Document)
+	for path, document := range documents {
+		if filter(path, document) {
+			filtered[path] = document
+		}
+	}
+	return filtered
 }
 
 func (c *Client) ListTasks(fetcher TaskFetcher, filters ...TaskFilter) []ast.Task {
