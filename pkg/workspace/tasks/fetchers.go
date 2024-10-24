@@ -14,20 +14,23 @@
 
 package tasks
 
-import "github.com/notedownorg/notedown/pkg/ast"
+import (
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
+)
 
 type TaskFetcher func(c *Client) []ast.Task
 
 func FetchAllTasks() TaskFetcher {
 	return func(c *Client) []ast.Task {
 		var tasks []ast.Task
-		c.mutex.RLock()
-		for _, document := range c.cache {
+		c.tasksMutex.RLock()
+		for _, document := range c.tasks {
 			for _, task := range document {
 				tasks = append(tasks, *task)
 			}
 		}
-		c.mutex.RUnlock()
+		c.tasksMutex.RUnlock()
 		return tasks
 	}
 }
@@ -35,11 +38,25 @@ func FetchAllTasks() TaskFetcher {
 func FetchTasksForDocument(document string) TaskFetcher {
 	return func(c *Client) []ast.Task {
 		var tasks []ast.Task
-		c.mutex.RLock()
-		for _, task := range c.cache[document] {
+		c.tasksMutex.RLock()
+		for _, task := range c.tasks[document] {
 			tasks = append(tasks, *task)
 		}
-		c.mutex.RUnlock()
+		c.tasksMutex.RUnlock()
 		return tasks
+	}
+}
+
+type DocumentFetcher func(c *Client) map[string]reader.Document
+
+func FetchAllDocuments() DocumentFetcher {
+	return func(c *Client) map[string]reader.Document {
+		c.documentsMutex.RLock()
+		defer c.documentsMutex.RUnlock()
+		documents := make(map[string]reader.Document)
+		for path, document := range c.documents {
+			documents[path] = *document
+		}
+		return documents
 	}
 }

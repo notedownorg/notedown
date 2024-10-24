@@ -14,7 +14,10 @@
 
 package tasks
 
-import "github.com/notedownorg/notedown/pkg/ast"
+import (
+	"github.com/notedownorg/notedown/pkg/ast"
+	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
+)
 
 type TaskFilter func(ast.Task) bool
 
@@ -39,5 +42,13 @@ func FilterByStatus(status ...ast.Status) TaskFilter {
 			}
 		}
 		return false
+	}
+}
+
+type DocumentFilter func(path string, document reader.Document) bool
+
+func FilterByDocumentType(documentType string) DocumentFilter {
+	return func(_ string, document reader.Document) bool {
+		return document.Metadata["type"] == documentType
 	}
 }
