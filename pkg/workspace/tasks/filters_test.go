@@ -54,9 +54,7 @@ func TestFilters(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tasks, err := c.ListTasks(tasks.FetchAllTasks(), tt.filter)
-			assert.NoError(t, err)
-			assert.ElementsMatch(t, tt.wantTasks, tasks)
+			assert.ElementsMatch(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tt.filter))
 		})
 	}
 
