@@ -38,6 +38,14 @@ func buildClient(events []reader.Event, validators ...validator) (*tasks.Client,
 	return client, feed
 }
 
+func taskCount(events []reader.Event) int {
+	count := 0
+	for _, event := range events {
+		count += len(event.Document.Tasks)
+	}
+	return count
+}
+
 func loadEvents() []reader.Event {
 	return []reader.Event{
 		// Project with tasks
@@ -48,8 +56,8 @@ func loadEvents() []reader.Event {
 				Document: ast.Document{
 					Metadata: ast.Metadata{ast.MetadataType: "project"},
 					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 1", ast.Todo, ast.WithLine(1)),
-						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 2", ast.Doing, ast.WithLine(2), ast.WithPriority(1)),
+						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 1", ast.Abandoned, ast.WithLine(1)),
+						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 2", ast.Done, ast.WithLine(2), ast.WithPriority(1)),
 					},
 				},
 			},
@@ -61,8 +69,9 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 3", ast.Done, ast.WithLine(1), ast.WithPriority(2)),
-						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 4", ast.Abandoned, ast.WithLine(2), ast.WithPriority(3)),
+						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 3", ast.Doing, ast.WithLine(1), ast.WithPriority(2)),
+						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 4", ast.Todo, ast.WithLine(2), ast.WithPriority(3)),
+						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 5", ast.Blocked, ast.WithLine(3), ast.WithPriority(4)),
 					},
 				},
 			},
@@ -86,55 +95,6 @@ func loadEvents() []reader.Event {
 		// Load complete
 		{
 			Op: reader.SubscriberLoadComplete,
-		},
-	}
-}
-
-func defaultEvents() []reader.Event {
-	return []reader.Event{
-		// Project with tasks
-		{
-			Op:  reader.Change,
-			Key: "one.md",
-			Document: reader.Document{
-				Document: ast.Document{
-					Metadata: ast.Metadata{ast.MetadataType: "project"},
-					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("one.md", "version"), "Task 1", ast.Todo, ast.WithLine(1)),
-						ast.NewTask(ast.NewIdentifier("one.md", "version"), "Task 2", ast.Doing, ast.WithLine(2), ast.WithPriority(1)),
-					},
-				},
-			},
-		},
-		// Document with tasks
-		{
-			Op:  reader.Change,
-			Key: "two.md",
-			Document: reader.Document{
-				Document: ast.Document{
-					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("two.md", "version"), "Task 3", ast.Done, ast.WithLine(1), ast.WithPriority(2)),
-						ast.NewTask(ast.NewIdentifier("two.md", "version"), "Task 4", ast.Abandoned, ast.WithLine(2), ast.WithPriority(3)),
-						ast.NewTask(ast.NewIdentifier("two.md", "version"), "Task 5", ast.Blocked, ast.WithLine(3), ast.WithPriority(10)),
-					},
-				},
-			},
-		},
-		// Document with no tasks
-		{
-			Op:       reader.Change,
-			Key:      "three.md",
-			Document: reader.Document{Document: ast.Document{}},
-		},
-		// Project with no tasks
-		{
-			Op:  reader.Change,
-			Key: "four.md",
-			Document: reader.Document{
-				Document: ast.Document{
-					Metadata: ast.Metadata{ast.MetadataType: "project"},
-				},
-			},
 		},
 	}
 }
