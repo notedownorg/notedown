@@ -45,17 +45,17 @@ func TestTaskFilters(t *testing.T) {
 		{
 			name:      "Filter by status",
 			filter:    tasks.FilterByStatus(ast.Done),
-			wantTasks: []ast.Task{events[1].Document.Tasks[0]},
+			wantTasks: []ast.Task{events[0].Document.Tasks[1]},
 		},
 		{
 			name:      "Filter by multiple statuses",
 			filter:    tasks.FilterByStatus(ast.Todo, ast.Done),
-			wantTasks: []ast.Task{events[0].Document.Tasks[0], events[1].Document.Tasks[0]},
+			wantTasks: []ast.Task{events[1].Document.Tasks[1], events[0].Document.Tasks[1]},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.ElementsMatch(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tt.filter))
+			assert.ElementsMatch(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tasks.WithFilters(tt.filter)))
 		})
 	}
 }
