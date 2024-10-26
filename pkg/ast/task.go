@@ -16,7 +16,6 @@ package ast
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/teambition/rrule-go"
@@ -31,33 +30,6 @@ const (
 	Done      Status = "x"
 	Abandoned Status = "a"
 )
-
-type Identifier struct {
-	path    string
-	line    *int
-	version string
-}
-
-// Don't expose line as this should only be used via the thing the identifier belongs to
-// This hides it from things where line number doesn't make sense (like a full document)
-func NewIdentifier(path string, version string) Identifier {
-	return Identifier{path: path, version: version}
-}
-
-func (i Identifier) String() string {
-	// Pipe separators are good enough for now but may need to be changed as pipes
-	// are technically valid (although unlikely to actually be used) in unix file paths
-	// We may want to consider an actual encoding scheme for this in the future.
-	var builder strings.Builder
-	builder.WriteString(i.path)
-	builder.WriteString("|")
-	builder.WriteString(i.version)
-	if i.line != nil {
-		builder.WriteString("|")
-		builder.WriteString(fmt.Sprintf("%v", *i.line))
-	}
-	return builder.String()
-}
 
 type Task struct {
 	identifier Identifier
@@ -109,7 +81,7 @@ func NewTaskFromTask(t Task, options ...TaskOption) Task {
 
 func WithLine(line int) TaskOption {
 	return func(t *Task) {
-		t.identifier.line = &line
+		t.identifier.line = line
 	}
 }
 
@@ -160,7 +132,7 @@ func (t Task) Identifier() Identifier {
 }
 
 func (t Task) Line() int {
-	return *t.Identifier().line
+	return t.Identifier().line
 }
 
 func (t Task) Path() string {
