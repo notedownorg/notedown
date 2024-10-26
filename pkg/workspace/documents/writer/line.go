@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"fmt"
+	"log/slog"
 	"os"
 	"strings"
 )
@@ -29,6 +30,7 @@ const (
 
 // AddLine adds a line of text to a document at the specified line number.
 func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
+	slog.Debug("adding line to document", "path", doc.Path, "number", line, "text", obj)
 	if doc.Hash == "" && line != AtEnd && line != AtBeginning {
 		return fmt.Errorf("hash must be provided when adding a line in the middle of a document")
 	}
@@ -72,6 +74,7 @@ func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
 
 // RemoveLine removes a line of text from a document at the specified line number.
 func (c Client) RemoveLine(doc Document, line int) error {
+	slog.Debug("removing line from document", "path", doc.Path, "number", line)
 	if doc.Hash == "" {
 		return fmt.Errorf("hash must be provided when removing a line to avoid stale writes")
 	}
@@ -106,6 +109,7 @@ func (c Client) RemoveLine(doc Document, line int) error {
 
 // UpdateLine updates a line of text in a document at the specified line number.
 func (c Client) UpdateLine(doc Document, line int, obj fmt.Stringer) error {
+	slog.Debug("updating line in document", "path", doc.Path, "number", line, "text", obj)
 	if doc.Hash == "" {
 		return fmt.Errorf("hash must be provided when updating a line to avoid stale writes")
 	}
