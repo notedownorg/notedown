@@ -12,53 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package reader
+package tasks
 
 type Event struct {
-	Op       Operation
-	Key      string
-	Document Document
+	Op Operation
 }
 
 type Operation uint32
 
 const (
-	// Signal that this document was present when the client was created or when the subscriber subscribed
+	// Signal that one or more tasks have been loaded
 	Load Operation = iota
 
-	// Signal that this document has been updated or created
+	// Signal that one or more tasks have been changed
 	Change
 
-	// Signal that this document has been deleted
+	// Signal that one or more tasks have been deleted
 	Delete
-
-	// Signal that the subscriber has received all existing documents present at the time of subscription
-	SubscriberLoadComplete
 )
 
-type subscribeOptions func(*Client, chan Event)
-
-// Load all existing documents as events to the new subscriber.
-// Once all events have been sent, the a LoadComplete event is sent.
-func WithInitialDocuments() subscribeOptions {
-	return func(client *Client, sub chan Event) {
-		go func(s chan Event) {
-			for key, doc := range client.documents {
-				s <- Event{Op: Load, Document: doc, Key: key}
-			}
-			s <- Event{Op: SubscriberLoadComplete}
-		}(sub)
-	}
-}
-
-func (c *Client) Subscribe(ch chan Event, opts ...subscribeOptions) int {
+func (c *Client) Subscribe(ch chan Event) int {
 	c.subscribers = append(c.subscribers, ch)
 	index := len(c.subscribers) - 1
-
-	// Apply any subscribeOptions
-	for _, opt := range opts {
-		opt(c, ch)
-	}
 	return index
 }
 

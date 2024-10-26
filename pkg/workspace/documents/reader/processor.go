@@ -69,7 +69,7 @@ func (c *Client) processFile(path string, load bool) {
 		c.docMutex.Lock()
 		c.documents[rel] = doc
 		c.docMutex.Unlock()
-		op := func() Op {
+		op := func() Operation {
 			if load {
 				return Load
 			} else {
