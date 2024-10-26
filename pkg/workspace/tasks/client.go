@@ -35,6 +35,9 @@ type Client struct {
 	documents      map[string]*reader.Document
 	documentsMutex sync.RWMutex
 
+	subscribers []chan Event
+	events      chan Event
+
 	initialLoadComplete bool
 
 	writer writer.LineWriter
@@ -56,48 +59,19 @@ func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clien
 		tasks:               make(map[string]map[int]*ast.Task),
 		documents:           make(map[string]*reader.Document),
 		writer:              writer,
+		events:              make(chan Event),
+		subscribers:         make([]chan Event, 0),
 		initialLoadComplete: false,
 	}
 
 	go client.processDocuments(feed)
+	go client.eventDispatcher()
 
 	for _, opt := range opts {
 		opt(client)
 	}
 
 	return client
-}
-
-func (c *Client) processDocuments(feed <-chan reader.Event) {
-	for {
-		select {
-		case event := <-feed:
-			switch event.Op {
-			case reader.Delete:
-				c.documentsMutex.Lock()
-				delete(c.documents, event.Key)
-				c.documentsMutex.Unlock()
-				c.tasksMutex.Lock()
-				delete(c.tasks, event.Key)
-				c.tasksMutex.Unlock()
-			case reader.Change, reader.Load:
-				tasks := make(map[int]*ast.Task)
-				for i := range event.Document.Tasks {
-					task := event.Document.Tasks[i]
-					tasks[task.Line()] = &task
-				}
-				c.tasksMutex.Lock()
-				c.tasks[event.Key] = tasks
-				c.tasksMutex.Unlock()
-				c.documentsMutex.Lock()
-				c.documents[event.Key] = &event.Document
-				c.documentsMutex.Unlock()
-			case reader.SubscriberLoadComplete:
-				c.initialLoadComplete = true
-			}
-
-		}
-	}
 }
 
 func (c *Client) ListDocuments(fetcher DocumentFetcher, filters ...DocumentFilter) map[string]reader.Document {
