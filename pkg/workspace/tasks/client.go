@@ -15,7 +15,6 @@
 package tasks
 
 import (
-	"slices"
 	"sync"
 	"time"
 
@@ -93,29 +92,6 @@ func filterDocuments(documents map[string]reader.Document, filter DocumentFilter
 }
 
 type ListTasksOptions func(tasks []ast.Task) []ast.Task
-
-func WithFilters(filters ...TaskFilter) ListTasksOptions {
-	return func(tasks []ast.Task) []ast.Task {
-		for _, filter := range filters {
-			tasks = filterTasks(tasks, filter)
-		}
-		return tasks
-	}
-}
-
-func WithSorters(sorters ...TaskSorter) ListTasksOptions {
-	return func(tasks []ast.Task) []ast.Task {
-		slices.SortFunc(tasks, func(a, b ast.Task) int {
-			for _, sorter := range sorters {
-				if result := sorter(a, b); result != 0 {
-					return result
-				}
-			}
-			return 0
-		})
-		return tasks
-	}
-}
 
 // Opts are applied in order so filters should be applied before sorters
 func (c *Client) ListTasks(fetcher TaskFetcher, opts ...ListTasksOptions) []ast.Task {

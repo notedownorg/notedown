@@ -33,7 +33,7 @@ func TestFetchAllTasks(t *testing.T) {
 func TestFetchTasksForDocument(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events)
-	tasks := c.ListTasks(tasks.FetchTasksForDocument("two.md"))
+	tasks := c.ListTasks(tasks.FetchTasksForDocument("one.md"))
 	wantTasks := events[1].Document.Tasks
 	assert.ElementsMatch(t, wantTasks, tasks)
 }
@@ -43,10 +43,10 @@ func TestFetchAllDocuments(t *testing.T) {
 	c, _ := buildClient(events)
 	documents := c.ListDocuments(tasks.FetchAllDocuments())
 	wantDocuments := map[string]reader.Document{
-		"one.md":   events[0].Document,
-		"two.md":   events[1].Document,
-		"three.md": events[2].Document,
-		"four.md":  events[3].Document,
+		"zero.md":  events[0].Document,
+		"one.md":   events[1].Document,
+		"two.md":   events[2].Document,
+		"three.md": events[3].Document,
 	}
 	assert.Equal(t, wantDocuments, documents)
 }
