@@ -68,6 +68,9 @@ func KanbanOrder() (ast.Status, ast.Status, ast.Status, ast.Status, ast.Status) 
 
 func SortByStatus(first, second, third, fourth, fifth ast.Status) TaskSorter {
 	return func(a, b ast.Task) int {
+		if a.Status() == b.Status() {
+			return 0
+		}
 		switch a.Status() {
 		case first:
 			if b.Status() == first {
