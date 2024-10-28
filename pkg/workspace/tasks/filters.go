@@ -15,13 +15,24 @@
 package tasks
 
 import (
+	"time"
+
 	"github.com/notedownorg/notedown/pkg/ast"
 	"github.com/notedownorg/notedown/pkg/workspace/documents/reader"
 )
 
 type TaskFilter func(ast.Task) bool
 
-// Priorities are OR'd together
+func WithFilters(filters ...TaskFilter) ListTasksOptions {
+	return func(tasks []ast.Task) []ast.Task {
+		for _, filter := range filters {
+			tasks = filterTasks(tasks, filter)
+		}
+		return tasks
+	}
+}
+
+// Priorities are OR'd together because a task can't have multiple priorities.
 func FilterByPriority(priority ...int) TaskFilter {
 	return func(task ast.Task) bool {
 		for _, p := range priority {
@@ -34,6 +45,7 @@ func FilterByPriority(priority ...int) TaskFilter {
 	}
 }
 
+// Statuses are OR'd together because a task can only have one status.
 func FilterByStatus(status ...ast.Status) TaskFilter {
 	return func(task ast.Task) bool {
 		for _, s := range status {
@@ -42,6 +54,37 @@ func FilterByStatus(status ...ast.Status) TaskFilter {
 			}
 		}
 		return false
+	}
+}
+
+// Following Go's time package, after and before are inclusive (include equal to).
+func FilterByDueDate(after *time.Time, before *time.Time) TaskFilter {
+	return func(t ast.Task) bool {
+		if t.Due() == nil {
+			return false
+		}
+		if after != nil && t.Due().Before(*after) {
+			return false
+		}
+		if before != nil && t.Due().After(*before) {
+			return false
+		}
+		return true
+	}
+}
+
+func FilterByCompletedDate(after *time.Time, before *time.Time) TaskFilter {
+	return func(t ast.Task) bool {
+		if t.Completed() == nil {
+			return false
+		}
+		if after != nil && t.Completed().Before(*after) {
+			return false
+		}
+		if before != nil && t.Completed().After(*before) {
+			return false
+		}
+		return true
 	}
 }
 

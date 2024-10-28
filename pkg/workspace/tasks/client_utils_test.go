@@ -46,18 +46,38 @@ func taskCount(events []reader.Event) int {
 	return count
 }
 
+func date(year, month, day int, add time.Duration) *time.Time {
+	res := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).Add(add)
+	return &res
+}
+
 func loadEvents() []reader.Event {
 	return []reader.Event{
 		// Project with tasks
 		{
 			Op:  reader.Load,
-			Key: "one.md",
+			Key: "zero.md",
 			Document: reader.Document{
 				Document: ast.Document{
 					Metadata: ast.Metadata{ast.MetadataType: "project"},
 					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 1", ast.Abandoned, ast.WithLine(1)),
-						ast.NewTask(ast.NewIdentifier("initial-one.md", "version"), "Task 2", ast.Done, ast.WithLine(2), ast.WithPriority(1)),
+						ast.NewTask(ast.NewIdentifier("initial-zero.md", "version"), "Task zero-0", ast.Abandoned, ast.WithLine(1)),
+						ast.NewTask(ast.NewIdentifier("initial-zero.md", "version"), "Task zero-1", ast.Done, ast.WithLine(2),
+							ast.WithPriority(1),
+						),
+						ast.NewTask(ast.NewIdentifier("initial-zero.md", "version"), "Task zero-2", ast.Doing, ast.WithLine(3),
+							ast.WithPriority(1),
+							ast.WithDue(*date(1, 1, 1, 0)),
+							ast.WithCompleted(*date(1, 1, 1, 0)),
+						),
+						ast.NewTask(ast.NewIdentifier("initial-zero.md", "version"), "Task zero-3", ast.Doing, ast.WithLine(4),
+							ast.WithDue(*date(1, 1, 2, 0)),
+							ast.WithCompleted(*date(1, 1, 2, 0)),
+						),
+						ast.NewTask(ast.NewIdentifier("initial-zero.md", "version"), "Task zero-4", ast.Doing, ast.WithLine(5),
+							ast.WithDue(*date(1, 1, 3, 0)),
+							ast.WithCompleted(*date(1, 1, 3, 0)),
+						),
 					},
 				},
 			},
@@ -65,13 +85,19 @@ func loadEvents() []reader.Event {
 		// Document with tasks
 		{
 			Op:  reader.Load,
-			Key: "two.md",
+			Key: "one.md",
 			Document: reader.Document{
 				Document: ast.Document{
 					Tasks: []ast.Task{
-						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 3", ast.Doing, ast.WithLine(1), ast.WithPriority(2)),
-						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 4", ast.Todo, ast.WithLine(2), ast.WithPriority(3)),
-						ast.NewTask(ast.NewIdentifier("intitial-two.md", "version"), "Task 5", ast.Blocked, ast.WithLine(3), ast.WithPriority(4)),
+						ast.NewTask(ast.NewIdentifier("intitial-one.md", "version"), "Task one-0", ast.Doing, ast.WithLine(1),
+							ast.WithPriority(2),
+						),
+						ast.NewTask(ast.NewIdentifier("intitial-one.md", "version"), "Task one-1", ast.Todo, ast.WithLine(2),
+							ast.WithPriority(3),
+						),
+						ast.NewTask(ast.NewIdentifier("intitial-one.md", "version"), "Task one-2", ast.Blocked, ast.WithLine(3),
+							ast.WithPriority(4),
+						),
 					},
 				},
 			},
@@ -79,13 +105,13 @@ func loadEvents() []reader.Event {
 		// Document with no tasks
 		{
 			Op:       reader.Load,
-			Key:      "three.md",
+			Key:      "two.md",
 			Document: reader.Document{Document: ast.Document{}},
 		},
 		// Project with no tasks
 		{
 			Op:  reader.Load,
-			Key: "four.md",
+			Key: "three.md",
 			Document: reader.Document{
 				Document: ast.Document{
 					Metadata: ast.Metadata{ast.MetadataType: "project"},

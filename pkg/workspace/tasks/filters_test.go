@@ -33,14 +33,21 @@ func TestTaskFilters(t *testing.T) {
 		wantTasks []ast.Task
 	}{
 		{
-			name:      "Filter by single priority",
-			filter:    tasks.FilterByPriority(1),
-			wantTasks: []ast.Task{events[0].Document.Tasks[1]},
+			name:   "Filter by single priority",
+			filter: tasks.FilterByPriority(1),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[1],
+				events[0].Document.Tasks[2],
+			},
 		},
 		{
-			name:      "Filter by multiple priorities",
-			filter:    tasks.FilterByPriority(1, 2),
-			wantTasks: []ast.Task{events[0].Document.Tasks[1], events[1].Document.Tasks[0]},
+			name:   "Filter by multiple priorities",
+			filter: tasks.FilterByPriority(1, 2),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[1],
+				events[0].Document.Tasks[2],
+				events[1].Document.Tasks[0],
+			},
 		},
 		{
 			name:      "Filter by status",
@@ -51,6 +58,66 @@ func TestTaskFilters(t *testing.T) {
 			name:      "Filter by multiple statuses",
 			filter:    tasks.FilterByStatus(ast.Todo, ast.Done),
 			wantTasks: []ast.Task{events[1].Document.Tasks[1], events[0].Document.Tasks[1]},
+		},
+		{
+			name:      "Filter by due date when after and before are set",
+			filter:    tasks.FilterByDueDate(date(1, 1, 2, 0), date(1, 1, 3, -1)),
+			wantTasks: []ast.Task{events[0].Document.Tasks[3]},
+		},
+		{
+			name:   "Filter by due date is set using nil-nil",
+			filter: tasks.FilterByDueDate(nil, nil),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+			},
+		},
+		{
+			name:   "Filter by due date before",
+			filter: tasks.FilterByDueDate(nil, date(1, 1, 2, 0)),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+			},
+		},
+		{
+			name:   "Filter by due date after",
+			filter: tasks.FilterByDueDate(date(1, 1, 2, 0), nil),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+			},
+		},
+		{
+			name:      "Filter by completed date before and after",
+			filter:    tasks.FilterByCompletedDate(date(1, 1, 2, 0), date(1, 1, 3, -1)),
+			wantTasks: []ast.Task{events[0].Document.Tasks[3]},
+		},
+		{
+			name:   "Filter by completed date is set using nil-nil",
+			filter: tasks.FilterByCompletedDate(nil, nil),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+			},
+		},
+		{
+			name:   "Filter by completed date before",
+			filter: tasks.FilterByCompletedDate(nil, date(1, 1, 2, 0)),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+			},
+		},
+		{
+			name:   "Filter by completed date after",
+			filter: tasks.FilterByCompletedDate(date(1, 1, 2, 0), nil),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -73,8 +140,8 @@ func TestDocumentFilters(t *testing.T) {
 			name:   "Filter by document type",
 			filter: tasks.FilterByDocumentType("project"),
 			wantDocuments: map[string]reader.Document{
-				"one.md":  events[0].Document,
-				"four.md": events[3].Document,
+				"zero.md":  events[0].Document,
+				"three.md": events[3].Document,
 			},
 		},
 	}

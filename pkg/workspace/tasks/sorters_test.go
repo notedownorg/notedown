@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestSortByStatus(t *testing.T) {
+func TestSorters(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events)
 
@@ -32,12 +32,77 @@ func TestSortByStatus(t *testing.T) {
 		wantTasks []ast.Task
 	}{
 		{
-			name:   "Sort by status = default order",
-			sorter: tasks.SortByStatus(tasks.DefautStatusOrder()),
+			name:   "Sort by status -> kanban order",
+			sorter: tasks.SortByStatus(tasks.KanbanOrder()),
 			wantTasks: []ast.Task{
 				events[1].Document.Tasks[1],
 				events[1].Document.Tasks[2],
 				events[1].Document.Tasks[0],
+				events[0].Document.Tasks[4],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[1],
+				events[0].Document.Tasks[0],
+			},
+		},
+		{
+			name:   "Sort by status -> agenda order",
+			sorter: tasks.SortByStatus(tasks.AgendaOrder()),
+			wantTasks: []ast.Task{
+				events[1].Document.Tasks[0],
+				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+				events[1].Document.Tasks[1],
+				events[1].Document.Tasks[2],
+				events[0].Document.Tasks[1],
+				events[0].Document.Tasks[0],
+			},
+		},
+		{
+			name:   "Sort by priority",
+			sorter: tasks.SortByPriority(),
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[1],
+				events[0].Document.Tasks[2],
+				events[1].Document.Tasks[0],
+				events[1].Document.Tasks[1],
+				events[1].Document.Tasks[2],
+				events[0].Document.Tasks[0],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tasks.WithSorters(tt.sorter)))
+		})
+	}
+}
+
+func TestSortersMultiple(t *testing.T) {
+	events := loadEvents()
+	c, _ := buildClient(events)
+
+	tests := []struct {
+		name      string
+		sorters   []tasks.TaskSorter
+		wantTasks []ast.Task
+	}{
+		{
+			name: "Sort by status -> agenda order, then by priority",
+			sorters: []tasks.TaskSorter{
+				tasks.SortByStatus(tasks.AgendaOrder()),
+				tasks.SortByPriority(),
+			},
+			wantTasks: []ast.Task{
+				events[0].Document.Tasks[2],
+				events[1].Document.Tasks[0],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
+				events[1].Document.Tasks[1],
+				events[1].Document.Tasks[2],
 				events[0].Document.Tasks[1],
 				events[0].Document.Tasks[0],
 			},
@@ -45,7 +110,7 @@ func TestSortByStatus(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tasks.WithSorters(tt.sorter)))
+			assert.Equal(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tasks.WithSorters(tt.sorters...)))
 		})
 	}
 }

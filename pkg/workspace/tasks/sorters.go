@@ -14,11 +14,55 @@
 
 package tasks
 
-import "github.com/notedownorg/notedown/pkg/ast"
+import (
+	"slices"
+	"strings"
+
+	"github.com/notedownorg/notedown/pkg/ast"
+)
 
 type TaskSorter func(a, b ast.Task) int
 
-func DefautStatusOrder() (ast.Status, ast.Status, ast.Status, ast.Status, ast.Status) {
+func WithSorters(sorters ...TaskSorter) ListTasksOptions {
+	return func(tasks []ast.Task) []ast.Task {
+		slices.SortFunc(tasks, func(a, b ast.Task) int {
+			for _, sorter := range sorters {
+				if result := sorter(a, b); result != 0 {
+					return result
+				}
+			}
+			return alphabetical(a, b)
+		})
+		return tasks
+	}
+}
+
+func SortByPriority() TaskSorter {
+	return func(a, b ast.Task) int {
+		if a.Priority() == nil && b.Priority() == nil {
+			return 0
+		}
+		if a.Priority() == nil {
+			return 1
+		}
+		if b.Priority() == nil {
+			return -1
+		}
+		if *a.Priority() == *b.Priority() {
+			return 0
+		}
+		if *a.Priority() < *b.Priority() {
+			return -1
+		}
+		return 1
+	}
+}
+
+func AgendaOrder() (ast.Status, ast.Status, ast.Status, ast.Status, ast.Status) {
+	return ast.Doing, ast.Todo, ast.Blocked, ast.Done, ast.Abandoned
+}
+
+func KanbanOrder() (ast.Status, ast.Status, ast.Status, ast.Status, ast.Status) {
 	return ast.Todo, ast.Blocked, ast.Doing, ast.Done, ast.Abandoned
 }
 
@@ -54,4 +98,13 @@ func SortByStatus(first, second, third, fourth, fifth ast.Status) TaskSorter {
 			return 0
 		}
 	}
+}
+
+func alphabetical(a, b ast.Task) int {
+	return strings.Compare(a.Name(), b.Name())
+}
+
+// Used as the tiebreaker in other sorts
+func SortByAlphabetical() TaskSorter {
+	return alphabetical
 }
