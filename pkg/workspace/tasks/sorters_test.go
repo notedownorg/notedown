@@ -32,21 +32,22 @@ func TestSorters(t *testing.T) {
 		wantTasks []ast.Task
 	}{
 		{
-			name:   "Sort by status -> kanban order",
+			name:   "Sort by status -> kanban order (then alphabetical)",
 			sorter: tasks.SortByStatus(tasks.KanbanOrder()),
 			wantTasks: []ast.Task{
 				events[1].Document.Tasks[1],
 				events[1].Document.Tasks[2],
+				events[1].Document.Tasks[3],
 				events[1].Document.Tasks[0],
-				events[0].Document.Tasks[4],
-				events[0].Document.Tasks[3],
 				events[0].Document.Tasks[2],
+				events[0].Document.Tasks[3],
+				events[0].Document.Tasks[4],
 				events[0].Document.Tasks[1],
 				events[0].Document.Tasks[0],
 			},
 		},
 		{
-			name:   "Sort by status -> agenda order",
+			name:   "Sort by status -> agenda order (then alphabetical)",
 			sorter: tasks.SortByStatus(tasks.AgendaOrder()),
 			wantTasks: []ast.Task{
 				events[1].Document.Tasks[0],
@@ -55,12 +56,13 @@ func TestSorters(t *testing.T) {
 				events[0].Document.Tasks[4],
 				events[1].Document.Tasks[1],
 				events[1].Document.Tasks[2],
+				events[1].Document.Tasks[3],
 				events[0].Document.Tasks[1],
 				events[0].Document.Tasks[0],
 			},
 		},
 		{
-			name:   "Sort by priority",
+			name:   "Sort by priority (then alphabetical)",
 			sorter: tasks.SortByPriority(),
 			wantTasks: []ast.Task{
 				events[0].Document.Tasks[1],
@@ -68,6 +70,7 @@ func TestSorters(t *testing.T) {
 				events[1].Document.Tasks[0],
 				events[1].Document.Tasks[1],
 				events[1].Document.Tasks[2],
+				events[1].Document.Tasks[3],
 				events[0].Document.Tasks[0],
 				events[0].Document.Tasks[3],
 				events[0].Document.Tasks[4],
@@ -103,6 +106,7 @@ func TestSortersMultiple(t *testing.T) {
 				events[0].Document.Tasks[4],
 				events[1].Document.Tasks[1],
 				events[1].Document.Tasks[2],
+				events[1].Document.Tasks[3],
 				events[0].Document.Tasks[1],
 				events[0].Document.Tasks[0],
 			},
