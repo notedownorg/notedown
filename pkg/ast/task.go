@@ -16,6 +16,7 @@ package ast
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/teambition/rrule-go"
@@ -192,21 +193,26 @@ func (t Task) Every() *Every {
 }
 
 func (t Task) String() string {
-	res := fmt.Sprintf("- [%v] %v", t.status, t.name)
+	return fmt.Sprintf("- [%v] %v", t.status, t.Body())
+}
+
+func (t Task) Body() string {
+	var b strings.Builder
+	b.WriteString(t.name)
 	if t.due != nil {
-		res = fmt.Sprintf("%v due:%v", res, t.due.Format("2006-01-02"))
+		b.WriteString(fmt.Sprintf(" due:%v", t.due.Format("2006-01-02")))
 	}
 	if t.scheduled != nil {
-		res = fmt.Sprintf("%v scheduled:%v", res, t.scheduled.Format("2006-01-02"))
+		b.WriteString(fmt.Sprintf(" scheduled:%v", t.scheduled.Format("2006-01-02")))
 	}
 	if t.priority != nil {
-		res = fmt.Sprintf("%v priority:%v", res, *t.priority)
+		b.WriteString(fmt.Sprintf(" priority:%v", *t.priority))
 	}
 	if t.every != nil {
-		res = fmt.Sprintf("%v every:%v", res, t.every.Text)
+		b.WriteString(fmt.Sprintf(" every:%v", t.every.Text))
 	}
 	if t.completed != nil {
-		res = fmt.Sprintf("%v completed:%v", res, t.completed.Format("2006-01-02"))
+		b.WriteString(fmt.Sprintf(" completed:%v", t.completed.Format("2006-01-02")))
 	}
-	return res
+	return b.String()
 }
