@@ -73,6 +73,18 @@ func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clien
 	return client
 }
 
+func (c *Client) Summary() (tasks int, documents int) {
+	c.tasksMutex.RLock()
+	for _, doc := range c.tasks {
+		tasks += len(doc)
+	}
+	c.tasksMutex.RUnlock()
+
+	c.documentsMutex.RLock()
+	defer c.documentsMutex.RUnlock()
+	return tasks, len(c.documents)
+}
+
 func (c *Client) ListDocuments(fetcher DocumentFetcher, filters ...DocumentFilter) map[string]reader.Document {
 	documents := fetcher(c)
 	for _, filter := range filters {
