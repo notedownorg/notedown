@@ -80,8 +80,8 @@ func TestDocumentParser(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithDue(date(2021, 1, 1)), ast.WithLine(3)),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(4)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithDue(date(2021, 1, 1)), ast.WithLine(4)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(5)),
 				},
 				Markers: ast.Markers{ContentStart: 3},
 			},
@@ -91,8 +91,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(0)),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(2)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(1)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(3)),
 				},
 			},
 		},
@@ -101,8 +101,8 @@ func TestDocumentParser(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(2)),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(4)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(3)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(5)),
 				},
 			},
 		},
@@ -152,8 +152,8 @@ func TestDocument(t *testing.T) {
 			want: ast.Document{
 				Metadata: map[string]interface{}{"title": "Hello, World!"},
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(3), ast.WithDue(date(2021, 1, 1))),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(4)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(4), ast.WithDue(date(2021, 1, 1))),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(5)),
 				},
 				Markers: ast.Markers{ContentStart: 3},
 			},
@@ -163,8 +163,8 @@ func TestDocument(t *testing.T) {
 			input: inputs["tasks with interleaved text"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(0)),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(2)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(1)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithLine(3)),
 				},
 			},
 		},
@@ -173,8 +173,8 @@ func TestDocument(t *testing.T) {
 			input: inputs["lots of newlines"],
 			want: ast.Document{
 				Tasks: []ast.Task{
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(2)),
-					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(4)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 1", ast.Todo, ast.WithLine(3)),
+					ast.NewTask(ast.NewIdentifier("p", "v"), "Task 2", ast.Doing, ast.WithDue(date(2021, 1, 1)), ast.WithLine(5)),
 				},
 			},
 		},

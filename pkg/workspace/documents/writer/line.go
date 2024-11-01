@@ -19,19 +19,20 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"strings"
 )
 
 const (
-	AtBeginning int = 0
-	AtEnd       int = -1
+	AT_BEGINNING int = 0
+	AT_END       int = math.MaxInt
 )
 
 // AddLine adds a line of text to a document at the specified line number.
 func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
 	slog.Debug("adding line to document", "path", doc.Path, "number", line, "text", obj)
-	if doc.Hash == "" && line != AtEnd && line != AtBeginning {
+	if doc.Hash == "" && line != AT_END && line != AT_BEGINNING {
 		return fmt.Errorf("hash must be provided when adding a line in the middle of a document")
 	}
 
@@ -47,13 +48,13 @@ func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
 
 	// If we're within the frontmatter return an error
 	// Unless we're adding AtBeginning, which should add the line after the frontmatter
-	if frontmatter != -1 && line <= frontmatter && line != AtBeginning {
+	if frontmatter != -1 && line <= frontmatter && line != AT_BEGINNING {
 		return fmt.Errorf("cannot add a line within frontmatter")
 	}
 
-	if line == AtEnd || line > len(lines) {
+	if line == AT_END || line > len(lines) {
 		lines = append(lines, obj.String())
-	} else if line == AtBeginning {
+	} else if line == AT_BEGINNING {
 		if frontmatter != -1 {
 			// If the file has frontmatter, we need to insert the line after it
 			lines = append(lines[:frontmatter], append([]string{obj.String()}, lines[frontmatter:]...)...)
@@ -84,7 +85,7 @@ func (c Client) RemoveLine(doc Document, line int) error {
 		return fmt.Errorf("failed to open document: %w", err)
 	}
 
-	if line == AtEnd || line == AtBeginning {
+	if line == AT_END || line == AT_BEGINNING {
 		return fmt.Errorf("must provide an absolute line number")
 	}
 
@@ -124,7 +125,7 @@ func (c Client) UpdateLine(doc Document, line int, obj fmt.Stringer) error {
 		return fmt.Errorf("failed to open document: %w", err)
 	}
 
-	if line == AtEnd || line == AtBeginning {
+	if line == AT_END || line == AT_BEGINNING {
 		return fmt.Errorf("must provide an absolute line number")
 	}
 

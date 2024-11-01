@@ -21,7 +21,7 @@ import (
 
 type Identifier struct {
 	path    string
-	line    int
+	line    int // line is 1-indexed, not 0
 	version string
 }
 
