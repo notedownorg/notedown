@@ -80,6 +80,7 @@ func NewTaskFromTask(t Task, options ...TaskOption) Task {
 	return task
 }
 
+// Line is 1-indexed not 0-indexed
 func WithLine(line int) TaskOption {
 	return func(t *Task) {
 		t.identifier.line = line

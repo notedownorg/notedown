@@ -58,7 +58,7 @@ func (c *Client) Delete(t ast.Task) error {
 func (c *Client) Move(t ast.Task, path string) error {
 	slog.Debug("moving task", "identifier", t.Identifier().String(), "task", t.String(), "new-path", path)
 	// Do the add first so we don't accidentally remove the task without adding it to the new file
-	err := c.writer.AddLine(writer.Document{Path: path}, writer.AtEnd, t)
+	err := c.writer.AddLine(writer.Document{Path: path}, writer.AT_END, t)
 	if err != nil {
 		return fmt.Errorf("failed to add new task when moving: %v: %w", t, err)
 	}

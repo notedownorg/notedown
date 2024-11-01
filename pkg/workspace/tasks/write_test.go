@@ -31,7 +31,7 @@ func TestWrite(t *testing.T) {
 		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
 			assert.Equal(t, "add", method)
 			assert.Equal(t, writer.Document{Path: "path"}, doc)
-			assert.Equal(t, writer.AtEnd, line)
+			assert.Equal(t, writer.AT_END, line)
 			return nil
 		},
 
@@ -55,7 +55,7 @@ func TestWrite(t *testing.T) {
 		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
 			assert.Equal(t, "add", method)
 			assert.Equal(t, writer.Document{Path: "newPath"}, doc)
-			assert.Equal(t, writer.AtEnd, line)
+			assert.Equal(t, writer.AT_END, line)
 			return nil
 		},
 		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
@@ -66,7 +66,7 @@ func TestWrite(t *testing.T) {
 		},
 	)
 
-	assert.NoError(t, client.Create("path", "Task", ast.Todo, ast.WithLine(writer.AtEnd)))
+	assert.NoError(t, client.Create("path", "Task", ast.Todo, ast.WithLine(writer.AT_END)))
 	assert.NoError(t, client.Update(ast.NewTask(ast.NewIdentifier("path", "version"), "Task", ast.Todo, ast.WithLine(7))))
 	assert.NoError(t, client.Delete(ast.NewTask(ast.NewIdentifier("path", "version"), "Task", ast.Todo, ast.WithLine(1))))
 	assert.NoError(t, client.Move(ast.NewTask(ast.NewIdentifier("path", "version"), "Task", ast.Todo, ast.WithLine(7)), "newPath"))

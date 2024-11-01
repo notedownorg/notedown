@@ -360,7 +360,8 @@ var everyParser = func(relativeTo time.Time) parse.Parser[ast.Every] {
 
 var Task = func(path string, version string, relativeTo time.Time) parse.Parser[ast.Task] {
 	return parse.Func(func(in *parse.Input) (ast.Task, bool, error) {
-		line, taskOpts := in.Position().Line, []ast.TaskOption{}
+		// Line is 1-indexed not 0-indexed, this is so it's a bit more user friendly and also to allow for 0 to represent the beginning of the file.
+		line, taskOpts := in.Position().Line+1, []ast.TaskOption{}
 		taskOpts = append(taskOpts, ast.WithLine(line))
 
 		// Read and dump the list item open
