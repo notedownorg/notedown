@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package parsers
+package writer
 
-import "github.com/a-h/parse"
-
-var InlineWhitespaceRunes = parse.RuneIn(" \t")
-
-var RemainingInlineWhitespace = parse.StringFrom(parse.ZeroOrMore(InlineWhitespaceRunes))
-
-var remainingWhitespace = parse.StringFrom(parse.ZeroOrMore(parse.Any(InlineWhitespaceRunes, parse.NewLine)))
-
-var NewLineOrEOF = parse.Any(parse.NewLine, parse.EOF[string]())
+type Document struct {
+	// Path is relative to root
+	Path     string
+	Checksum string
+}
