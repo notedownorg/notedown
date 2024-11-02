@@ -25,9 +25,9 @@ import (
 
 var whitespacePrefix = parse.AtMost(3, parse.RuneIn(" "))
 
-var dashBreakPart = parse.StringFrom(parse.Rune('-'), remainingInlineWhitespace)
-var underscoreBreakPart = parse.StringFrom(parse.Rune('_'), remainingInlineWhitespace)
-var asteriskBreakPart = parse.StringFrom(parse.Rune('*'), remainingInlineWhitespace)
+var dashBreakPart = parse.StringFrom(parse.Rune('-'), RemainingInlineWhitespace)
+var underscoreBreakPart = parse.StringFrom(parse.Rune('_'), RemainingInlineWhitespace)
+var asteriskBreakPart = parse.StringFrom(parse.Rune('*'), RemainingInlineWhitespace)
 
 var dashBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, dashBreakPart), parse.Times(1, parse.NewLine))
 var underscoreBreak = parse.StringFrom(whitespacePrefix, parse.AtLeast(3, underscoreBreakPart), parse.Times(1, parse.NewLine))
