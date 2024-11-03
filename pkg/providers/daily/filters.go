@@ -15,11 +15,26 @@
 package daily
 
 import (
+	"time"
+
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 )
 
 func WithFilters(filters ...collections.Filter[Daily]) collections.ListOption[Daily] {
 	return func(tasks []Daily) []Daily {
 		return collections.Slice[Daily](collections.And(filters...))(tasks)
+	}
+}
+
+// Following Go's time package, after and before are inclusive (include equal to).
+func FilterByDate(after *time.Time, before *time.Time) collections.Filter[Daily] {
+	return func(d Daily) bool {
+		if after != nil && d.date.Before(*after) {
+			return false
+		}
+		if before != nil && d.date.After(*before) {
+			return false
+		}
+		return true
 	}
 }

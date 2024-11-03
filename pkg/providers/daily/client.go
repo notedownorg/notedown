@@ -31,7 +31,8 @@ type publisher = traits.Publisher[Event]
 type Client struct {
 	*watcher
 	*publisher
-	writer writer.LineWriter
+	writer writer.DocumentWriter
+	dir    string
 
 	// notes maps between file paths to notes it should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
@@ -48,10 +49,11 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	}
 }
 
-func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
+func NewClient(writer writer.DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
 		notes:  make(map[string]Daily),
 		writer: writer,
+		dir:    "daily",
 	}
 
 	client.publisher = traits.NewPublisher[Event]()

@@ -22,7 +22,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 )
 
-func buildClient(events []reader.Event, validators ...test.LineWriterValidator) (*daily.Client, chan reader.Event) {
+func buildClient(events []reader.Event, validators ...test.DocumentWriterValidator) (*daily.Client, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.LineWriterValidator) 
 	}()
 
 	client := daily.NewClient(
-		&test.MockLineWriter{Validators: validators},
+		&test.MockDocumentWriter{Validators: validators},
 		feed,
 		daily.WithInitialLoadWaiter(100*time.Millisecond),
 	)
@@ -41,26 +41,51 @@ func buildClient(events []reader.Event, validators ...test.LineWriterValidator) 
 func dailyCount(events []reader.Event) int {
 	count := 0
 	for _, event := range events {
-		if event.Op == reader.Load && event.Document.Metadata[reader.MetadataType] == "daily" {
+		if event.Op == reader.Load && event.Document.Metadata[reader.MetadataTypeKey] == "daily" {
 			count++
 		}
 	}
 	return count
 }
 
+func date(year, month, day int, add time.Duration) *time.Time {
+	res := time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC).Add(add)
+	return &res
+}
+
 var eventNotes = []daily.Daily{
 	daily.NewDaily(daily.NewIdentifier("2024-01-01.md", "version")),
+	daily.NewDaily(daily.NewIdentifier("2024-01-02.md", "version")),
+	daily.NewDaily(daily.NewIdentifier("2024-01-03.md", "version")),
 }
 
 func loadEvents() []reader.Event {
 	return []reader.Event{
-		// Daily note
+		// Daily notes
 		{
 			Op:  reader.Load,
 			Key: "2024-01-01.md",
 			Document: reader.Document{
-				Metadata: reader.Metadata{reader.MetadataType: "daily"},
+				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
 				Contents: []byte(`# 2024-01-01`),
+				Checksum: "version",
+			},
+		},
+		{
+			Op:  reader.Load,
+			Key: "2024-01-02.md",
+			Document: reader.Document{
+				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
+				Contents: []byte(`# 2024-01-02`),
+				Checksum: "version",
+			},
+		},
+		{
+			Op:  reader.Load,
+			Key: "2024-01-03.md",
+			Document: reader.Document{
+				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
+				Contents: []byte(`# 2024-01-03`),
 				Checksum: "version",
 			},
 		},

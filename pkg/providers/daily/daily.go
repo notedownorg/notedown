@@ -15,9 +15,13 @@
 package daily
 
 import (
+	"log/slog"
 	"path/filepath"
 	"strings"
+	"time"
 )
+
+const MetadataKey = "daily"
 
 type Identifier struct {
 	path    string
@@ -43,12 +47,22 @@ func (i Identifier) String() string {
 type Daily struct {
 	name       string
 	identifier Identifier
+	date       time.Time
 }
 
 func NewDaily(identifier Identifier) Daily {
+	name := strings.TrimSuffix(filepath.Base(identifier.path), filepath.Ext(identifier.path))
+
+	// TODO: Support more than just YYYY-MM-DD
+	date, err := time.Parse("2006-01-02", name)
+	if err != nil {
+		slog.Error("failed to parse date from daily note name", "name", name, "identifier", identifier, "error", err)
+	}
+
 	return Daily{
 		identifier: identifier,
-		name:       strings.TrimSuffix(filepath.Base(identifier.path), filepath.Ext(identifier.path)),
+		name:       name,
+		date:       date,
 	}
 }
 
