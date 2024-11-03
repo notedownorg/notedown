@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tasks
+package daily
 
 import (
 	"sync"
@@ -33,10 +33,10 @@ type Client struct {
 	*publisher
 	writer writer.LineWriter
 
-	// tasks maps between file paths and line numbers to tasks it should ONLY be updated in response
+	// notes maps between file paths to notes it should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
-	tasks      map[string]map[int]Task
-	tasksMutex sync.RWMutex
+	notes      map[string]Daily
+	notesMutex sync.RWMutex
 }
 
 type clientOptions func(*Client)
@@ -50,7 +50,7 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 
 func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
-		tasks:  make(map[string]map[int]Task),
+		notes:  make(map[string]Daily),
 		writer: writer,
 	}
 
@@ -65,16 +65,12 @@ func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clien
 }
 
 func (c *Client) Summary() int {
-	tasks := 0
-	c.tasksMutex.RLock()
-	defer c.tasksMutex.RUnlock()
-	for _, doc := range c.tasks {
-		tasks += len(doc)
-	}
-	return tasks
+	c.notesMutex.RLock()
+	defer c.notesMutex.RUnlock()
+	return len(c.notes)
 }
 
 // Opts are applied in order so filters should be applied before sorters
-func (c *Client) ListTasks(fetcher collections.Fetcher[Client, Task], opts ...collections.ListOption[Task]) []Task {
-	return collections.List[Client, Task](c, fetcher, opts...)
+func (c *Client) ListDailyNotes(fetcher collections.Fetcher[Client, Daily], opts ...collections.ListOption[Daily]) []Daily {
+	return collections.List[Client, Daily](c, fetcher, opts...)
 }

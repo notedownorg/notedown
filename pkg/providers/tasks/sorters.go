@@ -15,27 +15,14 @@
 package tasks
 
 import (
-	"slices"
-	"strings"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 )
 
-type TaskSorter func(a, b Task) int
-
-func WithSorters(sorters ...TaskSorter) ListTasksOptions {
-	return func(tasks []Task) []Task {
-		slices.SortFunc(tasks, func(a, b Task) int {
-			for _, sorter := range sorters {
-				if result := sorter(a, b); result != 0 {
-					return result
-				}
-			}
-			return alphabetical(a, b)
-		})
-		return tasks
-	}
+func WithSorters(sorters ...collections.Sorter[Task]) collections.ListOption[Task] {
+	return collections.Sort[Task](collections.FallthroughDeterministic[Task](sorters...))
 }
 
-func SortByPriority() TaskSorter {
+func SortByPriority() collections.Sorter[Task] {
 	return func(a, b Task) int {
 		if a.Priority() == nil && b.Priority() == nil {
 			return 0
@@ -64,7 +51,7 @@ func KanbanOrder() (Status, Status, Status, Status, Status) {
 	return Todo, Blocked, Doing, Done, Abandoned
 }
 
-func SortByStatus(first, second, third, fourth, fifth Status) TaskSorter {
+func SortByStatus(first, second, third, fourth, fifth Status) collections.Sorter[Task] {
 	return func(a, b Task) int {
 		if a.Status() == b.Status() {
 			return 0
@@ -99,13 +86,4 @@ func SortByStatus(first, second, third, fourth, fifth Status) TaskSorter {
 			return 0
 		}
 	}
-}
-
-func alphabetical(a, b Task) int {
-	return strings.Compare(a.Name(), b.Name())
-}
-
-// Used as the tiebreaker in other sorts
-func SortByAlphabetical() TaskSorter {
-	return alphabetical
 }

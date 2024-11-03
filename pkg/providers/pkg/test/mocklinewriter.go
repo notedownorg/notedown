@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tasks_test
+package test
 
 import (
 	"fmt"
@@ -22,18 +22,18 @@ import (
 
 var _ writer.LineWriter = &MockLineWriter{}
 
-type validator func(method string, doc writer.Document, line int, obj fmt.Stringer) error
+type LineWriterValidator func(method string, doc writer.Document, line int, obj fmt.Stringer) error
 
 type MockLineWriter struct {
-	validators []validator
+	Validators []LineWriterValidator
 }
 
 func (m *MockLineWriter) validate(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-	if len(m.validators) == 0 {
+	if len(m.Validators) == 0 {
 		return fmt.Errorf("no validators left")
 	}
-	validator := m.validators[0]
-	m.validators = m.validators[1:]
+	validator := m.Validators[0]
+	m.Validators = m.Validators[1:]
 	return validator(method, doc, line, obj)
 }
 

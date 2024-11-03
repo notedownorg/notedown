@@ -17,7 +17,7 @@ package tasks_test
 import (
 	"testing"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/stretchr/testify/assert"
 )
@@ -28,7 +28,7 @@ func TestTaskFilters(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		filter    tasks.TaskFilter
+		filter    collections.Filter[tasks.Task]
 		wantTasks []tasks.Task
 	}{
 		{
@@ -122,31 +122,6 @@ func TestTaskFilters(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.ElementsMatch(t, tt.wantTasks, c.ListTasks(tasks.FetchAllTasks(), tasks.WithFilters(tt.filter)))
-		})
-	}
-}
-
-func TestDocumentFilters(t *testing.T) {
-	events := loadEvents()
-	c, _ := buildClient(events)
-
-	tests := []struct {
-		name          string
-		filter        tasks.DocumentFilter
-		wantDocuments map[string]reader.Document
-	}{
-		{
-			name:   "Filter by document type",
-			filter: tasks.FilterByDocumentType("project"),
-			wantDocuments: map[string]reader.Document{
-				"zero.md":  events[0].Document,
-				"three.md": events[3].Document,
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.wantDocuments, c.ListDocuments(tasks.FetchAllDocuments(), tt.filter))
 		})
 	}
 }

@@ -12,27 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tasks_test
+package daily_test
 
 import (
 	"testing"
 
-	"github.com/notedownorg/notedown/pkg/providers/tasks"
+	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFetchAllTasks(t *testing.T) {
+func TestFetchAllNotes(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events)
-	tasks := c.ListTasks(tasks.FetchAllTasks())
-	wantTasks := append(eventTasks["zero.md"], eventTasks["one.md"]...)
-	assert.ElementsMatch(t, wantTasks, tasks)
-}
-
-func TestFetchTasksForDocument(t *testing.T) {
-	events := loadEvents()
-	c, _ := buildClient(events)
-	tasks := c.ListTasks(tasks.FetchTasksForDocument("one.md"))
-	wantTasks := eventTasks["one.md"]
-	assert.ElementsMatch(t, wantTasks, tasks)
+	notes := c.ListDailyNotes(daily.FetchAllNotes())
+	assert.ElementsMatch(t, eventNotes, notes)
 }

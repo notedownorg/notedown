@@ -21,32 +21,29 @@ import (
 	"github.com/a-h/parse"
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	. "github.com/notedownorg/notedown/pkg/parsers"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
-func (c *Client) processDocuments(feed <-chan reader.Event) {
-	for {
-		select {
-		case event := <-feed:
-			switch event.Op {
-			case reader.Delete:
-				c.documentsMutex.Lock()
-				delete(c.documents, event.Key)
-				c.documentsMutex.Unlock()
-				c.tasksMutex.Lock()
-				delete(c.tasks, event.Key)
-				c.tasksMutex.Unlock()
-				c.events <- Event{Op: Delete}
-			case reader.Change:
-				c.handleChanges(event)
-				c.events <- Event{Op: Change}
-			case reader.Load:
-				c.handleChanges(event)
-				c.events <- Event{Op: Load}
-			case reader.SubscriberLoadComplete:
-				c.initialLoadComplete = true
-			}
+func onLoad(c *Client) traits.EventHandler {
+	return func(event reader.Event) {
+		c.handleChanges(event)
+		c.publisher.Events <- Event{Op: Load}
+	}
+}
 
-		}
+func onChange(c *Client) traits.EventHandler {
+	return func(event reader.Event) {
+		c.handleChanges(event)
+		c.publisher.Events <- Event{Op: Change}
+	}
+}
+
+func onDelete(c *Client) traits.EventHandler {
+	return func(event reader.Event) {
+		c.tasksMutex.Lock()
+		delete(c.tasks, event.Key)
+		c.tasksMutex.Unlock()
+		c.publisher.Events <- Event{Op: Delete}
 	}
 }
 
@@ -73,9 +70,6 @@ func (c *Client) handleChanges(event reader.Event) {
 	c.tasksMutex.Lock()
 	c.tasks[event.Key] = tasks
 	c.tasksMutex.Unlock()
-	c.documentsMutex.Lock()
-	c.documents[event.Key] = event.Document
-	c.documentsMutex.Unlock()
 }
 
 var parseBlock = func(path, version string, relativeTo time.Time) parse.Parser[[]Task] {

@@ -23,6 +23,20 @@ import (
 
 type Metadata map[string]interface{}
 
+func (m Metadata) Type() string {
+	if m == nil {
+		return ""
+	}
+	typeValue, ok := m[MetadataType]
+	if !ok {
+		return ""
+	}
+	if res, ok := typeValue.(string); ok {
+		return res
+	}
+	return ""
+}
+
 const (
 	MetadataType = "type"
 )
