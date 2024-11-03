@@ -103,7 +103,7 @@ func loadEvents() []reader.Event {
 			Op:  reader.Load,
 			Key: "zero.md",
 			Document: reader.Document{
-				Metadata: reader.Metadata{reader.MetadataType: "project"},
+				Metadata: reader.Metadata{reader.MetadataTypeKey: "project"},
 				Contents: []byte(`- [a] Task zero-0
 - [x] Task zero-1 p:1
 - [/] Task zero-2 p:1 due:0001-01-01 completed:0001-01-01
@@ -139,7 +139,7 @@ func loadEvents() []reader.Event {
 			Op:  reader.Load,
 			Key: "three.md",
 			Document: reader.Document{
-				Metadata: reader.Metadata{reader.MetadataType: "project"},
+				Metadata: reader.Metadata{reader.MetadataTypeKey: "project"},
 				Contents: []byte(``),
 				Checksum: "version",
 			},

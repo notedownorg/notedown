@@ -12,22 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package writer
+package daily
 
 import (
 	"fmt"
+	"path/filepath"
+	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 )
 
-type LineWriter interface {
-	AddLine(doc Document, line int, obj fmt.Stringer) error
-	RemoveLine(doc Document, line int) error
-	UpdateLine(doc Document, line int, obj fmt.Stringer) error
+func (c *Client) Ensure(date time.Time) error {
+	// O(n) but probably fine
+	// Unless humans achieve immortality or pre-emptively generate daily notes assuming they will live forever...
+	matches := c.ListDailyNotes(FetchAllNotes(), WithFilters(FilterByDate(&date, &date)))
+	if len(matches) > 0 {
+		return nil
+	}
+	return c.Create(date)
 }
 
-type DocumentWriter interface {
-	AddDocument(path string, metadata reader.Metadata, content []byte) error
-	// RemoveDocument(doc Document) error
-	// UpdateDocument(doc Document, metadata reader.Metadata, content []byte) error
+func (c *Client) Create(date time.Time) error {
+	name := date.Format("2006-01-02")
+	path := filepath.Join("daily", fmt.Sprintf("%s.md", name))
+	return c.writer.AddDocument(path, reader.Metadata{reader.MetadataTypeKey: MetadataKey}, []byte{})
 }

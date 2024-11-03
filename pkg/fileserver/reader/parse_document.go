@@ -27,7 +27,7 @@ func (m Metadata) Type() string {
 	if m == nil {
 		return ""
 	}
-	typeValue, ok := m[MetadataType]
+	typeValue, ok := m[MetadataTypeKey]
 	if !ok {
 		return ""
 	}
@@ -38,7 +38,7 @@ func (m Metadata) Type() string {
 }
 
 const (
-	MetadataType = "type"
+	MetadataTypeKey = "type"
 )
 
 type Document struct {
