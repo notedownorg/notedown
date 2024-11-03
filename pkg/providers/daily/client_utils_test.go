@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.DocumentWriterValidat
 	}()
 
 	client := daily.NewClient(
-		&test.MockDocumentWriter{Validators: validators},
+		&test.MockDocumentWriter{Validators: validators, Feed: feed},
 		feed,
 		daily.WithInitialLoadWaiter(100*time.Millisecond),
 	)
