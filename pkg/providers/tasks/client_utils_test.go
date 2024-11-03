@@ -18,10 +18,11 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 )
 
-func buildClient(events []reader.Event, validators ...validator) (*tasks.Client, chan reader.Event) {
+func buildClient(events []reader.Event, validators ...test.LineWriterValidator) (*tasks.Client, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -30,7 +31,7 @@ func buildClient(events []reader.Event, validators ...validator) (*tasks.Client,
 	}()
 
 	client := tasks.NewClient(
-		&MockLineWriter{validators: validators},
+		&test.MockLineWriter{Validators: validators},
 		feed,
 		tasks.WithInitialLoadWaiter(100*time.Millisecond),
 	)

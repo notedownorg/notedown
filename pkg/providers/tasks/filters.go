@@ -17,22 +17,17 @@ package tasks
 import (
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 )
 
-type TaskFilter func(Task) bool
-
-func WithFilters(filters ...TaskFilter) ListTasksOptions {
+func WithFilters(filters ...collections.Filter[Task]) collections.ListOption[Task] {
 	return func(tasks []Task) []Task {
-		for _, filter := range filters {
-			tasks = filterTasks(tasks, filter)
-		}
-		return tasks
+		return collections.Slice[Task](collections.And(filters...))(tasks)
 	}
 }
 
 // Priorities are OR'd together because a task can't have multiple priorities.
-func FilterByPriority(priority ...int) TaskFilter {
+func FilterByPriority(priority ...int) collections.Filter[Task] {
 	return func(task Task) bool {
 		for _, p := range priority {
 			taskPriority := task.Priority()
@@ -45,7 +40,7 @@ func FilterByPriority(priority ...int) TaskFilter {
 }
 
 // Statuses are OR'd together because a task can only have one status.
-func FilterByStatus(status ...Status) TaskFilter {
+func FilterByStatus(status ...Status) collections.Filter[Task] {
 	return func(task Task) bool {
 		for _, s := range status {
 			if task.Status() == s {
@@ -57,7 +52,7 @@ func FilterByStatus(status ...Status) TaskFilter {
 }
 
 // Following Go's time package, after and before are inclusive (include equal to).
-func FilterByDueDate(after *time.Time, before *time.Time) TaskFilter {
+func FilterByDueDate(after *time.Time, before *time.Time) collections.Filter[Task] {
 	return func(t Task) bool {
 		if t.Due() == nil {
 			return false
@@ -72,7 +67,7 @@ func FilterByDueDate(after *time.Time, before *time.Time) TaskFilter {
 	}
 }
 
-func FilterByCompletedDate(after *time.Time, before *time.Time) TaskFilter {
+func FilterByCompletedDate(after *time.Time, before *time.Time) collections.Filter[Task] {
 	return func(t Task) bool {
 		if t.Completed() == nil {
 			return false
@@ -84,13 +79,5 @@ func FilterByCompletedDate(after *time.Time, before *time.Time) TaskFilter {
 			return false
 		}
 		return true
-	}
-}
-
-type DocumentFilter func(path string, document reader.Document) bool
-
-func FilterByDocumentType(documentType string) DocumentFilter {
-	return func(_ string, document reader.Document) bool {
-		return document.Metadata["type"] == documentType
 	}
 }

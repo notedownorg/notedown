@@ -12,32 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tasks
+package daily
 
 import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 
-func FetchAllTasks() collections.Fetcher[Client, Task] {
-	return func(c *Client) []Task {
-		var tasks []Task
-		c.tasksMutex.RLock()
-		for _, document := range c.tasks {
-			for _, task := range document {
-				tasks = append(tasks, task)
-			}
+func FetchAllNotes() collections.Fetcher[Client, Daily] {
+	return func(c *Client) []Daily {
+		var documents []Daily
+		c.notesMutex.RLock()
+		for _, document := range c.notes {
+			documents = append(documents, document)
 		}
-		c.tasksMutex.RUnlock()
-		return tasks
-	}
-}
-
-func FetchTasksForDocument(document string) collections.Fetcher[Client, Task] {
-	return func(c *Client) []Task {
-		var tasks []Task
-		c.tasksMutex.RLock()
-		for _, task := range c.tasks[document] {
-			tasks = append(tasks, task)
-		}
-		c.tasksMutex.RUnlock()
-		return tasks
+		c.notesMutex.RUnlock()
+		return documents
 	}
 }

@@ -17,6 +17,7 @@ package tasks_test
 import (
 	"testing"
 
+	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +28,7 @@ func TestSorters(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		sorter    tasks.TaskSorter
+		sorter    collections.Sorter[tasks.Task]
 		wantTasks []tasks.Task
 	}{
 		{
@@ -89,12 +90,12 @@ func TestSortersMultiple(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		sorters   []tasks.TaskSorter
+		sorters   []collections.Sorter[tasks.Task]
 		wantTasks []tasks.Task
 	}{
 		{
 			name: "Sort by status -> agenda order, then by priority",
-			sorters: []tasks.TaskSorter{
+			sorters: []collections.Sorter[tasks.Task]{
 				tasks.SortByStatus(tasks.AgendaOrder()),
 				tasks.SortByPriority(),
 			},

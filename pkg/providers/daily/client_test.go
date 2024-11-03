@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tasks_test
+package daily_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/providers/daily"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/tasks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -33,11 +33,11 @@ func TestClient(t *testing.T) {
 		}
 	}()
 
-	client := tasks.NewClient(&test.MockLineWriter{}, ch)
+	client := daily.NewClient(&test.MockLineWriter{}, ch)
 
-	// Assert that we eventually get the correct number tasks
+	// Assert that we eventually get the correct number of notes
 	waitFor, tick := 3*time.Second, 200*time.Millisecond
-	assert.Eventually(t, func() bool { return len(client.ListTasks(tasks.FetchAllTasks())) == taskCount(events) }, waitFor, tick)
+	assert.Eventually(t, func() bool { return len(client.ListDailyNotes(daily.FetchAllNotes())) == dailyCount(events) }, waitFor, tick)
 }
 
 func TestClient_InitialLoadWaiter(t *testing.T) {
@@ -50,8 +50,8 @@ func TestClient_InitialLoadWaiter(t *testing.T) {
 		ch <- reader.Event{Op: reader.SubscriberLoadComplete}
 	}()
 
-	client := tasks.NewClient(&test.MockLineWriter{}, ch, tasks.WithInitialLoadWaiter(100*time.Millisecond))
+	client := daily.NewClient(&test.MockLineWriter{}, ch, daily.WithInitialLoadWaiter(100*time.Millisecond))
 
-	// Assert that the client has the correct number of tasks
-	assert.Equal(t, taskCount(events), len(client.ListTasks(tasks.FetchAllTasks())))
+	// Assert that the client has the correct number of notes
+	assert.Equal(t, dailyCount(events), len(client.ListDailyNotes(daily.FetchAllNotes())))
 }
