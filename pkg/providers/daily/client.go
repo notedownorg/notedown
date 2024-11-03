@@ -74,5 +74,5 @@ func (c *Client) Summary() int {
 
 // Opts are applied in order so filters should be applied before sorters
 func (c *Client) ListDailyNotes(fetcher collections.Fetcher[Client, Daily], opts ...collections.ListOption[Daily]) []Daily {
-	return collections.List[Client, Daily](c, fetcher, opts...)
+	return collections.List(c, fetcher, opts...)
 }

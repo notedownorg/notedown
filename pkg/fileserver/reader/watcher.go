@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"os"
 
 	"github.com/notedownorg/notedown/internal/fsnotify"
 )
@@ -43,12 +44,28 @@ func (c *Client) fileWatcher() {
 	}
 }
 
+func isDir(path string) bool {
+	fi, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	return fi.IsDir()
+}
+
 func (c *Client) handleCreateEvent(event fsnotify.Event) {
+	if isDir(event.Name) {
+		slog.Debug("ignoring directory create event", slog.String("dir", event.Name))
+		return
+	}
 	slog.Debug("handling file create event", slog.String("file", event.Name))
 	c.processFile(event.Name, false)
 }
 
 func (c *Client) handleRemoveEvent(event fsnotify.Event) {
+	if isDir(event.Name) {
+		slog.Debug("ignoring directory remove event", slog.String("dir", event.Name))
+		return
+	}
 	slog.Debug("handling file remove event", slog.String("file", event.Name))
 	rel, err := c.relative(event.Name)
 	if err != nil {
@@ -63,11 +80,19 @@ func (c *Client) handleRemoveEvent(event fsnotify.Event) {
 }
 
 func (c *Client) handleRenameEvent(event fsnotify.Event) {
+	if isDir(event.Name) {
+		slog.Debug("ignoring directory rename event", slog.String("dir", event.Name))
+		return
+	}
 	slog.Debug("handling file rename event", slog.String("file", event.Name))
 	c.handleRemoveEvent(event) // rename sends the name of the old file, presumably it sends a create event for the new file
 }
 
 func (c *Client) handleWriteEvent(event fsnotify.Event) {
+	if isDir(event.Name) {
+		slog.Debug("ignoring directory write event", slog.String("dir", event.Name))
+		return
+	}
 	slog.Debug("handling file write event", slog.String("file", event.Name))
 	c.processFile(event.Name, false)
 }
