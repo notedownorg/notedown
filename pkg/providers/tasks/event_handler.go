@@ -80,7 +80,7 @@ var parseBlock = func(path, version string, relativeTo time.Time) parse.Parser[[
 		_, _, err := parse.NewLine.Parse(in)
 
 		for {
-			task, ok, err := parseTask(path, version, relativeTo).Parse(in)
+			task, ok, err := ParseTask(path, version, relativeTo).Parse(in)
 			if err != nil {
 				return nil, false, err
 			}
