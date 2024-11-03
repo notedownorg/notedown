@@ -147,7 +147,7 @@ func TestTask(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			in := parse.NewInput(test.input)
-			result, found, _ := parseTask("path", "version", relativeTo).Parse(in)
+			result, found, _ := ParseTask("path", "version", relativeTo).Parse(in)
 			if !found {
 				t.Fatal("expected found")
 			}

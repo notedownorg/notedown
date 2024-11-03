@@ -358,7 +358,7 @@ var everyParser = func(relativeTo time.Time) parse.Parser[Every] {
 	})
 }
 
-var parseTask = func(path string, checksum string, relativeTo time.Time) parse.Parser[Task] {
+var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.Parser[Task] {
 	return parse.Func(func(in *parse.Input) (Task, bool, error) {
 		// Line is 1-indexed not 0-indexed, this is so it's a bit more user friendly and also to allow for 0 to represent the beginning of the file.
 		line, taskOpts := in.Position().Line+1, []TaskOption{}
