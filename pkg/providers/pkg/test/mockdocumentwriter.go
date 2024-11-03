@@ -23,9 +23,10 @@ import (
 
 var _ writer.DocumentWriter = &MockDocumentWriter{}
 
-type DocumentWriterValidator func(method string, doc writer.Document, metadata reader.Metadata, content []byte) error
+type DocumentWriterValidator func(method string, doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error
 
 type MockDocumentWriter struct {
+	Feed       chan reader.Event
 	Validators []DocumentWriterValidator
 }
 
@@ -39,5 +40,5 @@ func (m *MockDocumentWriter) validate(method string, doc writer.Document, metada
 	}
 	validator := m.Validators[0]
 	m.Validators = m.Validators[1:]
-	return validator(method, doc, metadata, content)
+	return validator(method, doc, metadata, content, m.Feed)
 }
