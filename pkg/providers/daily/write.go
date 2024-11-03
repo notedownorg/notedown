@@ -24,30 +24,30 @@ import (
 
 // Set wait to 0 to not wait for the file to appear in the cache
 // Otherwise ensure will error if the file does not appear in the cache within the wait duration
-func (c *Client) Ensure(date time.Time, wait time.Duration) error {
+func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error) {
 	// O(n) but probably fine
 	// Unless humans achieve immortality or pre-emptively generate daily notes assuming they will live forever...
 	matches := c.ListDailyNotes(FetchAllNotes(), WithFilters(FilterByDate(&date, &date)))
 	if len(matches) > 0 {
-		return nil
+		return matches[0], true, nil
 	}
 	if err := c.Create(date); err != nil {
-		return fmt.Errorf("failed to create daily note: %w", err)
+		return Daily{}, false, fmt.Errorf("failed to create daily note: %w", err)
 	}
 
 	if wait == 0 {
-		return nil
+		return Daily{}, false, nil
 	}
 
 	// If wait is set we wait for the file to appear in our cache before returning
 	start := time.Now()
 	for {
 		if time.Since(start) > wait {
-			return fmt.Errorf("timed out waiting for daily note to appear")
+			return Daily{}, false, fmt.Errorf("timed out waiting for daily note to appear")
 		}
 		matches = c.ListDailyNotes(FetchAllNotes(), WithFilters(FilterByDate(&date, &date)))
 		if len(matches) > 0 {
-			return nil
+			return matches[0], true, nil
 		}
 		time.Sleep(100 * time.Millisecond)
 	}

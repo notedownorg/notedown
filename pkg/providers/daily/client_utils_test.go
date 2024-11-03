@@ -54,9 +54,9 @@ func date(year, month, day int, add time.Duration) *time.Time {
 }
 
 var eventNotes = []daily.Daily{
-	daily.NewDaily(daily.NewIdentifier("2024-01-01.md", "version")),
-	daily.NewDaily(daily.NewIdentifier("2024-01-02.md", "version")),
-	daily.NewDaily(daily.NewIdentifier("2024-01-03.md", "version")),
+	daily.NewDaily(daily.NewIdentifier("daily/2024-01-01.md", "version")),
+	daily.NewDaily(daily.NewIdentifier("daily/2024-01-02.md", "version")),
+	daily.NewDaily(daily.NewIdentifier("daily/2024-01-03.md", "version")),
 }
 
 func loadEvents() []reader.Event {
@@ -64,7 +64,7 @@ func loadEvents() []reader.Event {
 		// Daily notes
 		{
 			Op:  reader.Load,
-			Key: "2024-01-01.md",
+			Key: "daily/2024-01-01.md",
 			Document: reader.Document{
 				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
 				Contents: []byte(`# 2024-01-01`),
@@ -73,7 +73,7 @@ func loadEvents() []reader.Event {
 		},
 		{
 			Op:  reader.Load,
-			Key: "2024-01-02.md",
+			Key: "daily/2024-01-02.md",
 			Document: reader.Document{
 				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
 				Contents: []byte(`# 2024-01-02`),
@@ -82,7 +82,7 @@ func loadEvents() []reader.Event {
 		},
 		{
 			Op:  reader.Load,
-			Key: "2024-01-03.md",
+			Key: "daily/2024-01-03.md",
 			Document: reader.Document{
 				Metadata: reader.Metadata{reader.MetadataTypeKey: "daily"},
 				Contents: []byte(`# 2024-01-03`),
