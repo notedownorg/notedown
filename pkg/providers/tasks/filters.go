@@ -22,7 +22,7 @@ import (
 
 func WithFilters(filters ...collections.Filter[Task]) collections.ListOption[Task] {
 	return func(tasks []Task) []Task {
-		return collections.Slice[Task](collections.And(filters...))(tasks)
+		return collections.Slice(collections.And(filters...))(tasks)
 	}
 }
 

@@ -19,7 +19,7 @@ import (
 )
 
 func WithSorters(sorters ...collections.Sorter[Task]) collections.ListOption[Task] {
-	return collections.Sort[Task](collections.FallthroughDeterministic[Task](sorters...))
+	return collections.Sort(collections.FallthroughDeterministic(sorters...))
 }
 
 func SortByPriority() collections.Sorter[Task] {

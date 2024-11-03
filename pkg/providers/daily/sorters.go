@@ -19,5 +19,5 @@ import (
 )
 
 func WithSorters(sorters ...collections.Sorter[Daily]) collections.ListOption[Daily] {
-	return collections.Sort[Daily](collections.FallthroughDeterministic[Daily](sorters...))
+	return collections.Sort(collections.FallthroughDeterministic(sorters...))
 }

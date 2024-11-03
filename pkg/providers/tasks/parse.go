@@ -377,7 +377,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		}
 
 		// Read until we hit a key, newline or eof to get the name.
-		name, ok, err := parse.StringUntil(parse.Any[string](anyFieldKey, NewLineOrEOF)).Parse(in)
+		name, ok, err := parse.StringUntil(parse.Any(anyFieldKey, NewLineOrEOF)).Parse(in)
 		if err != nil || !ok {
 			return Task{}, false, err
 		}
@@ -403,7 +403,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		in.Seek(start)
 
 		// Scheduled
-		_, ok, err = parse.StringUntil(parse.Any[string](scheduledKey, NewLineOrEOF)).Parse(in)
+		_, ok, err = parse.StringUntil(parse.Any(scheduledKey, NewLineOrEOF)).Parse(in)
 		if err != nil {
 			return Task{}, false, err
 		}
@@ -419,7 +419,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		in.Seek(start)
 
 		// Completed
-		_, ok, err = parse.StringUntil(parse.Any[string](completedKey, NewLineOrEOF)).Parse(in)
+		_, ok, err = parse.StringUntil(parse.Any(completedKey, NewLineOrEOF)).Parse(in)
 		if err != nil {
 			return Task{}, false, err
 		}
@@ -435,7 +435,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		in.Seek(start)
 
 		// Priority
-		_, ok, err = parse.StringUntil(parse.Any[string](priorityKey, NewLineOrEOF)).Parse(in)
+		_, ok, err = parse.StringUntil(parse.Any(priorityKey, NewLineOrEOF)).Parse(in)
 		if err != nil {
 			return Task{}, false, err
 		}
@@ -451,7 +451,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		in.Seek(start)
 
 		// Every
-		_, ok, err = parse.StringUntil(parse.Any[string](everyKey, NewLineOrEOF)).Parse(in)
+		_, ok, err = parse.StringUntil(parse.Any(everyKey, NewLineOrEOF)).Parse(in)
 		if err != nil {
 			return Task{}, false, err
 		}

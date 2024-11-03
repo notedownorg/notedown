@@ -76,5 +76,5 @@ func (c *Client) Summary() int {
 
 // Opts are applied in order so filters should be applied before sorters
 func (c *Client) ListTasks(fetcher collections.Fetcher[Client, Task], opts ...collections.ListOption[Task]) []Task {
-	return collections.List[Client, Task](c, fetcher, opts...)
+	return collections.List(c, fetcher, opts...)
 }
