@@ -16,6 +16,7 @@ package test
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
@@ -40,5 +41,6 @@ func (m *MockDocumentWriter) validate(method string, doc writer.Document, metada
 	}
 	validator := m.Validators[0]
 	m.Validators = m.Validators[1:]
+	slog.Info("removed validator", "remaining", len(m.Validators), "method", method, "doc", doc, "metadata", metadata, "content", content)
 	return validator(method, doc, metadata, content, m.Feed)
 }

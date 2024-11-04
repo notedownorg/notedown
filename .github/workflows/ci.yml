@@ -1,4 +1,4 @@
-name: Code Hygiene
+name: ci
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  make:
+  hygiene:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -15,18 +15,32 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.21'
+        go-version: '1.22'
 
     - name: Install Licenser
       run: go install github.com/liamawhite/licenser@21016ac7e79acc475e3b11f71aac7499a21790a5
 
-    - name: Make All
-      run: make
+    - run: make hygiene
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.22'
+
+    - run: make test
 
     - name: Testdata upload
       uses: actions/upload-artifact@v4
       if: failure()
       with:
         name: testdata
-        path: ${{ github.workspace }}/testdata
+        path: ${{ github.workspace }}/${{ matrix.os }}/testdata
         if-no-files-found: error

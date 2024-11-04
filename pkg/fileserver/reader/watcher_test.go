@@ -15,7 +15,6 @@
 package reader
 
 import (
-	"log/slog"
 	"math/rand"
 	"os"
 	"testing"
@@ -54,8 +53,6 @@ func TestDocuments_Client_Watcher(t *testing.T) {
 }
 
 func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
-	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
-
 	// Do the setup and ensure its correct
 	dir, err := copyTestData(t.Name())
 	if err != nil {
@@ -94,10 +91,11 @@ func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
 
 	// We have to make the keys relative...
 	for k := range wantAbs {
-		rel, _ := client.relative(k)
-		if err == nil {
-			wantRel[rel] = true
+		rel, err := client.relative(k)
+		if err != nil {
+			t.Fatal(err)
 		}
+		wantRel[rel] = true
 	}
 
 	// Add prexisting docs to the wantRel map
@@ -106,7 +104,7 @@ func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
 	}
 
 	// Wait for all files to finish processing
-	assert.Eventually(t, func() bool { return len(wantRel) == len(client.documents) }, 2*time.Second, time.Millisecond*100, "expected %v documents got %v", len(wantRel), len(client.documents))
+	assert.Eventually(t, func() bool { return len(wantRel) == len(client.documents) }, 5*time.Second, time.Millisecond*100, "expected %v documents got %v", len(wantRel), len(client.documents))
 
 	// Ensure the documents paths are correct
 	got := map[string]bool{}

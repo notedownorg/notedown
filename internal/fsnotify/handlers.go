@@ -18,12 +18,25 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// Provide access to the underlying fsnotify ops.
-const (
-	Create = fsnotify.Create
-	Remove = fsnotify.Remove
-	Rename = fsnotify.Rename
-	Write  = fsnotify.Write
-)
+func (rw *RecursiveWatcher) handleCreate(event fsnotify.Event) {
+	// If the event is a directory, add it to the watcher
+	if isDir(event.Name) {
+		rw.add(event.Name)
+	}
 
-type Event = fsnotify.Event
+	// Send the event to the events channel
+	rw.events <- event
+}
+
+func (rw *RecursiveWatcher) handleRemove(event fsnotify.Event) {
+	// If the event is a directory, remove it from the watcher
+	if isDir(event.Name) {
+		if err := rw.w.Remove(event.Name); err != nil {
+			rw.errors <- err
+		}
+		delete(rw.watchers, event.Name)
+	}
+
+	// Send the event to the events channel
+	rw.events <- event
+}
