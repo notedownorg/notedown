@@ -42,7 +42,10 @@ jobs:
 
     - name: Increase open file limit for macOS
       if: matrix.os == 'macos-latest'
-      run: ulimit -n 4096
+      run: |
+        ulimit -n
+        ulimit -n 4096
+        ulimit -n
 
     - run: make test
 
