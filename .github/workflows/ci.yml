@@ -35,6 +35,9 @@ jobs:
       with:
         go-version: '1.22'
 
+    - name: Install dictionary for babbler library
+      run: sudo apt-get update && sudo apt-get install -y wamerican
+
     - run: make test
 
     - name: Testdata upload
