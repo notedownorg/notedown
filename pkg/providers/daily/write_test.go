@@ -48,12 +48,12 @@ func TestWrite(t *testing.T) {
 		},
 	)
 
-	d, ok, err := client.Ensure(date.AddDate(0, 0, 1), time.Second)
+	d, ok, err := client.Ensure(date.AddDate(0, 0, 1), time.Second) // already exists
 	assert.NoError(t, err)
 	assert.True(t, ok)
 	assert.Equal(t, daily.NewDaily(daily.NewIdentifier("daily/2024-01-01.md", "version")), d)
 
-	d, ok, err = client.Ensure(date, time.Second) // already exists
+	d, ok, err = client.Ensure(date, time.Second)
 	assert.NoError(t, err)
 	assert.True(t, ok)
 	assert.Equal(t, daily.NewDaily(daily.NewIdentifier("daily/2023-12-31.md", "")), d)

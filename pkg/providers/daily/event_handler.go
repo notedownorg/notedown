@@ -15,6 +15,8 @@
 package daily
 
 import (
+	"log/slog"
+
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
@@ -39,6 +41,7 @@ func onDelete(c *Client) traits.EventHandler {
 		delete(c.notes, event.Key)
 		c.notesMutex.Unlock()
 		c.publisher.Events <- Event{Op: Delete}
+		slog.Debug("removed daily note", "path", event.Key)
 	}
 }
 
@@ -49,4 +52,5 @@ func (c *Client) handleChanges(event reader.Event) {
 	c.notesMutex.Lock()
 	c.notes[event.Key] = NewDaily(NewIdentifier(event.Key, event.Document.Checksum))
 	c.notesMutex.Unlock()
+	slog.Debug("added daily note", "path", event.Key)
 }
