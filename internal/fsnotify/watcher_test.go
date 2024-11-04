@@ -47,7 +47,6 @@ func TestRecursiveWatcher(t *testing.T) {
 
 	dir, _ := os.MkdirTemp("", "testrecursivewatcher")
 	w, _ := fsnotify.NewRecursiveWatcher(dir)
-	defer w.Close()
 
 	// What we want to test is that we get an accurate view of the filesystem based on the events we receive
 	// This because events are non-deteministic even if you dont take ordering into account
