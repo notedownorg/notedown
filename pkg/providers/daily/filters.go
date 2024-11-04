@@ -28,6 +28,12 @@ func WithFilters(filters ...collections.Filter[Daily]) collections.ListOption[Da
 
 // Following Go's time package, after and before are inclusive (include equal to).
 func FilterByDate(after *time.Time, before *time.Time) collections.Filter[Daily] {
+	if after != nil {
+		after = toDate(*after)
+	}
+	if before != nil {
+		before = toDate(*before)
+	}
 	return func(d Daily) bool {
 		if after != nil && d.date.Before(*after) {
 			return false
@@ -37,4 +43,9 @@ func FilterByDate(after *time.Time, before *time.Time) collections.Filter[Daily]
 		}
 		return true
 	}
+}
+
+func toDate(t time.Time) *time.Time {
+	date := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+	return &date
 }
