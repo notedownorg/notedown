@@ -40,6 +40,10 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt-get update && sudo apt-get install -y wamerican
 
+    - name: Increase open file limit for macOS
+      if: matrix.os == 'macos-latest'
+      run: ulimit -n 4096
+
     - run: make test
 
     - name: Testdata upload
