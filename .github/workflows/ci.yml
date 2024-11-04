@@ -41,6 +41,6 @@ jobs:
       uses: actions/upload-artifact@v4
       if: failure()
       with:
-        name: testdata/${{ matrix.os }}
+        name: testdata-${{ matrix.os }}
         path: ${{ github.workspace }}/testdata
         if-no-files-found: error
