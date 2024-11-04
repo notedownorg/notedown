@@ -22,10 +22,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/uuid"
 	cp "github.com/otiai10/copy"
 	"github.com/stretchr/testify/assert"
+	"github.com/tjarratt/babble"
 )
+
+var babbler = babble.NewBabbler()
 
 func setupTestDir(name string) (string, error) {
 	// If we're running in a CI environment, we dont want to create temp directories
@@ -82,8 +84,15 @@ func ensureNoErrors(t *testing.T, ch <-chan error) {
 }
 
 func createFile(dir string, content string, errs chan<- error) string {
-	filename := fmt.Sprintf("%v.md", uuid.New().String())
-	path := fmt.Sprintf("%v/%v", dir, filename)
+	filename := fmt.Sprintf("%v.md", babbler.Babble())
+	extraDir := babbler.Babble()
+
+	// ensure the directory exists
+	if err := os.MkdirAll(fmt.Sprintf("%v/%v", dir, extraDir), 0777); err != nil {
+		errs <- err
+	}
+	path := fmt.Sprintf("%v/%v/%v", dir, extraDir, filename)
+
 	slog.Debug("creating file", slog.String("file", path))
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
 		errs <- err
@@ -118,7 +127,7 @@ func createThenUpdateFile(dir string, content string, errs chan<- error) string 
 
 func createThenRenameFile(dir string, content string, errs chan<- error) string {
 	path := createFile(dir, content, errs)
-	newPath := fmt.Sprintf("%v/%v.md", dir, uuid.New().String())
+	newPath := fmt.Sprintf("%v/%v.md", dir, babbler.Babble())
 	go func() {
 		time.Sleep(time.Second) // allow the file to be processed
 		slog.Debug("renaming file", slog.String("file", path), slog.String("new", newPath))

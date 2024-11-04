@@ -14,6 +14,8 @@
 
 package reader
 
+import "log/slog"
+
 type Event struct {
 	Op       Operation
 	Key      string
@@ -69,7 +71,16 @@ func (c *Client) Unsubscribe(index int) {
 func (c *Client) eventDispatcher() {
 	for event := range c.events {
 		for _, subscriber := range c.subscribers {
-			go func(s chan Event, e Event) { s <- e }(subscriber, event)
+			go func(s chan Event, e Event) {
+				// Recover from a panic if the subscriber has been closed
+				// Likely this will only happen in tests but its theoretically possible in regular usage
+				defer func() {
+					if r := recover(); r != nil {
+						slog.Warn("dropping event as subscriber has been closed", "path", e.Key)
+					}
+				}()
+				s <- e
+			}(subscriber, event)
 		}
 	}
 }
