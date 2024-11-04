@@ -39,6 +39,7 @@ func randomFile(root string) string {
 		b.WriteString("/")
 	}
 	b.WriteString(babbler.Babble())
+    b.WriteString(".file")
 	return b.String()
 }
 
