@@ -28,10 +28,14 @@ import (
 type watcher = traits.Watcher
 type publisher = traits.Publisher[Event]
 
+type DocumentUpdater interface {
+	UpdateContent(doc writer.Document, mutations ...writer.LineMutation) error
+}
+
 type Client struct {
 	*watcher
 	*publisher
-	writer writer.LineWriter
+	writer DocumentUpdater
 
 	// tasks maps between file paths and line numbers to tasks it should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
@@ -48,7 +52,7 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	}
 }
 
-func NewClient(writer writer.LineWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
+func NewClient(writer DocumentUpdater, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
 		tasks:  make(map[string]map[int]Task),
 		writer: writer,

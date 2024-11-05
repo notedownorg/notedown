@@ -251,7 +251,7 @@ var everyParser = func(relativeTo time.Time) parse.Parser[Every] {
 					return Every{}, false, fmt.Errorf("failed to store original every text start: %d end: %d", start, end)
 				}
 
-				return Every{RRule: rr, Text: strings.TrimSpace(text)}, true, nil
+				return Every{rrule: rr, text: strings.TrimSpace(text)}, true, nil
 			}
 		}()
 
@@ -362,7 +362,6 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 	return parse.Func(func(in *parse.Input) (Task, bool, error) {
 		// Line is 1-indexed not 0-indexed, this is so it's a bit more user friendly and also to allow for 0 to represent the beginning of the file.
 		line, taskOpts := in.Position().Line+1, []TaskOption{}
-		taskOpts = append(taskOpts, WithLine(line))
 
 		// Read and dump the list item open
 		_, ok, err := listItemOpen.Parse(in)
@@ -470,7 +469,7 @@ var ParseTask = func(path string, checksum string, relativeTo time.Time) parse.P
 		parse.StringUntil(NewLineOrEOF).Parse(in)
 		NewLineOrEOF.Parse(in)
 
-		return NewTask(NewIdentifier(path, checksum), name, status, taskOpts...), true, nil
+		return NewTask(NewIdentifier(path, checksum, line), name, status, taskOpts...), true, nil
 	})
 }
 

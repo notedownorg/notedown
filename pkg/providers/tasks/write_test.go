@@ -17,6 +17,7 @@ package tasks_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
@@ -25,50 +26,62 @@ import (
 )
 
 func TestWrite(t *testing.T) {
-
 	client, _ := buildClient([]reader.Event{{Op: reader.SubscriberLoadComplete}},
+
 		// Create
-		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-			assert.Equal(t, "add", method)
+		func(doc writer.Document, mutations ...writer.LineMutation) error {
 			assert.Equal(t, writer.Document{Path: "path"}, doc)
-			assert.Equal(t, writer.AT_END, line)
+			lines := []string{"line 1", "line 2", "line 3"}
+			for _, mutation := range mutations {
+				lines, _ = mutation("", lines)
+			}
+			assert.Equal(t, []string{"line 1", "line 2", "line 3", "- [ ] Task"}, lines)
 			return nil
 		},
 
 		// Update
-		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-			assert.Equal(t, "update", method)
+		func(doc writer.Document, mutations ...writer.LineMutation) error {
 			assert.Equal(t, writer.Document{Path: "path", Checksum: "version"}, doc)
-			assert.Equal(t, 7, line)
+			lines := []string{"line 1", "line 2", "line 3"}
+			for _, mutation := range mutations {
+				lines, _ = mutation("version", lines)
+			}
+			assert.Equal(t, []string{"line 1", "line 2", "- [ ] Task"}, lines)
+			return nil
+		},
+
+		// Update with recurrence completion
+		func(doc writer.Document, mutations ...writer.LineMutation) error {
+			assert.Equal(t, writer.Document{Path: "path", Checksum: "version"}, doc)
+			lines := []string{"line 1", "line 2", "- [ ] Task every:day"}
+			for _, mutation := range mutations {
+				lines, _ = mutation("version", lines)
+			}
+			completed := fmt.Sprintf("- [x] Task every:day completed:%s", time.Now().Format("2006-01-02"))
+			assert.Equal(t, []string{"line 1", "line 2", "- [ ] Task every:day", completed}, lines)
 			return nil
 		},
 
 		// Delete
-		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-			assert.Equal(t, "remove", method)
+		func(doc writer.Document, mutations ...writer.LineMutation) error {
 			assert.Equal(t, writer.Document{Path: "path", Checksum: "version"}, doc)
-			assert.Equal(t, 1, line)
-			return nil
-		},
-
-		// Move
-		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-			assert.Equal(t, "add", method)
-			assert.Equal(t, writer.Document{Path: "newPath"}, doc)
-			assert.Equal(t, writer.AT_END, line)
-			return nil
-		},
-		func(method string, doc writer.Document, line int, obj fmt.Stringer) error {
-			assert.Equal(t, "remove", method)
-			assert.Equal(t, writer.Document{Path: "path", Checksum: "version"}, doc)
-			assert.Equal(t, 7, line)
+			lines := []string{"line 1", "- [ ] Task", "line 3"}
+			for _, mutation := range mutations {
+				lines, _ = mutation("version", lines)
+			}
+			assert.Equal(t, []string{"line 1", "line 3"}, lines)
 			return nil
 		},
 	)
 
-	assert.NoError(t, client.Create("path", "Task", tasks.Todo, tasks.WithLine(writer.AT_END)))
-	assert.NoError(t, client.Update(tasks.NewTask(tasks.NewIdentifier("path", "version"), "Task", tasks.Todo, tasks.WithLine(7))))
-	assert.NoError(t, client.Delete(tasks.NewTask(tasks.NewIdentifier("path", "version"), "Task", tasks.Todo, tasks.WithLine(1))))
-	assert.NoError(t, client.Move(tasks.NewTask(tasks.NewIdentifier("path", "version"), "Task", tasks.Todo, tasks.WithLine(7)), "newPath"))
+	assert.NoError(t, client.Create("path", writer.AT_END, "Task", tasks.Todo))
+	assert.NoError(t, client.Update(tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo)))
+
+	every, _ := tasks.NewEvery("day")
+	original := tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo, tasks.WithEvery(every))
+	completed := tasks.NewTaskFromTask(original, tasks.WithStatus(tasks.Done))
+	assert.NoError(t, client.Update(completed))
+
+	assert.NoError(t, client.Delete(tasks.NewTask(tasks.NewIdentifier("path", "version", 2), "Task", tasks.Todo)))
 
 }

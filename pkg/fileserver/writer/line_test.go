@@ -15,120 +15,314 @@
 package writer_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestLines_Basic(t *testing.T) {
-	dir, err := copyTestData(t.Name())
-	if err != nil {
-		t.Fatal(err)
+func TestLine_AddLine(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		line     fmt.Stringer
+		lines    []string
+		checksum string
+		want     []string
+		wantErr  bool
+	}{
+		{
+			name:     "Add line at beginning",
+			number:   writer.AT_BEGINNING,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"new line", "line 1", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line at beginning with empty checksum",
+			number:   writer.AT_BEGINNING,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "",
+			want:     []string{"new line", "line 1", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line at end",
+			number:   writer.AT_END,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "line 2", "line 3", "new line"},
+		},
+		{
+			name:     "Add line at end with empty checksum",
+			number:   writer.AT_END,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "",
+			want:     []string{"line 1", "line 2", "line 3", "new line"},
+		},
+		{
+			name:     "Add line at > number of lines",
+			number:   999,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "line 2", "line 3", "new line"},
+		},
+		{
+			name:     "Add line at 0",
+			number:   0,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"new line", "line 1", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line at 1",
+			number:   1,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"new line", "line 1", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line at 2",
+			number:   2,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "new line", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line at 2 with empty checksum",
+			number:   2,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "",
+			wantErr:  true,
+		},
+		{
+			name:     "Add line at negative",
+			number:   -1,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"new line", "line 1", "line 2", "line 3"},
+		},
+		{
+			name:     "Add line with newline character",
+			number:   1,
+			line:     Text("new\nline"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
 	}
-	client := writer.NewClient(dir)
-	basic := func() Document { return loadDocument(t, dir, "basic.md") }
 
-	// Updates (do these first as they rely most on the original line numbers)
-	assert.NoError(t, client.UpdateLine(basic().Document, 7, Text("This line was updated")))
-	assert.Error(t, client.UpdateLine(basic().Document, 0, Text("No such line as they're 1-indexed")))
-	assert.Error(t, client.UpdateLine(basic().Document, 999, Text("No such line, oob")))
-	assert.Error(t, client.UpdateLine(basic().Document, writer.AT_BEGINNING, Text("Must provide an absolute line number")))
-	assert.Error(t, client.UpdateLine(basic().Document, writer.AT_END, Text("Must provide an absolute line number")))
-
-	// Deletes
-	assert.NoError(t, client.RemoveLine(basic().Document, 5))
-	assert.Error(t, client.RemoveLine(basic().Document, 0))
-	assert.Error(t, client.RemoveLine(basic().Document, 999))
-	assert.Error(t, client.RemoveLine(basic().Document, writer.AT_BEGINNING))
-	assert.Error(t, client.RemoveLine(basic().Document, writer.AT_END))
-
-	// Adds (do these last so we don't change the delete/update line numbers)
-	assert.NoError(t, client.AddLine(basic().Document, 999, Text("This line was added at line 999")))
-	assert.NoError(t, client.AddLine(basic().Document, writer.AT_BEGINNING, Text("This line was added at the beginning")))
-	assert.NoError(t, client.AddLine(basic().Document, 3, Text("This line was added at line 3")))
-	assert.NoError(t, client.AddLine(basic().Document, writer.AT_END, Text("This line was added at the end")))
-
-	// Verify the files are all correct
-	basicWant := loadDocument(t, "testdata/golden", "basic.md")
-	assert.Equal(t, string(basicWant.Contents), string(basic().Contents))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := writer.AddLine(tt.number, tt.line)(tt.checksum, tt.lines)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+		})
+	}
 }
 
-func TestLines_Empty(t *testing.T) {
-	dir, err := copyTestData(t.Name())
-	if err != nil {
-		t.Fatal(err)
+func TestLine_RemoveLine(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		lines    []string
+		checksum string
+		want     []string
+		wantErr  bool
+	}{
+		{
+			name:     "Remove line at 1",
+			number:   1,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 2", "line 3"},
+		},
+		{
+			name:     "Remove line at 2",
+			number:   2,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "line 3"},
+		},
+		{
+			name:     "Remove line at 3",
+			number:   3,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "line 2"},
+		},
+		{
+			name:     "Remove line at end",
+			number:   writer.AT_END,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Remove line at beginning",
+			number:   writer.AT_BEGINNING,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Remove line at 0",
+			number:   0,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Remove line at -1",
+			number:   -1,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Remove line at > number of lines",
+			number:   999,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Remove line with empty checksum",
+			number:   1,
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "",
+			wantErr:  true,
+		},
 	}
-	client := writer.NewClient(dir)
-	empty := func() Document { return loadDocument(t, dir, "empty.md") }
 
-	// Beginning
-	assert.NoError(t, client.AddLine(empty().Document, writer.AT_BEGINNING, Text("This line was added at the beginning")))
-	assert.NoError(t, client.UpdateLine(empty().Document, 1, Text("This line was updated")))
-	assert.NoError(t, client.RemoveLine(empty().Document, 1))
-
-	// End
-	assert.NoError(t, client.AddLine(empty().Document, writer.AT_END, Text("This line was added at the end")))
-	assert.NoError(t, client.UpdateLine(empty().Document, 1, Text("This line was updated")))
-	assert.NoError(t, client.RemoveLine(empty().Document, 1))
-
-	// 1
-	assert.NoError(t, client.AddLine(empty().Document, 1, Text("This line was added at line 1")))
-	assert.NoError(t, client.UpdateLine(empty().Document, 1, Text("This line was updated")))
-	assert.NoError(t, client.RemoveLine(empty().Document, 1))
-
-	emptyWant := loadDocument(t, "testdata/golden", "empty.md")
-	assert.Equal(t, string(emptyWant.Contents), string(empty().Contents))
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := writer.RemoveLine(tt.number)(tt.checksum, tt.lines)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+		})
+	}
 }
 
-func TestLines_Frontmatter(t *testing.T) {
-	dir, err := copyTestData(t.Name())
-	if err != nil {
-		t.Fatal(err)
+func TestLine_UpdateLine(t *testing.T) {
+	tests := []struct {
+		name     string
+		number   int
+		line     fmt.Stringer
+		lines    []string
+		checksum string
+		want     []string
+		wantErr  bool
+	}{
+		{
+			name:     "Update line at 1",
+			number:   1,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"new line", "line 2", "line 3"},
+		},
+		{
+			name:     "Update line at 2",
+			number:   2,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "new line", "line 3"},
+		},
+		{
+			name:     "Update line at 3",
+			number:   3,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			want:     []string{"line 1", "line 2", "new line"},
+		},
+		{
+			name:     "Update line at end",
+			number:   writer.AT_END,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line at beginning",
+			number:   writer.AT_BEGINNING,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line at 0",
+			number:   0,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line at -1",
+			number:   -1,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line at > number of lines",
+			number:   999,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line with empty checksum",
+			number:   1,
+			line:     Text("new line"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "",
+			wantErr:  true,
+		},
+		{
+			name:     "Update line with newline character",
+			number:   1,
+			line:     Text("new\nline"),
+			lines:    []string{"line 1", "line 2", "line 3"},
+			checksum: "hash",
+			wantErr:  true,
+		},
 	}
-	client := writer.NewClient(dir)
-	frontmatter := func() Document { return loadDocument(t, dir, "frontmatter.md") }
 
-	assert.NoError(t, client.AddLine(frontmatter().Document, writer.AT_BEGINNING, Text("This line was added at the beginning but should be after frontmatter")))
-
-	// 0 == AtBeginning which is fine, its inserted after the frontmatter
-	assert.Error(t, client.AddLine(frontmatter().Document, 1, Text("Can't add frontmatter by line")))
-	assert.Error(t, client.AddLine(frontmatter().Document, 2, Text("Can't add frontmatter by line")))
-
-	assert.Error(t, client.RemoveLine(frontmatter().Document, 0))
-	assert.Error(t, client.RemoveLine(frontmatter().Document, 1))
-	assert.Error(t, client.RemoveLine(frontmatter().Document, 2))
-
-	assert.Error(t, client.UpdateLine(frontmatter().Document, 0, Text("Can't update frontmatter by line")))
-	assert.Error(t, client.UpdateLine(frontmatter().Document, 1, Text("Can't update frontmatter by line")))
-	assert.Error(t, client.UpdateLine(frontmatter().Document, 2, Text("Can't update frontmatter by line")))
-
-	frontmatterWant := loadDocument(t, "testdata/golden", "frontmatter.md")
-	assert.Equal(t, string(frontmatterWant.Contents), string(frontmatter().Contents))
-}
-
-func TestLines_StaleWrites(t *testing.T) {
-	dir, err := copyTestData(t.Name())
-	if err != nil {
-		t.Fatal(err)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := writer.UpdateLine(tt.number, tt.line)(tt.checksum, tt.lines)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, got)
+			}
+		})
 	}
-	client := writer.NewClient(dir)
-	basic := loadDocument(t, dir, "basic.md")
-
-	// Make changes to the file
-	assert.NoError(t, client.AddLine(basic.Document, writer.AT_END, Text("This line was added at the end")))
-
-	// Now when we go to write using the original document/hash, we should get an error
-	assert.Error(t, client.AddLine(basic.Document, 20, Text("This line is being written to a stale document")))
-
-	// But if we provide and empty hash/version we can still override the file
-	// This should only be used if you don't care if the file is out of date e.g. you're appending to the end
-	basic.Document.Checksum = ""
-	assert.NoError(t, client.AddLine(basic.Document, writer.AT_END, Text("This line is being written to a stale document")))
-	assert.NoError(t, client.AddLine(basic.Document, writer.AT_BEGINNING, Text("This line is being written to a stale document")))
-
-	// Empty hashes with updates, deletes and line adds not at beginning/end should still be rejected though
-	assert.Error(t, client.AddLine(basic.Document, 20, Text("This line is being written to a stale document")))
-	assert.Error(t, client.UpdateLine(basic.Document, 20, Text("This line is being written to a stale document")))
-	assert.Error(t, client.RemoveLine(basic.Document, 20))
 }

@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/a-h/parse"
 	"github.com/teambition/rrule-go"
 )
 
@@ -28,9 +29,9 @@ type Identifier struct {
 	version string
 }
 
-// By default we will set line to -1 to default to end of file
-func NewIdentifier(path string, version string) Identifier {
-	return Identifier{path: path, version: version, line: -1}
+// Line is 1-indexed, not 0-indexed
+func NewIdentifier(path string, version string, line int) Identifier {
+	return Identifier{path: path, version: version, line: line}
 }
 
 func (i Identifier) String() string {
@@ -65,15 +66,35 @@ type Task struct {
 	completed  *time.Time
 	priority   *int
 	every      *Every
+
+	// This is used to track if the task has been mutated to done and has an every set
+	// but not yet written back to the file. This is so that we can handle the repeat.
+	uncommittedRepeat bool
 }
 
 type Every struct {
-	RRule *rrule.RRule
-	Text  string // maintain the original text for every so we can write it back out
+	rrule *rrule.RRule
+	text  string // maintain the original text for every so we can write it back out
+}
+
+func NewEvery(text string) (Every, error) {
+	// Handle e:<text> vs every:<text> vs <text>
+	if !strings.HasPrefix(text, "e:") && !strings.HasPrefix(text, "every:") {
+		text = "e:" + text
+	}
+	e, ok, err := everyParser(time.Now()).Parse(parse.NewInput(text))
+	if err != nil {
+		return Every{}, fmt.Errorf("failed to parse every text: %w", err)
+	}
+	if !ok {
+		return Every{}, fmt.Errorf("failed to parse every text: unable to find a valid recurrence")
+	}
+	return e, nil
 }
 
 type TaskOption func(*Task)
 
+// Used to create new tasks. For mutating tasks, use NewTaskFromTask.
 func NewTask(identifier Identifier, name string, status Status, options ...TaskOption) Task {
 	task := Task{
 		identifier: identifier,
@@ -86,29 +107,24 @@ func NewTask(identifier Identifier, name string, status Status, options ...TaskO
 	return task
 }
 
-// Used if you want to mutate/update a task
+// Used if you want to mutate/update a task, crucially this does not expose any method to update the identifier
+// This means that if this new task is passed to the update method, we will know which task to update.
 func NewTaskFromTask(t Task, options ...TaskOption) Task {
 	task := Task{
-		identifier: t.identifier,
-		name:       t.name,
-		status:     t.status,
-		due:        t.due,
-		scheduled:  t.scheduled,
-		completed:  t.completed,
-		priority:   t.priority,
-		every:      t.every,
+		identifier:        t.identifier,
+		name:              t.name,
+		status:            t.status,
+		due:               t.due,
+		scheduled:         t.scheduled,
+		completed:         t.completed,
+		priority:          t.priority,
+		every:             t.every,
+		uncommittedRepeat: t.uncommittedRepeat,
 	}
 	for _, option := range options {
 		option(&task)
 	}
 	return task
-}
-
-// Line is 1-indexed not 0-indexed
-func WithLine(line int) TaskOption {
-	return func(t *Task) {
-		t.identifier.line = line
-	}
 }
 
 func WithName(name string) TaskOption {
@@ -119,6 +135,20 @@ func WithName(name string) TaskOption {
 
 func WithStatus(status Status) TaskOption {
 	return func(t *Task) {
+
+		// If the task is being marked as done and it wasn't done before...
+		if status == Done && t.status != Done {
+
+			// If there is no completed time, set it to now
+			if t.completed == nil {
+				WithCompleted(time.Now())(t)
+			}
+
+			// If the task has a repeat, mark the task so we know we need to handle it when persisting
+			if t.every != nil {
+				t.uncommittedRepeat = true
+			}
+		}
 		t.status = status
 	}
 }
@@ -234,7 +264,7 @@ func (t Task) Body() string {
 		b.WriteString(fmt.Sprintf(" priority:%v", *t.priority))
 	}
 	if t.every != nil {
-		b.WriteString(fmt.Sprintf(" every:%v", t.every.Text))
+		b.WriteString(fmt.Sprintf(" every:%v", t.every.text))
 	}
 	if t.completed != nil {
 		b.WriteString(fmt.Sprintf(" completed:%v", t.completed.Format("2006-01-02")))
