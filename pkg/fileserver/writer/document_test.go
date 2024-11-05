@@ -97,7 +97,7 @@ func TestAddDocument(t *testing.T) {
 		client := writer.NewClient(dir)
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := client.AddDocument(tt.path, tt.metadata, tt.content)
+			err := client.Add(tt.path, tt.metadata, tt.content)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -110,5 +110,111 @@ func TestAddDocument(t *testing.T) {
 			assert.Equal(t, tt.wantFinal, contents)
 		})
 	}
+}
 
+const (
+	basicChecksum                = "6c8e08c7544069890a42303050e57b0b46a4c0bb2c5dd55b0d0f7929eb0f9c51"
+	emptyChecksum                = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+	frontmatterChecksum          = "71946b820432d103bd6071ba7eaf80ec129295a868a9546132a8ed1ed0291a56"
+	frontmatterNoContentChecksum = "cc0e785e1411c118e1341d0d69f786fca07ceb405b492ad07d26d83d142fe353"
+)
+
+func TestUpdateDocument(t *testing.T) {
+	tests := []struct {
+		name      string
+		doc       writer.Document
+		mutations []writer.LineMutation
+		wantErr   bool
+		wantFinal []byte
+	}{
+		{
+			name: "Basic file",
+			doc:  writer.Document{Path: "basic.md", Checksum: basicChecksum},
+			mutations: []writer.LineMutation{
+				writer.RemoveLine(5),
+				writer.AddLine(1, Text("This line was added")),
+				writer.UpdateLine(7, Text("This line was updated")),
+			},
+			wantFinal: []byte(`This line was added
+This is a basic document
+
+It has no front matter
+
+
+This line was updated
+`),
+		},
+		{
+			name: "File with front matter and content",
+			doc:  writer.Document{Path: "frontmatter.md", Checksum: frontmatterChecksum},
+			mutations: []writer.LineMutation{
+				writer.AddLine(1, Text("This line was added")),
+				writer.RemoveLine(1),
+				writer.UpdateLine(2, Text("This line was updated")),
+			},
+			wantFinal: []byte(`---
+key: value
+---
+
+This line was updated
+`),
+		},
+		{
+			name: "File with front matter and no content",
+			doc:  writer.Document{Path: "frontmatter_no_content.md", Checksum: frontmatterNoContentChecksum},
+			mutations: []writer.LineMutation{
+				writer.AddLine(1, Text("This line was added")),
+				writer.UpdateLine(1, Text("This line was updated")),
+			},
+			wantFinal: []byte(`---
+key: value
+---
+This line was updated
+`),
+		},
+		{
+			name: "Empty file",
+			doc:  writer.Document{Path: "empty.md", Checksum: emptyChecksum},
+			mutations: []writer.LineMutation{
+				writer.AddLine(1, Text("This line was added")),
+				writer.AddLine(2, Text("This line was added as well")),
+				writer.UpdateLine(1, Text("This line was updated")),
+				writer.RemoveLine(2),
+			},
+			wantFinal: []byte("This line was updated\n"),
+		},
+		{
+			name:      "File no longer exists",
+			doc:       writer.Document{Path: "does_not_exist.md", Checksum: ""},
+			mutations: []writer.LineMutation{},
+			wantErr:   true,
+		},
+		{
+			name:      "File has been modified since last read",
+			doc:       writer.Document{Path: "basic.md", Checksum: "bad_checksum"},
+			mutations: []writer.LineMutation{},
+			wantErr:   true,
+		},
+	}
+	for _, tt := range tests {
+		dir, err := copyTestData(t.Name())
+		if err != nil {
+			t.Fatalf("failed to copy test data: %v", err)
+		}
+		client := writer.NewClient(dir)
+
+		t.Run(tt.name, func(t *testing.T) {
+			err := client.UpdateContent(tt.doc, tt.mutations...)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+
+			// Check the file contents
+			contents, err := os.ReadFile(filepath.Join(dir, tt.doc.Path))
+			assert.NoError(t, err)
+			assert.Equal(t, string(tt.wantFinal), string(contents))
+		})
+	}
 }

@@ -28,9 +28,8 @@ func TestWrite(t *testing.T) {
 	date := time.Date(2023, 12, 31, 0, 0, 0, 0, time.UTC)
 	client, _ := buildClient(loadEvents(),
 		// Ensure doesn't exist
-		func(method string, doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
+		func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
 			path := "daily/2023-12-31.md"
-			assert.Equal(t, "add", method)
 			assert.Equal(t, writer.Document{Path: path}, doc)
 			feed <- reader.Event{
 				Op:       reader.Change,
@@ -41,8 +40,7 @@ func TestWrite(t *testing.T) {
 		},
 
 		// Create
-		func(method string, doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
-			assert.Equal(t, "add", method)
+		func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
 			assert.Equal(t, writer.Document{Path: "daily/2023-12-31.md"}, doc)
 			return nil
 		},

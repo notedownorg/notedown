@@ -16,9 +16,6 @@ package writer
 
 import "path/filepath"
 
-var _ LineWriter = &Client{}
-var _ DocumentWriter = &Client{}
-
 type Client struct {
 	root string
 }

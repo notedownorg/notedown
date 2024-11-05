@@ -17,6 +17,7 @@ package writer
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -38,7 +39,7 @@ func (e *FileExistsError) Error() string {
 	return fmt.Sprintf("file %s already exists", e.Filename)
 }
 
-func (c Client) AddDocument(path string, metadata reader.Metadata, content []byte) error {
+func (c Client) Add(path string, metadata reader.Metadata, content []byte) error {
 	// Ensure the file does not exist
 	_, err := os.Stat(c.abs(path))
 	if err == nil {
@@ -69,10 +70,46 @@ func (c Client) AddDocument(path string, metadata reader.Metadata, content []byt
 	return os.WriteFile(c.abs(path), b.Bytes(), 0644)
 }
 
+// Update contents of a document. Mutations are applied in order and are atomeic.
+// If any mutation errors, the document will not be written to disk.
+func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
+	slog.Debug("updating content of document", "path", doc.Path)
+
+	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Checksum)
+	if err != nil {
+		return fmt.Errorf("failed to validate document: %w", err)
+	}
+
+	// Split out the frontmatter if it exists as mutations assume it's not there
+	prefix := make([]string, 0)
+	if frontmatter != -1 {
+		prefix, lines = lines[:frontmatter], lines[frontmatter:]
+	}
+
+	for i, mutation := range mutations {
+		lines, err = mutation(doc.Checksum, lines)
+		if err != nil {
+			return fmt.Errorf("invalid line mutation at index %d, no mutations will be written to disk: %w", i, err)
+		}
+	}
+
+	content := bytes.NewBuffer([]byte{})
+	for _, line := range append(prefix, lines...) {
+		content.WriteString(line)
+		content.WriteString("\n")
+	}
+
+	if err := os.WriteFile(c.abs(doc.Path), content.Bytes(), 0644); err != nil {
+		return fmt.Errorf("failed to write document: %w", err)
+	}
+
+	return nil
+}
+
 // func (c Client) RemoveDocument(doc Document) error {
 //     return nil
 // }
 //
-// func (c Client) UpdateDocument(doc Document, metadata reader.Metadata, content []byte) error {
+// func (c Client) UpdateMetadata(doc Document, metadata reader.Metadata) error {
 //     return nil
 // }

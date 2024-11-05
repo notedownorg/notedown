@@ -56,5 +56,5 @@ func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error)
 func (c *Client) Create(date time.Time) error {
 	name := date.Format("2006-01-02")
 	path := filepath.Join("daily", fmt.Sprintf("%s.md", name))
-	return c.writer.AddDocument(path, reader.Metadata{reader.MetadataTypeKey: MetadataKey}, []byte{})
+	return c.writer.Add(path, reader.Metadata{reader.MetadataTypeKey: MetadataKey}, []byte{})
 }

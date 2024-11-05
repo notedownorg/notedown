@@ -33,7 +33,7 @@ func TestClient(t *testing.T) {
 		}
 	}()
 
-	client := tasks.NewClient(&test.MockLineWriter{}, ch)
+	client := tasks.NewClient(&test.MockDocumentContentUpdater{}, ch)
 
 	// Assert that we eventually get the correct number tasks
 	waitFor, tick := 3*time.Second, 200*time.Millisecond
@@ -50,7 +50,7 @@ func TestClient_InitialLoadWaiter(t *testing.T) {
 		ch <- reader.Event{Op: reader.SubscriberLoadComplete}
 	}()
 
-	client := tasks.NewClient(&test.MockLineWriter{}, ch, tasks.WithInitialLoadWaiter(100*time.Millisecond))
+	client := tasks.NewClient(&test.MockDocumentContentUpdater{}, ch, tasks.WithInitialLoadWaiter(100*time.Millisecond))
 
 	// Assert that the client has the correct number of tasks
 	assert.Equal(t, taskCount(events), len(client.ListTasks(tasks.FetchAllTasks())))

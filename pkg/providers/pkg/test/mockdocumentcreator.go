@@ -16,35 +16,29 @@ package test
 
 import (
 	"fmt"
+	"log/slog"
 
+	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 )
 
-var _ writer.LineWriter = &MockLineWriter{}
+type AddValidator func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error
 
-type LineWriterValidator func(method string, doc writer.Document, line int, obj fmt.Stringer) error
-
-type MockLineWriter struct {
-	Validators []LineWriterValidator
+type MockDocumentCreator struct {
+	Feed       chan reader.Event
+	Validators []AddValidator
 }
 
-func (m *MockLineWriter) validate(method string, doc writer.Document, line int, obj fmt.Stringer) error {
+func (m *MockDocumentCreator) Add(path string, metadata reader.Metadata, content []byte) error {
+	return m.validate(writer.Document{Path: path}, metadata, content)
+}
+
+func (m *MockDocumentCreator) validate(doc writer.Document, metadata reader.Metadata, content []byte) error {
 	if len(m.Validators) == 0 {
 		return fmt.Errorf("no validators left")
 	}
 	validator := m.Validators[0]
 	m.Validators = m.Validators[1:]
-	return validator(method, doc, line, obj)
-}
-
-func (m *MockLineWriter) AddLine(doc writer.Document, line int, obj fmt.Stringer) error {
-	return m.validate("add", doc, line, obj)
-}
-
-func (m *MockLineWriter) RemoveLine(doc writer.Document, line int) error {
-	return m.validate("remove", doc, line, nil)
-}
-
-func (m *MockLineWriter) UpdateLine(doc writer.Document, line int, obj fmt.Stringer) error {
-	return m.validate("update", doc, line, obj)
+	slog.Info("removed validator", "remaining", len(m.Validators), "doc", doc, "metadata", metadata, "content", content)
+	return validator(doc, metadata, content, m.Feed)
 }

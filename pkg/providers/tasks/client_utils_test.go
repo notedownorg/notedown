@@ -22,7 +22,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/tasks"
 )
 
-func buildClient(events []reader.Event, validators ...test.LineWriterValidator) (*tasks.Client, chan reader.Event) {
+func buildClient(events []reader.Event, validators ...test.ContentUpdateValidator) (*tasks.Client, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.LineWriterValidator) 
 	}()
 
 	client := tasks.NewClient(
-		&test.MockLineWriter{Validators: validators},
+		&test.MockDocumentContentUpdater{Validators: validators},
 		feed,
 		tasks.WithInitialLoadWaiter(100*time.Millisecond),
 	)
@@ -45,37 +45,17 @@ func date(year, month, day int, add time.Duration) *time.Time {
 
 var eventTasks = map[string][]tasks.Task{
 	"zero.md": {
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version"), "Task zero-0", tasks.Abandoned, tasks.WithLine(1)),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version"), "Task zero-1", tasks.Done, tasks.WithLine(2),
-			tasks.WithPriority(1),
-		),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version"), "Task zero-2", tasks.Doing, tasks.WithLine(3),
-			tasks.WithPriority(1),
-			tasks.WithDue(*date(1, 1, 1, 0)),
-			tasks.WithCompleted(*date(1, 1, 1, 0)),
-		),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version"), "Task zero-3", tasks.Doing, tasks.WithLine(4),
-			tasks.WithDue(*date(1, 1, 2, 0)),
-			tasks.WithCompleted(*date(1, 1, 2, 0)),
-		),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version"), "Task zero-4", tasks.Doing, tasks.WithLine(5),
-			tasks.WithDue(*date(1, 1, 3, 0)),
-			tasks.WithCompleted(*date(1, 1, 3, 0)),
-		),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 1), "Task zero-0", tasks.Abandoned),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 2), "Task zero-1", tasks.Done, tasks.WithPriority(1)),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 3), "Task zero-2", tasks.Doing, tasks.WithPriority(1), tasks.WithDue(*date(1, 1, 1, 0)), tasks.WithCompleted(*date(1, 1, 1, 0))),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 4), "Task zero-3", tasks.Doing, tasks.WithDue(*date(1, 1, 2, 0)), tasks.WithCompleted(*date(1, 1, 2, 0))),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 5), "Task zero-4", tasks.Doing, tasks.WithDue(*date(1, 1, 3, 0)), tasks.WithCompleted(*date(1, 1, 3, 0))),
 	},
 	"one.md": {
-		tasks.NewTask(tasks.NewIdentifier("one.md", "version"), "Task one-0", tasks.Doing, tasks.WithLine(1),
-			tasks.WithPriority(2),
-		),
-		tasks.NewTask(tasks.NewIdentifier("one.md", "version"), "Task one-1", tasks.Todo, tasks.WithLine(2),
-			tasks.WithPriority(3),
-		),
-		tasks.NewTask(tasks.NewIdentifier("one.md", "version"), "Task one-2", tasks.Blocked, tasks.WithLine(3),
-			tasks.WithPriority(4),
-		),
-		tasks.NewTask(tasks.NewIdentifier("one.md", "version"), "Task one-3", tasks.Blocked, tasks.WithLine(4),
-			tasks.WithPriority(4),
-		),
+		tasks.NewTask(tasks.NewIdentifier("one.md", "version", 1), "Task one-0", tasks.Doing, tasks.WithPriority(2)),
+		tasks.NewTask(tasks.NewIdentifier("one.md", "version", 2), "Task one-1", tasks.Todo, tasks.WithPriority(3)),
+		tasks.NewTask(tasks.NewIdentifier("one.md", "version", 3), "Task one-2", tasks.Blocked, tasks.WithPriority(4)),
+		tasks.NewTask(tasks.NewIdentifier("one.md", "version", 4), "Task one-3", tasks.Blocked, tasks.WithPriority(4)),
 	},
 	"two.md":   {},
 	"three.md": {},

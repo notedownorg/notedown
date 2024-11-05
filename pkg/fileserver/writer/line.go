@@ -15,12 +15,8 @@
 package writer
 
 import (
-	"bytes"
-	"crypto/sha256"
 	"fmt"
-	"log/slog"
 	"math"
-	"os"
 	"strings"
 )
 
@@ -29,133 +25,77 @@ const (
 	AT_END       int = math.MaxInt
 )
 
-// AddLine adds a line of text to a document at the specified line number.
-func (c Client) AddLine(doc Document, line int, obj fmt.Stringer) error {
-	slog.Debug("adding line to document", "path", doc.Path, "number", line, "text", obj)
-	if doc.Checksum == "" && line != AT_END && line != AT_BEGINNING {
-		return fmt.Errorf("hash must be provided when adding a line in the middle of a document")
-	}
+type LineMutation func(checksum string, lines []string) ([]string, error)
 
-	err := validateLine(obj.String())
-	if err != nil {
-		return fmt.Errorf("invalid text: %w", err)
-	}
-
-	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Checksum)
-	if err != nil {
-		return fmt.Errorf("failed to open document: %w", err)
-	}
-
-	// If we're within the frontmatter return an error
-	// Unless we're adding AtBeginning, which should add the line after the frontmatter
-	if frontmatter != -1 && line <= frontmatter && line != AT_BEGINNING {
-		return fmt.Errorf("cannot add a line within frontmatter")
-	}
-
-	if line == AT_END || line > len(lines) {
-		lines = append(lines, obj.String())
-	} else if line == AT_BEGINNING {
-		if frontmatter != -1 {
-			// If the file has frontmatter, we need to insert the line after it
-			lines = append(lines[:frontmatter], append([]string{obj.String()}, lines[frontmatter:]...)...)
-		} else {
-			lines = append([]string{obj.String()}, lines...)
+// Add a line to the content. All line numbers are 1-indexed and do not include frontmatter
+// e.g. if the frontmatter ends at line 3 in the underlying file, adding a line at 1 will insert the line at 4
+func AddLine(number int, obj fmt.Stringer) LineMutation {
+	return func(checksum string, lines []string) ([]string, error) {
+		// Validate that the inputs
+		if err := validateLine(obj.String()); err != nil {
+			return lines, fmt.Errorf("invalid text adding line '%s': %w", obj, err)
 		}
-	} else {
+		if checksum == "" && number != AT_END && number != AT_BEGINNING {
+			return lines, fmt.Errorf("hash must be provided when adding a line in the middle of a document")
+		}
+
+		// If we're adding at the end, just append the line
+		if number == AT_END || number > len(lines) {
+			return append(lines, obj.String()), nil
+		}
+
+		// Handle adding at the beginning
+		if number == AT_BEGINNING || number <= 1 {
+			return append([]string{obj.String()}, lines...), nil
+		}
+
 		// 0-indexed but input is 1-indexed
-		lines = append(lines[:line-1], append([]string{obj.String()}, lines[line:]...)...)
+		return append(lines[:number-1], append([]string{obj.String()}, lines[number-1:]...)...), nil
 	}
-
-	err = writeLines(c.abs(doc.Path), lines)
-	if err != nil {
-		return fmt.Errorf("failed to write document: %w", err)
-	}
-	return nil
 }
 
-// RemoveLine removes a line of text from a document at the specified line number.
-func (c Client) RemoveLine(doc Document, line int) error {
-	slog.Debug("removing line from document", "path", doc.Path, "number", line)
-	if doc.Checksum == "" {
-		return fmt.Errorf("hash must be provided when removing a line to avoid stale writes")
-	}
+// Remove a line from the content. All line numbers are 1-indexed and do not include frontmatter
+// e.g. if the frontmatter ends at line 3 in the underlying file, removing a line at 1 will remove the line at 4
+func RemoveLine(number int) LineMutation {
+	return func(checksum string, lines []string) ([]string, error) {
+		if checksum == "" {
+			return lines, fmt.Errorf("hash must be provided when removing a line to avoid stale writes")
+		}
+		if number == AT_END || number == AT_BEGINNING {
+			return lines, fmt.Errorf("must provide an absolute line number when removing a line")
+		}
 
-	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Checksum)
-	if err != nil {
-		return fmt.Errorf("failed to open document: %w", err)
-	}
+		if number <= 0 || number > len(lines) {
+			return lines, fmt.Errorf("line number out of bounds")
+		}
 
-	if line == AT_END || line == AT_BEGINNING {
-		return fmt.Errorf("must provide an absolute line number")
+		// 0-indexed but input is 1-indexed
+		return append(lines[:number-1], lines[number:]...), nil
 	}
-
-	if line <= 0 || line > len(lines) {
-		return fmt.Errorf("line number out of bounds")
-	}
-
-	// If we're within the frontmatter return an error
-	if frontmatter != -1 && line <= frontmatter {
-		return fmt.Errorf("cannot remove a line within frontmatter")
-	}
-
-	// 0-indexed but input is 1-indexed
-	lines = append(lines[:line-1], lines[line:]...)
-
-	err = writeLines(c.abs(doc.Path), lines)
-	if err != nil {
-		return fmt.Errorf("failed to write document: %w", err)
-	}
-	return nil
 }
 
-// UpdateLine updates a line of text in a document at the specified line number.
-func (c Client) UpdateLine(doc Document, line int, obj fmt.Stringer) error {
-	slog.Debug("updating line in document", "path", doc.Path, "number", line, "text", obj)
-	if doc.Checksum == "" {
-		return fmt.Errorf("hash must be provided when updating a line to avoid stale writes")
+// Update a line in the content. All line numbers are 1-indexed and do not include frontmatter
+// e.g. if the frontmatter ends at line 3 in the underlying file, updating a line at 1 will update the line at 4
+func UpdateLine(number int, obj fmt.Stringer) LineMutation {
+	return func(checksum string, lines []string) ([]string, error) {
+		if err := validateLine(obj.String()); err != nil {
+			return lines, fmt.Errorf("invalid text updating line '%s': %w", obj, err)
+		}
+		if checksum == "" {
+			return lines, fmt.Errorf("hash must be provided when updating a line to avoid stale writes")
+		}
+		if number == AT_END || number == AT_BEGINNING {
+			return lines, fmt.Errorf("must provide an absolute line number")
+		}
+
+		if number <= 0 || number > len(lines) {
+			return lines, fmt.Errorf("line number out of bounds")
+		}
+
+		// 0-indexed but input is 1-indexed
+		lines[number-1] = obj.String()
+		return lines, nil
 	}
-
-	err := validateLine(obj.String())
-	if err != nil {
-		return fmt.Errorf("invalid text: %w", err)
-	}
-
-	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Checksum)
-	if err != nil {
-		return fmt.Errorf("failed to open document: %w", err)
-	}
-
-	if line == AT_END || line == AT_BEGINNING {
-		return fmt.Errorf("must provide an absolute line number")
-	}
-
-	if line <= 0 || line > len(lines) {
-		return fmt.Errorf("line number out of bounds")
-	}
-
-	// If we're within the frontmatter return an error
-	if frontmatter != -1 && line <= frontmatter {
-		return fmt.Errorf("cannot update a line within frontmatter")
-	}
-
-	lines[line-1] = obj.String() // 0-indexed
-
-	err = writeLines(c.abs(doc.Path), lines)
-	if err != nil {
-		return fmt.Errorf("failed to write document: %w", err)
-	}
-	return nil
-}
-
-func writeLines(path string, lines []string) error {
-	// maintain trailing newline
-	content := bytes.NewBuffer([]byte{})
-	for _, line := range lines {
-		content.WriteString(line)
-		content.WriteString("\n")
-	}
-
-	return os.WriteFile(path, content.Bytes(), 0644)
 }
 
 func validateLine(text string) error {
@@ -163,42 +103,4 @@ func validateLine(text string) error {
 		return fmt.Errorf("text contains newline character")
 	}
 	return nil
-}
-
-// returns lines, where the frontmatter ends or -1 if there is no frontmatter and an error
-func readAndValidateFile(path string, checksum string) ([]string, int, error) {
-	bytes, err := os.ReadFile(path)
-	if err != nil {
-		return nil, -1, err
-	}
-
-	// Ensure file hasn't been modified only if a hash is provided
-	if checksum != "" {
-		algo := sha256.New()
-		algo.Write(bytes)
-		if checksum != fmt.Sprintf("%x", algo.Sum(nil)) {
-			return nil, -1, fmt.Errorf("file has been modified since last read, unable to write with stale data")
-		}
-	}
-
-	lines := strings.Split(string(bytes), "\n")
-
-	// Remove the last line if it's empty to prevent adding additional whitespace
-	if len(lines) > 0 && lines[len(lines)-1] == "" {
-		lines = lines[:len(lines)-1]
-	}
-
-	// Check if the file has frontmatter
-	// This is a simple/fast check, but it should be sufficient for this use case
-	frontmatter := -1
-	if len(lines) > 0 && strings.HasPrefix(lines[0], "---") {
-		for i, line := range lines[1:] {
-			if strings.HasPrefix(line, "---") {
-				frontmatter = i + 2 // 0 -> 1-indexed and after the current line
-				break
-			}
-		}
-	}
-
-	return lines, frontmatter, nil
 }

@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
@@ -28,10 +27,14 @@ import (
 type watcher = traits.Watcher
 type publisher = traits.Publisher[Event]
 
+type DocumentWriter interface {
+	Add(path string, metadata reader.Metadata, content []byte) error
+}
+
 type Client struct {
 	*watcher
 	*publisher
-	writer writer.DocumentWriter
+	writer DocumentWriter
 	dir    string
 
 	// notes maps between file paths to notes it should ONLY be updated in response
@@ -49,7 +52,7 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	}
 }
 
-func NewClient(writer writer.DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
+func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
 	client := &Client{
 		notes:  make(map[string]Daily),
 		writer: writer,

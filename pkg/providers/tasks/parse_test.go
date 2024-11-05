@@ -46,102 +46,102 @@ func TestTask(t *testing.T) {
 		{
 			name:     "Todo",
 			input:    "- [ ] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo),
 		},
 		{
 			name:     "Done (lowercase)",
 			input:    "- [x] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Done, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Done),
 		},
 		{
 			name:     "Done (uppercase)",
 			input:    "- [X] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Done, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Done),
 		},
 		{
 			name:     "Doing",
 			input:    "- [/] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Doing, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Doing),
 		},
 		{
 			name:     "Blocked (lowercase)",
 			input:    "- [b] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Blocked, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Blocked),
 		},
 		{
 			name:     "Blocked (uppercase)",
 			input:    "- [B] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Blocked, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Blocked),
 		},
 		{
 			name:     "Abandoned (lowercase)",
 			input:    "- [a] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Abandoned, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Abandoned),
 		},
 		{
 			name:     "Abandoned (uppercase)",
 			input:    "- [A] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Abandoned, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Abandoned),
 		},
 		// Whitespace tests
 		{
 			name:     "Leading space",
 			input:    " - [ ] Task",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo),
 		},
 		{
 			name:     "Trailing space",
 			input:    "- [ ] Task ",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo),
 		},
 		{
 			name:     "Task name with spaces",
 			input:    "- [ ] Task Name",
-			expected: NewTask(NewIdentifier("path", "version"), "Task Name", Todo, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task Name", Todo),
 		},
 		{
 			name:     "Task name with lots of random spaces",
 			input:    "          - [ ]   Task   Name   ",
-			expected: NewTask(NewIdentifier("path", "version"), "Task   Name", Todo, WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task   Name", Todo),
 		},
 		// Fields
 		{
 			name:     "Due date",
 			input:    "- [ ] Task due:2021-01-01",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithDue(date(2021, 1, 1)), WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithDue(date(2021, 1, 1))),
 		},
 		{
 			name:          "Due date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 due:2021-01-01",
-			expected:      NewTask(NewIdentifier("path", "version"), "Task 1", Todo, WithLine(1)),
+			expected:      NewTask(NewIdentifier("path", "version", 1), "Task 1", Todo),
 			leftOverInput: true,
 		},
 		{
 			name:     "Scheduled date",
 			input:    "- [ ] Task scheduled:2021-01-01",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithScheduled(date(2021, 1, 1)), WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithScheduled(date(2021, 1, 1))),
 		},
 		{
 			name:          "Scheduled date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 scheduled:2021-01-01",
-			expected:      NewTask(NewIdentifier("path", "version"), "Task 1", Todo, WithLine(1)),
+			expected:      NewTask(NewIdentifier("path", "version", 1), "Task 1", Todo),
 			leftOverInput: true,
 		},
 		{
 			name:     "Completed date",
 			input:    "- [ ] Task completed:2021-01-01",
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithCompleted(date(2021, 1, 1)), WithLine(1)),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithCompleted(date(2021, 1, 1))),
 		},
 		{
 			name:          "Completed date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 completed:2021-01-01",
-			expected:      NewTask(NewIdentifier("path", "version"), "Task 1", Todo, WithLine(1)),
+			expected:      NewTask(NewIdentifier("path", "version", 1), "Task 1", Todo),
 			leftOverInput: true,
 		},
 		{
 			name:     "Conflicting short and long fields",
 			input:    "- [ ] Task scheduled:2021-01-01 completed:2021-01-02", // both end in d: so make sure theres no due date
-			expected: NewTask(NewIdentifier("path", "version"), "Task", Todo, WithLine(1), WithScheduled(date(2021, 1, 1)), WithCompleted(date(2021, 1, 2))),
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithScheduled(date(2021, 1, 1)), WithCompleted(date(2021, 1, 2))),
 		},
 	}
 	for _, test := range tests {
@@ -616,8 +616,8 @@ func TestEvery(t *testing.T) {
 			if !found {
 				t.Fatal("expected found")
 			}
-			assert.Equal(t, test.expected, result.RRule.Between(relativeTo, test.end, true))
-			assert.Equal(t, test.expectedText, result.Text)
+			assert.Equal(t, test.expected, result.rrule.Between(relativeTo, test.end, true))
+			assert.Equal(t, test.expectedText, result.text)
 		})
 	}
 }
