@@ -92,6 +92,10 @@ func NewEvery(text string) (Every, error) {
 	return e, nil
 }
 
+func (e Every) String() string {
+	return e.text
+}
+
 type TaskOption func(*Task)
 
 // Used to create new tasks. For mutating tasks, use NewTaskFromTask.
