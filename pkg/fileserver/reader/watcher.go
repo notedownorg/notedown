@@ -19,6 +19,7 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/notedownorg/notedown/internal/fsnotify"
 )
@@ -28,6 +29,10 @@ func (c *Client) fileWatcher() {
 	for {
 		select {
 		case event := <-c.watcher.Events():
+			if c.isIgnored(event.Name) {
+				slog.Debug("ignoring path", slog.String("file", event.Name))
+				continue
+			}
 			switch event.Op {
 			case fsnotify.Create:
 				c.handleCreateEvent(event)
@@ -42,6 +47,17 @@ func (c *Client) fileWatcher() {
 			log.Printf("error: %s", err)
 		}
 	}
+}
+
+var ignoredDirs = []string{".git", ".vscode", ".debug", ".stversions"}
+
+func (c *Client) isIgnored(path string) bool {
+	for _, ignore := range ignoredDirs {
+		if strings.Contains(path, "/"+ignore) {
+			return true
+		}
+	}
+	return false
 }
 
 func isDir(path string) bool {
