@@ -91,8 +91,10 @@ func NewClient(root string, application string) (*Client, error) {
 		if info.IsDir() {
 			return nil
 		}
-		if strings.Contains(path, ".git") || strings.Contains(path, ".stversions") {
-			return nil
+		for _, ignoredDir := range ignoredDirs {
+			if strings.Contains(path, ignoredDir) {
+				return nil
+			}
 		}
 		if strings.HasSuffix(path, ".md") {
 			wg.Add(1) // Increment the wait group for each file we process
