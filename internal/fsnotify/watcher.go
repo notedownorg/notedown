@@ -17,12 +17,14 @@ package fsnotify
 import (
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 )
 
 type RecursiveWatcher struct {
-	root string
+	root        string
+	ignoredDirs []string
 
 	w      *fsnotify.Watcher
 	events chan fsnotify.Event
@@ -31,18 +33,31 @@ type RecursiveWatcher struct {
 	watchers map[string]struct{}
 }
 
-func NewRecursiveWatcher(root string) (*RecursiveWatcher, error) {
+type Option func(*RecursiveWatcher)
+
+func WithIgnoredDirs(dirs []string) Option {
+	return func(rw *RecursiveWatcher) {
+		rw.ignoredDirs = dirs
+	}
+}
+
+func NewRecursiveWatcher(root string, opts ...Option) (*RecursiveWatcher, error) {
 	w, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
 	}
 
 	rw := &RecursiveWatcher{
-		root:     root,
-		w:        w,
-		events:   make(chan fsnotify.Event),
-		errors:   make(chan error),
-		watchers: make(map[string]struct{}),
+		root:        root,
+		ignoredDirs: []string{},
+		w:           w,
+		events:      make(chan fsnotify.Event),
+		errors:      make(chan error),
+		watchers:    make(map[string]struct{}),
+	}
+
+	for _, opt := range opts {
+		opt(rw)
 	}
 
 	go rw.eventLoop()
@@ -96,6 +111,14 @@ func (rw *RecursiveWatcher) add(path string) {
 	if _, ok := rw.watchers[path]; ok {
 		slog.Debug("path already being watched", "path", path)
 		return
+	}
+
+	// Check the path does not match any ignored directories
+	for _, ignoredDir := range rw.ignoredDirs {
+		if strings.Contains(path, ignoredDir) {
+			slog.Debug("path matches ignored directory", "path", path, "ignoredDir", ignoredDir)
+			return
+		}
 	}
 
 	// If the path is not a directory, return
