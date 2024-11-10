@@ -47,7 +47,8 @@ type Client struct {
 }
 
 func NewClient(root string, application string) (*Client, error) {
-	watcher, err := fsnotify.NewRecursiveWatcher(root)
+	ignoredDirs := []string{".git", ".vscode", ".debug", ".stversions", ".stfolder"}
+	watcher, err := fsnotify.NewRecursiveWatcher(root, fsnotify.WithIgnoredDirs(ignoredDirs))
 	if err != nil {
 		return nil, err
 	}
