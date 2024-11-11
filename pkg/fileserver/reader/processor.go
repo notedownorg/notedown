@@ -28,9 +28,17 @@ func (c *Client) processFile(path string, load bool) {
 	// If we have already processed this file and it is up to date, we can skip it
 	if c.isUpToDate(path) {
 		slog.Debug("file is up to date, stopping short", slog.String("file", path))
+
+		// To enable us to know when all files are loaded we must always report load events
+		if load {
+			rel, err := c.relative(path)
+			if err != nil {
+				c.errors <- fmt.Errorf("failed to get relative path: %w", err)
+			}
+			c.events <- Event{Op: Load, Document: c.documents[rel], Key: rel}
+		}
 		return
 	}
-
 	// Do the rest in a goroutine so we can continue doing other things
 	c.threadLimit.Acquire(context.Background(), 1) // acquire semaphore as we will be making a blocking syscall
 	go func() {
