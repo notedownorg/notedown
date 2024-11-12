@@ -82,6 +82,7 @@ func NewEvery(text string) (Every, error) {
 	if !strings.HasPrefix(text, "e:") && !strings.HasPrefix(text, "every:") {
 		text = "e:" + text
 	}
+
 	e, ok, err := everyParser(time.Now()).Parse(parse.NewInput(text))
 	if err != nil {
 		return Every{}, fmt.Errorf("failed to parse every text: %w", err)
@@ -268,7 +269,7 @@ func (t Task) Body() string {
 		b.WriteString(fmt.Sprintf(" priority:%v", *t.priority))
 	}
 	if t.every != nil {
-		b.WriteString(fmt.Sprintf(" every:%v", t.every.text))
+		b.WriteString(fmt.Sprintf(" every:%s", t.every))
 	}
 	if t.completed != nil {
 		b.WriteString(fmt.Sprintf(" completed:%v", t.completed.Format("2006-01-02")))
