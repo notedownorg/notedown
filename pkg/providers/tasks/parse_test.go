@@ -35,7 +35,7 @@ var relativeTo, _ = time.Parse(time.RFC3339, "2020-01-02T00:00:00Z") // thurs
 var dailyRule, _ = rrule.NewRRule(rrule.ROption{Freq: rrule.DAILY, Dtstart: relativeTo})
 var spacesRule, _ = rrule.NewRRule(rrule.ROption{Freq: rrule.WEEKLY, Dtstart: relativeTo, Byweekday: []rrule.Weekday{rrule.MO, rrule.WE, rrule.FR}})
 
-func TestTask(t *testing.T) {
+func TestParseTask(t *testing.T) {
 	tests := []struct {
 		name          string
 		input         string
@@ -104,6 +104,11 @@ func TestTask(t *testing.T) {
 			input:    "          - [ ]   Task   Name   ",
 			expected: NewTask(NewIdentifier("path", "version", 1), "Task   Name", Todo),
 		},
+		{
+			name:     "Task name with square brackets",
+			input:    "- [ ] [Task] name",
+			expected: NewTask(NewIdentifier("path", "version", 1), "[Task] name", Todo),
+		},
 		// Fields
 		{
 			name:     "Due date",
@@ -133,6 +138,16 @@ func TestTask(t *testing.T) {
 			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithCompleted(date(2021, 1, 1))),
 		},
 		{
+			name:     "Priority",
+			input:    "- [ ] Task priority:1",
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithPriority(1)),
+		},
+		{
+			name:     "Every",
+			input:    "- [ ] Task every:day",
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithEvery(Every{dailyRule, "day"})),
+		},
+		{
 			name:          "Completed date on different task",
 			input:         "- [ ] Task 1\n- [ ] Task 2 completed:2021-01-01",
 			expected:      NewTask(NewIdentifier("path", "version", 1), "Task 1", Todo),
@@ -142,6 +157,16 @@ func TestTask(t *testing.T) {
 			name:     "Conflicting short and long fields",
 			input:    "- [ ] Task scheduled:2021-01-01 completed:2021-01-02", // both end in d: so make sure theres no due date
 			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithScheduled(date(2021, 1, 1)), WithCompleted(date(2021, 1, 2))),
+		},
+		{
+			name:     "Fields parse order",
+			input:    "- [ ] Task due:2021-01-01 scheduled:2021-01-02 completed:2021-01-03 priority:1 every:day",
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithDue(date(2021, 1, 1)), WithScheduled(date(2021, 1, 2)), WithCompleted(date(2021, 1, 3)), WithPriority(1), WithEvery(Every{dailyRule, "day"})),
+		},
+		{
+			name:     "Fields reverse parse order",
+			input:    "- [ ] Task every:day priority:1 completed:2021-01-03 scheduled:2021-01-02 due:2021-01-01",
+			expected: NewTask(NewIdentifier("path", "version", 1), "Task", Todo, WithDue(date(2021, 1, 1)), WithScheduled(date(2021, 1, 2)), WithCompleted(date(2021, 1, 3)), WithPriority(1), WithEvery(Every{dailyRule, "day"})),
 		},
 	}
 	for _, test := range tests {
@@ -161,7 +186,7 @@ func TestTask(t *testing.T) {
 	}
 }
 
-func TestDueDate(t *testing.T) {
+func TestParseDueDate(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -178,11 +203,6 @@ func TestDueDate(t *testing.T) {
 			input:    "d:2021-01-01",
 			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
-		{
-			name:     "Short with leading space",
-			input:    " d:2021-01-01",
-			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -196,7 +216,7 @@ func TestDueDate(t *testing.T) {
 	}
 }
 
-func TestScheduledDate(t *testing.T) {
+func TestParseScheduledDate(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -212,11 +232,6 @@ func TestScheduledDate(t *testing.T) {
 			input:    "s:2021-01-01",
 			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
-		{
-			name:     "Short with leading space",
-			input:    " s:2021-01-01",
-			expected: time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC),
-		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -230,7 +245,7 @@ func TestScheduledDate(t *testing.T) {
 	}
 }
 
-func TestCompletedDate(t *testing.T) {
+func TestParseCompletedDate(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -254,7 +269,7 @@ func TestCompletedDate(t *testing.T) {
 	}
 }
 
-func TestPriority(t *testing.T) {
+func TestParsePriority(t *testing.T) {
 	tests := []struct {
 		name     string
 		input    string
@@ -269,11 +284,6 @@ func TestPriority(t *testing.T) {
 		{
 			name:     "Short",
 			input:    "p:1",
-			expected: 1,
-		},
-		{
-			name:     "Short with leading space",
-			input:    " p:1",
 			expected: 1,
 		},
 		{
@@ -307,7 +317,7 @@ func TestPriority(t *testing.T) {
 	}
 }
 
-func TestEvery(t *testing.T) {
+func TestParseEvery(t *testing.T) {
 	tests := []struct {
 		input        string
 		expected     []time.Time
@@ -332,21 +342,6 @@ func TestEvery(t *testing.T) {
 		},
 		{
 			input:        "e:day",
-			expectedText: "day",
-			expected: []time.Time{
-				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 3, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 4, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 5, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 6, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 7, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 8, 0, 0, 0, 0, time.UTC),
-				time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
-			},
-			end: time.Date(2020, 1, 9, 0, 0, 0, 0, time.UTC),
-		},
-		{
-			input:        " e:day",
 			expectedText: "day",
 			expected: []time.Time{
 				time.Date(2020, 1, 2, 0, 0, 0, 0, time.UTC),

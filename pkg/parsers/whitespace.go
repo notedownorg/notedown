@@ -18,6 +18,23 @@ import "github.com/a-h/parse"
 
 var InlineWhitespaceRunes = parse.RuneIn(" \t")
 
+type leadingWhitespaceParser[T any] struct {
+	p parse.Parser[T]
+}
+
+func (l leadingWhitespaceParser[T]) Parse(in *parse.Input) (T, bool, error) {
+	// Read the leading whitespace.
+	_, ok, err := parse.OneOrMore(InlineWhitespaceRunes).Parse(in)
+	if err != nil || !ok {
+		return *new(T), ok, err
+	}
+	return l.p.Parse(in)
+}
+
+func LeadingWhitespace[T any](p parse.Parser[T]) leadingWhitespaceParser[T] {
+	return leadingWhitespaceParser[T]{p: p}
+}
+
 var RemainingInlineWhitespace = parse.StringFrom(parse.ZeroOrMore(InlineWhitespaceRunes))
 
 var remainingWhitespace = parse.StringFrom(parse.ZeroOrMore(parse.Any(InlineWhitespaceRunes, parse.NewLine)))
