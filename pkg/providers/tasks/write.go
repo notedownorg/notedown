@@ -66,10 +66,10 @@ func (c *Client) Update(t Task) error {
 	// If this task has been flagged as completed with recurrence handle it.
 	if repeater, repeat := newForRepeat(t); repeat {
 		// Task completion is handled by adding the completed task to the line below.
-		// - [ ] Task every:day
+        // - [ ] Task due:2024-01-01 every:day
 		// after:
-		// - [ ] Task every:day
-		// - [x] Task every:day completed:2024-01-01
+        // - [ ] Task due:2024-01-02 every:day
+        // - [x] Task due:2024-01-01 every:day completed:2024-01-01
 		mutations := []writer.LineMutation{
 			writer.UpdateLine(t.Line(), repeater),
 			writer.AddLine(t.Line()+1, t),
