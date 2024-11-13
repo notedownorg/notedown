@@ -52,13 +52,15 @@ func TestWrite(t *testing.T) {
 
 		// Update with recurrence completion
 		func(doc writer.Document, mutations ...writer.LineMutation) error {
+			now, tomorrow := time.Now(), time.Now().Add(time.Hour*24)
 			assert.Equal(t, writer.Document{Path: "path", Checksum: "version"}, doc)
-			lines := []string{"line 1", "line 2", "- [ ] Task every:day"}
+			original := func(t time.Time) string { return fmt.Sprintf("- [ ] Task due:%s every:day", t.Format("2006-01-02")) }
+			lines := []string{"line 1", "line 2", original(now)}
 			for _, mutation := range mutations {
 				lines, _ = mutation("version", lines)
 			}
-			completed := fmt.Sprintf("- [x] Task every:day completed:%s", time.Now().Format("2006-01-02"))
-			assert.Equal(t, []string{"line 1", "line 2", "- [ ] Task every:day", completed}, lines)
+			completed := fmt.Sprintf("- [x] Task due:%s every:day completed:%s", now.Format("2006-01-02"), now.Format("2006-01-02"))
+			assert.Equal(t, []string{"line 1", "line 2", original(tomorrow), completed}, lines)
 			return nil
 		},
 
@@ -79,8 +81,8 @@ func TestWrite(t *testing.T) {
 
 	every, err := tasks.NewEvery("day")
 	assert.NoError(t, err)
-	original := tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo, tasks.WithEvery(every))
-	completed := tasks.NewTaskFromTask(original, tasks.WithStatus(tasks.Done))
+	original := tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo, tasks.WithEvery(every), tasks.WithDue(time.Now()))
+	completed := tasks.NewTaskFromTask(original, tasks.WithStatus(tasks.Done, time.Now()))
 	assert.NoError(t, client.Update(completed))
 
 	assert.NoError(t, client.Delete(tasks.NewTask(tasks.NewIdentifier("path", "version", 2), "Task", tasks.Todo)))
