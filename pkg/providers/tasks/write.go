@@ -42,6 +42,11 @@ func newForRepeat(t Task) (Task, bool) {
 	// Update the due date/scheduled date to the next recurrence
 	// Use midnight the day after completed + inclusive to avoid repeating on the same day
 	completed := normalizeDate(*t.completed).Add(24 * time.Hour)
+
+	// Set dtstart to the completed date to handle the case where the task is completed in the past
+	// Unlikely to happen in practice but I hit this while testing
+	t.every.rrule.DTStart(completed)
+
 	if next := t.every.rrule.After(completed, true); next.Unix() != 0 {
 		next = normalizeDate(next)
 		if t.scheduled != nil {
@@ -61,8 +66,6 @@ func newForRepeat(t Task) (Task, bool) {
 }
 
 func (c *Client) Update(t Task) error {
-	slog.Debug("updating task", "identifier", t.Identifier().String(), "task", t.String())
-
 	// If this task has been flagged as completed with recurrence handle it.
 	if repeater, repeat := newForRepeat(t); repeat {
 		// Task completion is handled by adding the completed task to the line below.
@@ -74,6 +77,8 @@ func (c *Client) Update(t Task) error {
 			writer.UpdateLine(t.Line(), repeater),
 			writer.AddLine(t.Line()+1, t),
 		}
+		slog.Debug("updating original task", "identifier", t.Identifier().String(), "task", t.String())
+		slog.Debug("adding repeated task", "identifier", repeater.Identifier().String(), "task", repeater.String())
 		if err := c.writer.UpdateContent(writer.Document{Path: t.Path(), Checksum: t.Version()}, mutations...); err != nil {
 			return fmt.Errorf("failed to update task: %v: %w", t, err)
 		}
@@ -81,6 +86,7 @@ func (c *Client) Update(t Task) error {
 	}
 
 	mutation := writer.UpdateLine(t.Line(), t)
+	slog.Debug("updating task", "identifier", t.Identifier().String(), "task", t.String())
 	if err := c.writer.UpdateContent(writer.Document{Path: t.Path(), Checksum: t.Version()}, mutation); err != nil {
 		return fmt.Errorf("failed to update task: %v: %w", t, err)
 	}
