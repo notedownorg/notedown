@@ -138,20 +138,28 @@ func WithName(name string) TaskOption {
 	}
 }
 
-func WithStatus(status Status) TaskOption {
+func normalizeDate(date time.Time) time.Time {
+	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+}
+
+// Date is used to set the completon date if you are marking a task as Done
+// This value will almost always be time.Now()
+func WithStatus(status Status, date time.Time) TaskOption {
 	return func(t *Task) {
 
 		// If the task is being marked as done and it wasn't done before...
 		if status == Done && t.status != Done {
 
+			date = normalizeDate(date)
 			// If there is no completed time, set it to now
 			if t.completed == nil {
-				WithCompleted(time.Now())(t)
+				WithCompleted(date)(t)
 			}
 
-			// If the task has a repeat, mark the task so we know we need to handle it when persisting
+			// Mark the task as uncommitted so we can handle the repeat at write time
 			if t.every != nil {
 				t.uncommittedRepeat = true
+
 			}
 		}
 		t.status = status
