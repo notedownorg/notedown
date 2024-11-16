@@ -118,6 +118,36 @@ func TestTaskFilters(t *testing.T) {
 				eventTasks["zero.md"][4],
 			},
 		},
+		{
+			name:      "Filter by scheduled date before and after",
+			filter:    tasks.FilterByScheduledDate(date(1, 1, 2, 0), date(1, 1, 3, -1)),
+			wantTasks: []tasks.Task{eventTasks["zero.md"][3]},
+		},
+		{
+			name:   "Filter by scheduled date is set using nil-nil",
+			filter: tasks.FilterByScheduledDate(nil, nil),
+			wantTasks: []tasks.Task{
+				eventTasks["zero.md"][2],
+				eventTasks["zero.md"][3],
+				eventTasks["zero.md"][4],
+			},
+		},
+		{
+			name:   "Filter by scheduled date before",
+			filter: tasks.FilterByScheduledDate(nil, date(1, 1, 2, 0)),
+			wantTasks: []tasks.Task{
+				eventTasks["zero.md"][2],
+				eventTasks["zero.md"][3],
+			},
+		},
+		{
+			name:   "Filter by scheduled date after",
+			filter: tasks.FilterByScheduledDate(date(1, 1, 2, 0), nil),
+			wantTasks: []tasks.Task{
+				eventTasks["zero.md"][3],
+				eventTasks["zero.md"][4],
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
