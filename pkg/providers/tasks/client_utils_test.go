@@ -47,9 +47,9 @@ var eventTasks = map[string][]tasks.Task{
 	"zero.md": {
 		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 1), "Task zero-0", tasks.Abandoned),
 		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 2), "Task zero-1", tasks.Done, tasks.WithPriority(1)),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 3), "Task zero-2", tasks.Doing, tasks.WithPriority(1), tasks.WithDue(*date(1, 1, 1, 0)), tasks.WithCompleted(*date(1, 1, 1, 0))),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 4), "Task zero-3", tasks.Doing, tasks.WithDue(*date(1, 1, 2, 0)), tasks.WithCompleted(*date(1, 1, 2, 0))),
-		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 5), "Task zero-4", tasks.Doing, tasks.WithDue(*date(1, 1, 3, 0)), tasks.WithCompleted(*date(1, 1, 3, 0))),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 3), "Task zero-2", tasks.Doing, tasks.WithPriority(1), tasks.WithDue(*date(1, 1, 1, 0)), tasks.WithCompleted(*date(1, 1, 1, 0)), tasks.WithScheduled(*date(1, 1, 1, 0))),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 4), "Task zero-3", tasks.Doing, tasks.WithDue(*date(1, 1, 2, 0)), tasks.WithCompleted(*date(1, 1, 2, 0)), tasks.WithScheduled(*date(1, 1, 2, 0))),
+		tasks.NewTask(tasks.NewIdentifier("zero.md", "version", 5), "Task zero-4", tasks.Doing, tasks.WithDue(*date(1, 1, 3, 0)), tasks.WithCompleted(*date(1, 1, 3, 0)), tasks.WithScheduled(*date(1, 1, 3, 0))),
 	},
 	"one.md": {
 		tasks.NewTask(tasks.NewIdentifier("one.md", "version", 1), "Task one-0", tasks.Doing, tasks.WithPriority(2)),
@@ -86,9 +86,9 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{reader.MetadataTypeKey: "project"},
 				Contents: []byte(`- [a] Task zero-0
 - [x] Task zero-1 p:1
-- [/] Task zero-2 p:1 due:0001-01-01 completed:0001-01-01
-- [/] Task zero-3 due:0001-01-02 completed:0001-01-02
-- [/] Task zero-4 due:0001-01-03 completed:0001-01-03
+- [/] Task zero-2 p:1 due:0001-01-01 completed:0001-01-01 scheduled:0001-01-01
+- [/] Task zero-3 due:0001-01-02 completed:0001-01-02 scheduled:0001-01-02
+- [/] Task zero-4 due:0001-01-03 completed:0001-01-03 scheduled:0001-01-03
 `),
 				Checksum: "version",
 			},
