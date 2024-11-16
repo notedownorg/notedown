@@ -14,7 +14,7 @@
 
 all: format mod test dirty
 
-hygiene: format mod dirty
+hygiene: format mod
 
 dirty:
 	git diff --exit-code
