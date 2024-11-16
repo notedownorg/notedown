@@ -59,7 +59,7 @@ func TestTaskFilters(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.ElementsMatch(t, tt.wantNotes, c.ListDailyNotes(daily.FetchAllNotes(), daily.WithFilters(tt.filter)))
+			assert.ElementsMatch(t, tt.wantNotes, c.ListDailyNotes(daily.FetchAllNotes(), daily.WithFilter(tt.filter)))
 		})
 	}
 }

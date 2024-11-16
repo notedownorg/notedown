@@ -27,7 +27,7 @@ import (
 func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error) {
 	// O(n) but probably fine
 	// Unless humans achieve immortality or pre-emptively generate daily notes assuming they will live forever...
-	matches := c.ListDailyNotes(FetchAllNotes(), WithFilters(FilterByDate(&date, &date)))
+	matches := c.ListDailyNotes(FetchAllNotes(), WithFilter(FilterByDate(&date, &date)))
 	if len(matches) > 0 {
 		return matches[0], true, nil
 	}
@@ -45,7 +45,7 @@ func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error)
 		if time.Since(start) > wait {
 			return Daily{}, false, fmt.Errorf("timed out waiting for daily note to appear")
 		}
-		matches = c.ListDailyNotes(FetchAllNotes(), WithFilters(FilterByDate(&date, &date)))
+		matches = c.ListDailyNotes(FetchAllNotes(), WithFilter(FilterByDate(&date, &date)))
 		if len(matches) > 0 {
 			return matches[0], true, nil
 		}

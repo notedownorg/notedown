@@ -20,9 +20,12 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 )
 
-func WithFilters(filters ...collections.Filter[Daily]) collections.ListOption[Daily] {
+var And = collections.And[Daily]
+var Or = collections.Or[Daily]
+
+func WithFilter(filter collections.Filter[Daily]) collections.ListOption[Daily] {
 	return func(tasks []Daily) []Daily {
-		return collections.Slice(collections.And(filters...))(tasks)
+		return collections.Slice(filter)(tasks)
 	}
 }
 

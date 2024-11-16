@@ -21,6 +21,7 @@ jobs:
       run: go install github.com/liamawhite/licenser@21016ac7e79acc475e3b11f71aac7499a21790a5
 
     - run: make hygiene
+    - run: make dirty
 
   test:
     runs-on: ${{ matrix.os }}
