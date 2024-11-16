@@ -87,16 +87,16 @@ func FilterByCompletedDate(after *time.Time, before *time.Time) collections.Filt
 }
 
 func FilterByScheduledDate(after *time.Time, before *time.Time) collections.Filter[Task] {
-    return func(t Task) bool {
-        if t.Scheduled() == nil {
-            return false
-        }
-        if after != nil && t.Scheduled().Before(*after) {
-            return false
-        }
-        if before != nil && t.Scheduled().After(*before) {
-            return false
-        }
-        return true
-    }
+	return func(t Task) bool {
+		if t.Scheduled() == nil {
+			return false
+		}
+		if after != nil && t.Scheduled().Before(*after) {
+			return false
+		}
+		if before != nil && t.Scheduled().After(*before) {
+			return false
+		}
+		return true
+	}
 }
