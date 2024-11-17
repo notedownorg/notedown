@@ -138,8 +138,9 @@ func WithName(name string) TaskOption {
 	}
 }
 
-func normalizeDate(date time.Time) time.Time {
-	return time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+func normalizeDate(date time.Time) *time.Time {
+	res := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
+	return &res
 }
 
 // Date is used to set the completon date if you are marking a task as Done
@@ -150,7 +151,6 @@ func WithStatus(status Status, date time.Time) TaskOption {
 		// If the task is being marked as done and it wasn't done before...
 		if status == Done && t.status != Done {
 
-			date = normalizeDate(date)
 			// If there is no completed time, set it to now
 			if t.completed == nil {
 				WithCompleted(date)(t)
@@ -168,19 +168,19 @@ func WithStatus(status Status, date time.Time) TaskOption {
 
 func WithDue(due time.Time) TaskOption {
 	return func(t *Task) {
-		t.due = &due
+		t.due = normalizeDate(due)
 	}
 }
 
 func WithScheduled(scheduled time.Time) TaskOption {
 	return func(t *Task) {
-		t.scheduled = &scheduled
+		t.scheduled = normalizeDate(scheduled)
 	}
 }
 
 func WithCompleted(completed time.Time) TaskOption {
 	return func(t *Task) {
-		t.completed = &completed
+		t.completed = normalizeDate(completed)
 	}
 }
 
