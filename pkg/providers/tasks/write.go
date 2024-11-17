@@ -17,7 +17,6 @@ package tasks
 import (
 	"fmt"
 	"log/slog"
-	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 )
@@ -40,19 +39,16 @@ func newForRepeat(t Task) (Task, bool) {
 	}
 
 	// Update the due date/scheduled date to the next recurrence
-	// Use midnight the day after completed + inclusive to avoid repeating on the same day
-	completed := normalizeDate(*t.completed).Add(24 * time.Hour)
+	completed := *normalizeDate(*t.completed)
 
 	// Set dtstart to the completed date to handle the case where the task is completed in the past
 	// Unlikely to happen in practice but I hit this while testing
 	t.every.rrule.DTStart(completed)
 
-	if next := t.every.rrule.After(completed, true); next.Unix() != 0 {
-		next = normalizeDate(next)
+	if next := t.every.rrule.After(completed, false); next.Unix() != 0 {
 		if t.scheduled != nil {
 			WithScheduled(next)(&t)
-		}
-		if t.due != nil {
+		} else {
 			WithDue(next)(&t)
 		}
 	}
