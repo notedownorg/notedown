@@ -23,18 +23,18 @@ import (
 	"github.com/teambition/rrule-go"
 )
 
-type Identifier struct {
+type identifier struct {
 	path    string
 	line    int // line is 1-indexed, not 0
 	version string
 }
 
 // Line is 1-indexed, not 0-indexed
-func NewIdentifier(path string, version string, line int) Identifier {
-	return Identifier{path: path, version: version, line: line}
+func NewIdentifier(path string, version string, line int) identifier {
+	return identifier{path: path, version: version, line: line}
 }
 
-func (i Identifier) String() string {
+func (i identifier) String() string {
 	// Pipe separators are good enough for now but may need to be changed as pipes
 	// are technically valid (although unlikely to actually be used) in unix file paths
 	// We may want to consider an actual encoding scheme for this in the future.
@@ -58,7 +58,7 @@ const (
 )
 
 type Task struct {
-	identifier Identifier
+	identifier identifier
 	name       string
 	status     Status
 	due        *time.Time
@@ -100,7 +100,7 @@ func (e Every) String() string {
 type TaskOption func(*Task)
 
 // Used to create new tasks. For mutating tasks, use NewTaskFromTask.
-func NewTask(identifier Identifier, name string, status Status, options ...TaskOption) Task {
+func NewTask(identifier identifier, name string, status Status, options ...TaskOption) Task {
 	task := Task{
 		identifier: identifier,
 		name:       name,
@@ -196,7 +196,7 @@ func WithEvery(every Every) TaskOption {
 	}
 }
 
-func (t Task) Identifier() Identifier {
+func (t Task) Identifier() identifier {
 	return t.identifier
 }
 

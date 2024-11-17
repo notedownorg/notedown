@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package daily
+package projects
 
 import (
 	"log/slog"
@@ -41,7 +41,7 @@ func onDelete(c *Client) traits.EventHandler {
 		delete(c.notes, event.Key)
 		c.notesMutex.Unlock()
 		c.publisher.Events <- Event{Op: Delete}
-		slog.Debug("removed daily note", "path", event.Key)
+		slog.Debug("removed project", "path", event.Key)
 	}
 }
 
@@ -49,8 +49,28 @@ func (c *Client) handleChanges(event reader.Event) {
 	if event.Document.Metadata.Type() != MetadataKey {
 		return
 	}
+
+	// Handle metadata
+	opts := make([]ProjectOption, 0)
+	if event.Document.Metadata[StatusKey] != nil {
+		status, ok := event.Document.Metadata[StatusKey].(Status)
+		if !ok {
+			slog.Error("invalid status value, defaulting to backlog", "path", event.Key, "status", event.Document.Metadata[StatusKey])
+			opts = append(opts, WithStatus(Backlog))
+		} else {
+			opts = append(opts, WithStatus(status))
+		}
+	} else {
+		opts = append(opts, WithStatus(Backlog))
+	}
+
+	p := NewProject(NewIdentifier(event.Key, event.Document.Checksum))
+	for _, opt := range opts {
+		opt(&p)
+	}
+
 	c.notesMutex.Lock()
-	c.notes[event.Key] = NewDaily(NewIdentifier(event.Key, event.Document.Checksum))
+	c.notes[event.Key] = p
 	c.notesMutex.Unlock()
-	slog.Debug("added daily note", "path", event.Key)
+	slog.Debug("added project", "path", event.Key)
 }
