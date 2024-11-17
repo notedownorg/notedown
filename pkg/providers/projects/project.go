@@ -12,16 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package daily
+package projects
 
 import (
-	"log/slog"
 	"path/filepath"
 	"strings"
-	"time"
 )
 
-const MetadataKey = "daily"
+const MetadataKey = "project"
 
 type identifier struct {
 	path    string
@@ -44,36 +42,60 @@ func (i identifier) String() string {
 	return builder.String()
 }
 
-type Daily struct {
+const StatusKey = "status"
+
+type Status string
+
+const (
+	Active    Status = "active"
+	Archived  Status = "archived"
+	Abandoned Status = "abandoned"
+	Blocked   Status = "blocked"
+	Backlog   Status = "backlog"
+)
+
+type Project struct {
 	name       string
 	identifier identifier
-	date       time.Time
+	status     Status
 }
 
-func NewDaily(identifier identifier) Daily {
+type ProjectOption func(*Project)
+
+func NewProject(identifier identifier, opts ...ProjectOption) Project {
 	name := strings.TrimSuffix(filepath.Base(identifier.path), filepath.Ext(identifier.path))
-
-	// TODO: Support more than just YYYY-MM-DD
-	date, err := time.Parse("2006-01-02", name)
-	if err != nil {
-		slog.Error("failed to parse date from daily note name", "name", name, "identifier", identifier, "error", err)
-	}
-
-	return Daily{
+	p := Project{
 		identifier: identifier,
 		name:       name,
-		date:       date,
+	}
+	for _, opt := range opts {
+		opt(&p)
+	}
+	return p
+}
+
+func WithStatus(status Status) ProjectOption {
+	return func(p *Project) {
+		p.status = status
 	}
 }
 
-func (d Daily) Identifier() identifier {
-	return d.identifier
+func (p Project) Identifier() identifier {
+	return p.identifier
 }
 
-func (d Daily) Name() string {
-	return d.name
+func (p Project) Name() string {
+	return p.name
 }
 
-func (d Daily) Path() string {
-	return d.identifier.path
+func (p Project) Path() string {
+	return p.identifier.path
+}
+
+func (p Project) Status() Status {
+	return p.status
+}
+
+func (p Project) String() string {
+	return p.Name()
 }
