@@ -22,7 +22,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 )
 
-func buildClient(events []reader.Event, validators ...test.AddValidator) (*daily.Client, chan reader.Event) {
+func buildClient(events []reader.Event, validators ...test.AddValidator) (*daily.DailyClient, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {

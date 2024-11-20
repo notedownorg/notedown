@@ -21,7 +21,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 )
 
-func (c *Client) Create(path string, name string, status Status, options ...ProjectOption) error {
+func (c *ProjectClient) Create(path string, name string, status Status, options ...ProjectOption) error {
 	options = append(options, WithStatus(status))
 	project := NewProject(NewIdentifier(path, ""), options...)
 	slog.Debug("creating project", "identifier", project.Identifier().String(), "project", project.String())

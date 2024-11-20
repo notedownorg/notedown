@@ -24,7 +24,7 @@ import (
 
 // Set wait to 0 to not wait for the file to appear in the cache
 // Otherwise ensure will error if the file does not appear in the cache within the wait duration
-func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error) {
+func (c *DailyClient) Ensure(date time.Time, wait time.Duration) (Daily, bool, error) {
 	// O(n) but probably fine
 	// Unless humans achieve immortality or pre-emptively generate daily notes assuming they will live forever...
 	matches := c.ListDailyNotes(FetchAllNotes(), WithFilter(FilterByDate(&date, &date)))
@@ -53,7 +53,7 @@ func (c *Client) Ensure(date time.Time, wait time.Duration) (Daily, bool, error)
 	}
 }
 
-func (c *Client) Create(date time.Time) error {
+func (c *DailyClient) Create(date time.Time) error {
 	name := date.Format("2006-01-02")
 	path := filepath.Join("daily", fmt.Sprintf("%s.md", name))
 	return c.writer.Add(path, reader.Metadata{reader.MetadataTypeKey: MetadataKey}, []byte{})

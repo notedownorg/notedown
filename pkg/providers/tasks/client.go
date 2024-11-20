@@ -32,7 +32,7 @@ type DocumentUpdater interface {
 	UpdateContent(doc writer.Document, mutations ...writer.LineMutation) error
 }
 
-type Client struct {
+type TaskClient struct {
 	*watcher
 	*publisher
 	writer DocumentUpdater
@@ -43,17 +43,17 @@ type Client struct {
 	tasksMutex sync.RWMutex
 }
 
-type clientOptions func(*Client)
+type clientOptions func(*TaskClient)
 
 // Inform NewClient to wait for the initial load to complete before returning
 func WithInitialLoadWaiter(tick time.Duration) clientOptions {
-	return func(client *Client) {
+	return func(client *TaskClient) {
 		traits.WithInitialLoadWaiter(client.watcher)(tick)
 	}
 }
 
-func NewClient(writer DocumentUpdater, feed <-chan reader.Event, opts ...clientOptions) *Client {
-	client := &Client{
+func NewClient(writer DocumentUpdater, feed <-chan reader.Event, opts ...clientOptions) *TaskClient {
+	client := &TaskClient{
 		tasks:  make(map[string]map[int]Task),
 		writer: writer,
 	}
@@ -68,7 +68,7 @@ func NewClient(writer DocumentUpdater, feed <-chan reader.Event, opts ...clientO
 	return client
 }
 
-func (c *Client) Summary() int {
+func (c *TaskClient) Summary() int {
 	tasks := 0
 	c.tasksMutex.RLock()
 	defer c.tasksMutex.RUnlock()
@@ -79,6 +79,6 @@ func (c *Client) Summary() int {
 }
 
 // Opts are applied in order so filters should be applied before sorters
-func (c *Client) ListTasks(fetcher collections.Fetcher[Client, Task], opts ...collections.ListOption[Task]) []Task {
+func (c *TaskClient) ListTasks(fetcher collections.Fetcher[TaskClient, Task], opts ...collections.ListOption[Task]) []Task {
 	return collections.List(c, fetcher, opts...)
 }

@@ -21,7 +21,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 )
 
-func (c *Client) Create(path string, line int, name string, status Status, options ...TaskOption) error {
+func (c *TaskClient) Create(path string, line int, name string, status Status, options ...TaskOption) error {
 	task := NewTask(NewIdentifier(path, "", line), name, status, options...)
 	slog.Debug("creating task", "identifier", task.Identifier().String(), "task", task.String())
 
@@ -61,7 +61,7 @@ func newForRepeat(t Task) (Task, bool) {
 	return t, true
 }
 
-func (c *Client) Update(t Task) error {
+func (c *TaskClient) Update(t Task) error {
 	// If this task has been flagged as completed with recurrence handle it.
 	if repeater, repeat := newForRepeat(t); repeat {
 		// Task completion is handled by adding the completed task to the line below.
@@ -89,7 +89,7 @@ func (c *Client) Update(t Task) error {
 	return nil
 }
 
-func (c *Client) Delete(t Task) error {
+func (c *TaskClient) Delete(t Task) error {
 	slog.Debug("deleting task", "identifier", t.Identifier().String(), "task", t.String())
 	mutation := writer.RemoveLine(t.Line())
 	if err := c.writer.UpdateContent(writer.Document{Path: t.Path(), Checksum: t.Version()}, mutation); err != nil {

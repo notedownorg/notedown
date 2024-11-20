@@ -31,7 +31,7 @@ type DocumentWriter interface {
 	Add(path string, metadata reader.Metadata, content []byte) error
 }
 
-type Client struct {
+type DailyClient struct {
 	*watcher
 	*publisher
 	writer DocumentWriter
@@ -43,17 +43,17 @@ type Client struct {
 	notesMutex sync.RWMutex
 }
 
-type clientOptions func(*Client)
+type clientOptions func(*DailyClient)
 
 // Inform NewClient to wait for the initial load to complete before returning
 func WithInitialLoadWaiter(tick time.Duration) clientOptions {
-	return func(client *Client) {
+	return func(client *DailyClient) {
 		traits.WithInitialLoadWaiter(client.watcher)(tick)
 	}
 }
 
-func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *Client {
-	client := &Client{
+func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *DailyClient {
+	client := &DailyClient{
 		notes:  make(map[string]Daily),
 		writer: writer,
 		dir:    "daily",
@@ -69,13 +69,13 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 	return client
 }
 
-func (c *Client) Summary() int {
+func (c *DailyClient) Summary() int {
 	c.notesMutex.RLock()
 	defer c.notesMutex.RUnlock()
 	return len(c.notes)
 }
 
 // Opts are applied in order so filters should be applied before sorters
-func (c *Client) ListDailyNotes(fetcher collections.Fetcher[Client, Daily], opts ...collections.ListOption[Daily]) []Daily {
+func (c *DailyClient) ListDailyNotes(fetcher collections.Fetcher[DailyClient, Daily], opts ...collections.ListOption[Daily]) []Daily {
 	return collections.List(c, fetcher, opts...)
 }

@@ -16,8 +16,8 @@ package projects
 
 import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 
-func FetchAllProjects() collections.Fetcher[Client, Project] {
-	return func(c *Client) []Project {
+func FetchAllProjects() collections.Fetcher[ProjectClient, Project] {
+	return func(c *ProjectClient) []Project {
 		var documents []Project
 		c.notesMutex.RLock()
 		for _, document := range c.notes {
