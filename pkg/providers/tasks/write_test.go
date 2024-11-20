@@ -76,15 +76,15 @@ func TestWrite(t *testing.T) {
 		},
 	)
 
-	assert.NoError(t, client.Create("path", writer.AT_END, "Task", tasks.Todo))
-	assert.NoError(t, client.Update(tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo)))
+	assert.NoError(t, client.CreateTask("path", writer.AT_END, "Task", tasks.Todo))
+	assert.NoError(t, client.UpdateTask(tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo)))
 
 	every, err := tasks.NewEvery("day")
 	assert.NoError(t, err)
 	original := tasks.NewTask(tasks.NewIdentifier("path", "version", 3), "Task", tasks.Todo, tasks.WithEvery(every), tasks.WithDue(time.Now()))
 	completed := tasks.NewTaskFromTask(original, tasks.WithStatus(tasks.Done, time.Now()))
-	assert.NoError(t, client.Update(completed))
+	assert.NoError(t, client.UpdateTask(completed))
 
-	assert.NoError(t, client.Delete(tasks.NewTask(tasks.NewIdentifier("path", "version", 2), "Task", tasks.Todo)))
+	assert.NoError(t, client.DeleteTask(tasks.NewTask(tasks.NewIdentifier("path", "version", 2), "Task", tasks.Todo)))
 
 }

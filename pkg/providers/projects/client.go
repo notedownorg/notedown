@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
@@ -67,15 +66,4 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 	}
 
 	return client
-}
-
-func (c *ProjectClient) Summary() int {
-	c.notesMutex.RLock()
-	defer c.notesMutex.RUnlock()
-	return len(c.notes)
-}
-
-// Opts are applied in order so filters should be applied before sorters
-func (c *ProjectClient) ListProjects(fetcher collections.Fetcher[ProjectClient, Project], opts ...collections.ListOption[Project]) []Project {
-	return collections.List(c, fetcher, opts...)
 }
