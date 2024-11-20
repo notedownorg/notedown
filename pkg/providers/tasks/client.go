@@ -20,7 +20,6 @@ import (
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
-	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
@@ -66,19 +65,4 @@ func NewClient(writer DocumentUpdater, feed <-chan reader.Event, opts ...clientO
 	}
 
 	return client
-}
-
-func (c *TaskClient) Summary() int {
-	tasks := 0
-	c.tasksMutex.RLock()
-	defer c.tasksMutex.RUnlock()
-	for _, doc := range c.tasks {
-		tasks += len(doc)
-	}
-	return tasks
-}
-
-// Opts are applied in order so filters should be applied before sorters
-func (c *TaskClient) ListTasks(fetcher collections.Fetcher[TaskClient, Task], opts ...collections.ListOption[Task]) []Task {
-	return collections.List(c, fetcher, opts...)
 }

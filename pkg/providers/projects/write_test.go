@@ -34,5 +34,5 @@ func TestWrite(t *testing.T) {
 		},
 	)
 
-	assert.NoError(t, client.Create("projects/project.md", "project", projects.Backlog))
+	assert.NoError(t, client.CreateProject("projects/project.md", "project", projects.Backlog))
 }

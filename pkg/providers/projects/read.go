@@ -14,20 +14,18 @@
 
 package projects
 
-import (
-	"fmt"
-	"log/slog"
+import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-)
+type Fetcher = collections.Fetcher[ProjectClient, Project]
+type ListOption = collections.ListOption[Project]
 
-func (c *ProjectClient) CreateProject(path string, name string, status Status, options ...ProjectOption) error {
-	options = append(options, WithStatus(status))
-	project := NewProject(NewIdentifier(path, ""), options...)
-	slog.Debug("creating project", "identifier", project.Identifier().String(), "project", project.String())
+func (c *ProjectClient) ProjectSummary() int {
+	c.notesMutex.RLock()
+	defer c.notesMutex.RUnlock()
+	return len(c.notes)
+}
 
-	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: status}
-	contents := []byte(fmt.Sprintf("# %s\n\n", name))
-
-	return c.writer.Add(path, metadata, contents)
+// Opts are applied in order so filters should be applied before sorters
+func (c *ProjectClient) ListProjects(fetcher Fetcher, opts ...ListOption) []Project {
+	return collections.List(c, fetcher, opts...)
 }

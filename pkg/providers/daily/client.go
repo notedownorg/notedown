@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
@@ -67,15 +66,4 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 	}
 
 	return client
-}
-
-func (c *DailyClient) Summary() int {
-	c.notesMutex.RLock()
-	defer c.notesMutex.RUnlock()
-	return len(c.notes)
-}
-
-// Opts are applied in order so filters should be applied before sorters
-func (c *DailyClient) ListDailyNotes(fetcher collections.Fetcher[DailyClient, Daily], opts ...collections.ListOption[Daily]) []Daily {
-	return collections.List(c, fetcher, opts...)
 }
