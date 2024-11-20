@@ -16,8 +16,8 @@ package tasks
 
 import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 
-func FetchAllTasks() collections.Fetcher[Client, Task] {
-	return func(c *Client) []Task {
+func FetchAllTasks() collections.Fetcher[TaskClient, Task] {
+	return func(c *TaskClient) []Task {
 		var tasks []Task
 		c.tasksMutex.RLock()
 		for _, document := range c.tasks {
@@ -30,8 +30,8 @@ func FetchAllTasks() collections.Fetcher[Client, Task] {
 	}
 }
 
-func FetchTasksForDocument(document string) collections.Fetcher[Client, Task] {
-	return func(c *Client) []Task {
+func FetchTasksForDocument(document string) collections.Fetcher[TaskClient, Task] {
+	return func(c *TaskClient) []Task {
 		var tasks []Task
 		c.tasksMutex.RLock()
 		for _, task := range c.tasks[document] {

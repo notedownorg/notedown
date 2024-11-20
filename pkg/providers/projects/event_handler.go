@@ -21,21 +21,21 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
-func onLoad(c *Client) traits.EventHandler {
+func onLoad(c *ProjectClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.handleChanges(event)
 		c.publisher.Events <- Event{Op: Load}
 	}
 }
 
-func onChange(c *Client) traits.EventHandler {
+func onChange(c *ProjectClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.handleChanges(event)
 		c.publisher.Events <- Event{Op: Change}
 	}
 }
 
-func onDelete(c *Client) traits.EventHandler {
+func onDelete(c *ProjectClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.notesMutex.Lock()
 		delete(c.notes, event.Key)
@@ -45,7 +45,7 @@ func onDelete(c *Client) traits.EventHandler {
 	}
 }
 
-func (c *Client) handleChanges(event reader.Event) {
+func (c *ProjectClient) handleChanges(event reader.Event) {
 	if event.Document.Metadata.Type() != MetadataKey {
 		return
 	}

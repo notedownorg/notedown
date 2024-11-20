@@ -24,21 +24,21 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
-func onLoad(c *Client) traits.EventHandler {
+func onLoad(c *TaskClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.handleChanges(event)
 		c.publisher.Events <- Event{Op: Load}
 	}
 }
 
-func onChange(c *Client) traits.EventHandler {
+func onChange(c *TaskClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.handleChanges(event)
 		c.publisher.Events <- Event{Op: Change}
 	}
 }
 
-func onDelete(c *Client) traits.EventHandler {
+func onDelete(c *TaskClient) traits.EventHandler {
 	return func(event reader.Event) {
 		c.tasksMutex.Lock()
 		delete(c.tasks, event.Key)
@@ -47,7 +47,7 @@ func onDelete(c *Client) traits.EventHandler {
 	}
 }
 
-func (c *Client) handleChanges(event reader.Event) {
+func (c *TaskClient) handleChanges(event reader.Event) {
 	tasks := make(map[int]Task)
 
 	// Go through the contents block by block in search of tasks

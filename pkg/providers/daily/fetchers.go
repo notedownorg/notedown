@@ -16,8 +16,8 @@ package daily
 
 import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 
-func FetchAllNotes() collections.Fetcher[Client, Daily] {
-	return func(c *Client) []Daily {
+func FetchAllNotes() collections.Fetcher[DailyClient, Daily] {
+	return func(c *DailyClient) []Daily {
 		var documents []Daily
 		c.notesMutex.RLock()
 		for _, document := range c.notes {
