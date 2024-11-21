@@ -23,15 +23,17 @@ import (
 
 func onLoad(c *DailyClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Load}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Load}
+		}
 	}
 }
 
 func onChange(c *DailyClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Change}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Change}
+		}
 	}
 }
 
@@ -45,12 +47,13 @@ func onDelete(c *DailyClient) traits.EventHandler {
 	}
 }
 
-func (c *DailyClient) handleChanges(event reader.Event) {
+func (c *DailyClient) handleChanges(event reader.Event) bool {
 	if event.Document.Metadata.Type() != MetadataKey {
-		return
+		return false
 	}
 	c.notesMutex.Lock()
 	c.notes[event.Key] = NewDaily(NewIdentifier(event.Key, event.Document.Checksum))
 	c.notesMutex.Unlock()
-	slog.Debug("added daily note", "path", event.Key)
+	slog.Debug("updated daily note in cache", "path", event.Key)
+	return true
 }
