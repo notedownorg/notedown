@@ -54,6 +54,14 @@ const (
 	Backlog   Status = "backlog"
 )
 
+var statusMap = map[string]Status{
+	"active":    Active,
+	"archived":  Archived,
+	"abandoned": Abandoned,
+	"blocked":   Blocked,
+	"backlog":   Backlog,
+}
+
 type Project struct {
 	name       string
 	identifier identifier
