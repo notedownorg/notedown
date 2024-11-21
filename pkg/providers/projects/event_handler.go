@@ -23,15 +23,17 @@ import (
 
 func onLoad(c *ProjectClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Load}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Load}
+		}
 	}
 }
 
 func onChange(c *ProjectClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Change}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Change}
+		}
 	}
 }
 
@@ -45,9 +47,9 @@ func onDelete(c *ProjectClient) traits.EventHandler {
 	}
 }
 
-func (c *ProjectClient) handleChanges(event reader.Event) {
+func (c *ProjectClient) handleChanges(event reader.Event) bool {
 	if event.Document.Metadata.Type() != MetadataKey {
-		return
+		return false
 	}
 
 	// Handle metadata
@@ -63,6 +65,7 @@ func (c *ProjectClient) handleChanges(event reader.Event) {
 	c.notes[event.Key] = p
 	c.notesMutex.Unlock()
 	slog.Debug("added project", "path", event.Key)
+	return true
 }
 
 func extractStatus(path string, metadata reader.Metadata) Status {

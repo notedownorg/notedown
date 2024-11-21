@@ -51,16 +51,17 @@ func TestEventBroadcast_Fuzz(t *testing.T) {
 	// Throw some events at the daily client and ensure we are notified correctly
 	want := make([]daily.Operation, 0)
 	count := 1000
+	d := reader.Document{Metadata: reader.Metadata{reader.MetadataTypeKey: daily.MetadataKey}}
 	for i := 0; i < count; i++ {
 		switch rand.Intn(3) {
 		case 0:
-			feed <- reader.Event{Op: reader.Load, Key: "test.md"}
+			feed <- reader.Event{Op: reader.Load, Key: "test.md", Document: d}
 			want = append(want, daily.Load)
 		case 1:
-			feed <- reader.Event{Op: reader.Change, Key: "test.md"}
+			feed <- reader.Event{Op: reader.Change, Key: "test.md", Document: d}
 			want = append(want, daily.Change)
 		case 2:
-			feed <- reader.Event{Op: reader.Delete, Key: "test.md"}
+			feed <- reader.Event{Op: reader.Delete, Key: "test.md", Document: d}
 			want = append(want, daily.Delete)
 		}
 	}

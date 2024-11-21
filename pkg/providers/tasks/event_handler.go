@@ -26,15 +26,17 @@ import (
 
 func onLoad(c *TaskClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Load}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Load}
+		}
 	}
 }
 
 func onChange(c *TaskClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.handleChanges(event)
-		c.publisher.Events <- Event{Op: Change}
+		if c.handleChanges(event) {
+			c.publisher.Events <- Event{Op: Change}
+		}
 	}
 }
 
@@ -47,7 +49,7 @@ func onDelete(c *TaskClient) traits.EventHandler {
 	}
 }
 
-func (c *TaskClient) handleChanges(event reader.Event) {
+func (c *TaskClient) handleChanges(event reader.Event) bool {
 	tasks := make(map[int]Task)
 
 	// Go through the contents block by block in search of tasks
@@ -55,11 +57,11 @@ func (c *TaskClient) handleChanges(event reader.Event) {
 	blocks, ok, err := parse.Until(parseBlock(event.Key, event.Document.Checksum, time.Now()), parse.EOF[string]()).Parse(in)
 	if err != nil {
 		slog.Error("failed to parse blocks", slog.String("file", event.Key), slog.String("error", err.Error()))
-		return
+		return false
 	}
 	if !ok {
 		slog.Debug("no blocks found", slog.String("file", event.Key))
-		return
+		return false
 	}
 	for _, block := range blocks {
 		for _, task := range block {
@@ -70,6 +72,8 @@ func (c *TaskClient) handleChanges(event reader.Event) {
 	c.tasksMutex.Lock()
 	c.tasks[event.Key] = tasks
 	c.tasksMutex.Unlock()
+	slog.Debug("updated task in cache", "path", event.Key)
+	return true
 }
 
 var parseBlock = func(path, version string, relativeTo time.Time) parse.Parser[[]Task] {
