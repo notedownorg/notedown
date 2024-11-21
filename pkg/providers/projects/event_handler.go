@@ -52,17 +52,7 @@ func (c *ProjectClient) handleChanges(event reader.Event) {
 
 	// Handle metadata
 	opts := make([]ProjectOption, 0)
-	if event.Document.Metadata[StatusKey] != nil {
-		status, ok := event.Document.Metadata[StatusKey].(Status)
-		if !ok {
-			slog.Error("invalid status value, defaulting to backlog", "path", event.Key, "status", event.Document.Metadata[StatusKey])
-			opts = append(opts, WithStatus(Backlog))
-		} else {
-			opts = append(opts, WithStatus(status))
-		}
-	} else {
-		opts = append(opts, WithStatus(Backlog))
-	}
+	opts = append(opts, WithStatus(extractStatus(event.Key, event.Document.Metadata)))
 
 	p := NewProject(NewIdentifier(event.Key, event.Document.Checksum))
 	for _, opt := range opts {
@@ -73,4 +63,25 @@ func (c *ProjectClient) handleChanges(event reader.Event) {
 	c.notes[event.Key] = p
 	c.notesMutex.Unlock()
 	slog.Debug("added project", "path", event.Key)
+}
+
+func extractStatus(path string, metadata reader.Metadata) Status {
+	if metadata[StatusKey] == nil {
+		slog.Error("status key not found, defaulting to backlog", "path", path)
+		return Backlog
+	}
+
+	str, ok := metadata[StatusKey].(string)
+	if !ok {
+		slog.Error("invalid status value, defaulting to backlog", "status", metadata[StatusKey], "path", path)
+		return Backlog
+	}
+
+	status, ok := statusMap[str]
+	if !ok {
+		slog.Error("invalid status value, defaulting to backlog", "status", metadata[StatusKey], "path", path)
+		return Backlog
+	}
+
+	return status
 }

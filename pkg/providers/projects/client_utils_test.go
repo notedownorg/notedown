@@ -59,14 +59,14 @@ var eventNotes = []projects.Project{
 
 func loadEvents() []reader.Event {
 	return []reader.Event{
-		// Projects
+		// Projects status as string to reflect how it actually receives data in practice
 		{
 			Op:  reader.Load,
 			Key: "projects/one.md",
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
-					projects.StatusKey:     projects.Active,
+					projects.StatusKey:     string(projects.Active),
 				},
 				Contents: []byte(`# One`),
 				Checksum: "version",
@@ -78,7 +78,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
-					projects.StatusKey:     projects.Backlog,
+					projects.StatusKey:     string(projects.Backlog),
 				},
 				Contents: []byte(`# Two`),
 				Checksum: "version",
@@ -90,7 +90,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
-					projects.StatusKey:     projects.Abandoned,
+					projects.StatusKey:     string(projects.Abandoned),
 				},
 				Contents: []byte(`# Three`),
 				Checksum: "version",
@@ -102,7 +102,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
-					projects.StatusKey:     projects.Archived,
+					projects.StatusKey:     string(projects.Archived),
 				},
 				Contents: []byte(`# Four`),
 				Checksum: "version",
@@ -114,7 +114,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
-					projects.StatusKey:     projects.Blocked,
+					projects.StatusKey:     string(projects.Blocked),
 				},
 				Contents: []byte(`# Five`),
 				Checksum: "version",
