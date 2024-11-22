@@ -20,12 +20,16 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestEventBroadcast_Fuzz(t *testing.T) {
-	c, feed := buildClient(loadEvents())
+	c, feed := buildClient(
+		loadEvents(),
+		test.Validators{},
+	)
 
 	// Create two subscribers
 	sub1 := make(chan projects.Event)
@@ -51,7 +55,7 @@ func TestEventBroadcast_Fuzz(t *testing.T) {
 	// Throw some events at the daily client and ensure we are notified correctly
 	want := make([]projects.Operation, 0)
 	count := 1000
-	d := reader.Document{Metadata: reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey}}
+	d := reader.Document{Metadata: reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: string(projects.Active)}}
 	for i := 0; i < count; i++ {
 		switch rand.Intn(3) {
 		case 0:

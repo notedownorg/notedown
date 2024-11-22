@@ -22,7 +22,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 )
 
-func buildClient(events []reader.Event, validators ...test.AddValidator) (*projects.ProjectClient, chan reader.Event) {
+func buildClient(events []reader.Event, validators test.Validators) (*projects.ProjectClient, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.AddValidator) (*proje
 	}()
 
 	client := projects.NewClient(
-		&test.MockDocumentCreator{Validators: validators, Feed: feed},
+		&test.MockDocumentWriter{Validators: validators, Feed: feed},
 		feed,
 		projects.WithInitialLoadWaiter(100*time.Millisecond),
 	)

@@ -18,13 +18,14 @@ import (
 	"testing"
 
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTaskFilters(t *testing.T) {
 	events := loadEvents()
-	c, _ := buildClient(events)
+	c, _ := buildClient(events, test.Validators{})
 
 	tests := []struct {
 		name      string

@@ -19,6 +19,7 @@ import (
 	"log/slog"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 )
 
 func (c *ProjectClient) CreateProject(path string, name string, status Status, options ...ProjectOption) error {
@@ -29,5 +30,10 @@ func (c *ProjectClient) CreateProject(path string, name string, status Status, o
 	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: status}
 	contents := []byte(fmt.Sprintf("# %s\n\n", name))
 
-	return c.writer.Add(path, metadata, contents)
+	return c.writer.Create(path, metadata, contents)
+}
+
+func (c *ProjectClient) DeleteProject(path string) error {
+	slog.Debug("deleting project", "path", path)
+	return c.writer.Delete(writer.Document{Path: path})
 }

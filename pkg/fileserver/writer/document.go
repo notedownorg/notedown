@@ -39,7 +39,7 @@ func (e *FileExistsError) Error() string {
 	return fmt.Sprintf("file %s already exists", e.Filename)
 }
 
-func (c Client) Add(path string, metadata reader.Metadata, content []byte) error {
+func (c Client) Create(path string, metadata reader.Metadata, content []byte) error {
 	// Ensure the file does not exist
 	_, err := os.Stat(c.abs(path))
 	if err == nil {
@@ -71,7 +71,7 @@ func (c Client) Add(path string, metadata reader.Metadata, content []byte) error
 }
 
 // Update contents of a document. Mutations are applied in order and are atomeic.
-// If any mutation errors, the document will not be written to disk.
+// i.e. if any mutation errors, the document will not be written to disk.
 func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
 	slog.Debug("updating content of document", "path", doc.Path)
 
@@ -106,10 +106,12 @@ func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
 	return nil
 }
 
-// func (c Client) RemoveDocument(doc Document) error {
-//     return nil
-// }
-//
-// func (c Client) UpdateMetadata(doc Document, metadata reader.Metadata) error {
-//     return nil
-// }
+func (c Client) DeleteDocument(doc Document) error {
+	slog.Debug("deleting document", "path", doc.Path)
+	if err := os.Remove(c.abs(doc.Path)); err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("failed to delete document: %w", err)
+		}
+	}
+	return nil
+}

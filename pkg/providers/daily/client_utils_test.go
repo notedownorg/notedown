@@ -22,7 +22,7 @@ import (
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 )
 
-func buildClient(events []reader.Event, validators ...test.AddValidator) (*daily.DailyClient, chan reader.Event) {
+func buildClient(events []reader.Event, validators ...test.CreateValidator) (*daily.DailyClient, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.AddValidator) (*daily
 	}()
 
 	client := daily.NewClient(
-		&test.MockDocumentCreator{Validators: validators, Feed: feed},
+		&test.MockDocumentWriter{Validators: test.Validators{Create: validators}, Feed: feed},
 		feed,
 		daily.WithInitialLoadWaiter(100*time.Millisecond),
 	)

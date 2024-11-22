@@ -15,6 +15,7 @@
 package daily_test
 
 import (
+	"fmt"
 	"math/rand"
 	"testing"
 	"time"
@@ -52,16 +53,17 @@ func TestEventBroadcast_Fuzz(t *testing.T) {
 	want := make([]daily.Operation, 0)
 	count := 1000
 	d := reader.Document{Metadata: reader.Metadata{reader.MetadataTypeKey: daily.MetadataKey}}
+	key := fmt.Sprintf("%v.md", time.Now().Format("2006-01-02"))
 	for i := 0; i < count; i++ {
 		switch rand.Intn(3) {
 		case 0:
-			feed <- reader.Event{Op: reader.Load, Key: "test.md", Document: d}
+			feed <- reader.Event{Op: reader.Load, Key: key, Document: d}
 			want = append(want, daily.Load)
 		case 1:
-			feed <- reader.Event{Op: reader.Change, Key: "test.md", Document: d}
+			feed <- reader.Event{Op: reader.Change, Key: key, Document: d}
 			want = append(want, daily.Change)
 		case 2:
-			feed <- reader.Event{Op: reader.Delete, Key: "test.md", Document: d}
+			feed <- reader.Event{Op: reader.Delete, Key: key, Document: d}
 			want = append(want, daily.Delete)
 		}
 	}

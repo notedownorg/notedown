@@ -27,7 +27,7 @@ type watcher = traits.Watcher
 type publisher = traits.Publisher[Event]
 
 type DocumentWriter interface {
-	Add(path string, metadata reader.Metadata, content []byte) error
+	Create(path string, metadata reader.Metadata, content []byte) error
 }
 
 type DailyClient struct {

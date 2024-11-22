@@ -33,7 +33,7 @@ func TestClient(t *testing.T) {
 		}
 	}()
 
-	client := projects.NewClient(&test.MockDocumentCreator{}, ch)
+	client := projects.NewClient(&test.MockDocumentWriter{}, ch)
 
 	// Assert that we eventually get the correct number of notes
 	waitFor, tick := 3*time.Second, 200*time.Millisecond
@@ -50,7 +50,7 @@ func TestClient_InitialLoadWaiter(t *testing.T) {
 		ch <- reader.Event{Op: reader.SubscriberLoadComplete}
 	}()
 
-	client := projects.NewClient(&test.MockDocumentCreator{}, ch, projects.WithInitialLoadWaiter(100*time.Millisecond))
+	client := projects.NewClient(&test.MockDocumentWriter{}, ch, projects.WithInitialLoadWaiter(100*time.Millisecond))
 
 	// Assert that the client has the correct number of notes
 	assert.Equal(t, projectsCount(events), len(client.ListProjects((projects.FetchAllProjects()))))
