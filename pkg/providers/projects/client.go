@@ -17,6 +17,7 @@ package projects
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -74,6 +75,9 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 // Where a new project should be created based on the name
 func (c *ProjectClient) NewProjectLocation(name string) string {
 	if name == "" {
+		return ""
+	}
+	if strings.ContainsAny(name, "./\\") {
 		return ""
 	}
 	return filepath.Join(c.dir, fmt.Sprintf("%s.md", name))
