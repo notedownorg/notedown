@@ -23,9 +23,8 @@ import (
 )
 
 type CreateValidator func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error
-
+type MetadataUpdateValidator func(doc writer.Document, metadata reader.Metadata) error
 type ContentUpdateValidator func(doc writer.Document, mutations ...writer.LineMutation) error
-
 type DeleteValidator func(doc writer.Document) error
 
 type MockDocumentWriter struct {
@@ -34,9 +33,10 @@ type MockDocumentWriter struct {
 }
 
 type Validators struct {
-	Create        []CreateValidator
-	ContentUpdate []ContentUpdateValidator
-	Delete        []DeleteValidator
+	Create         []CreateValidator
+	MetadataUpdate []MetadataUpdateValidator
+	ContentUpdate  []ContentUpdateValidator
+	Delete         []DeleteValidator
 }
 
 func (m *MockDocumentWriter) Create(path string, metadata reader.Metadata, content []byte) error {
@@ -51,6 +51,19 @@ func (m *MockDocumentWriter) validateCreate(doc writer.Document, metadata reader
 	m.Validators.Create = m.Validators.Create[1:]
 	slog.Info("removed create validator", "remaining", len(m.Validators.Create), "doc", doc, "metadata", metadata, "content", content)
 	return validator(doc, metadata, content, m.Feed)
+}
+
+func (m *MockDocumentWriter) UpdateMetadata(doc writer.Document, metadata reader.Metadata) error {
+	return m.validateMetadataUpdate(doc, metadata)
+}
+
+func (m *MockDocumentWriter) validateMetadataUpdate(doc writer.Document, metadata reader.Metadata) error {
+	if len(m.Validators.MetadataUpdate) == 0 {
+		return fmt.Errorf("no metadata update validators left")
+	}
+	validator := m.Validators.MetadataUpdate[0]
+	m.Validators.MetadataUpdate = m.Validators.MetadataUpdate[1:]
+	return validator(doc, metadata)
 }
 
 func (m *MockDocumentWriter) UpdateContent(doc writer.Document, mutations ...writer.LineMutation) error {

@@ -33,6 +33,13 @@ func (c *ProjectClient) CreateProject(path string, name string, status Status, o
 	return c.writer.Create(path, metadata, contents)
 }
 
+func (c *ProjectClient) UpdateProject(project Project) error {
+	slog.Debug("updating project", "identifier", project.Identifier().String(), "project", project.String())
+
+	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: project.Status()}
+	return c.writer.UpdateMetadata(writer.Document{Path: project.Path()}, metadata)
+}
+
 func (c *ProjectClient) DeleteProject(path string) error {
 	slog.Debug("deleting project", "path", path)
 	return c.writer.Delete(writer.Document{Path: path})
