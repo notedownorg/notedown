@@ -32,6 +32,7 @@ type publisher = traits.Publisher[Event]
 
 type DocumentWriter interface {
 	Create(path string, metadata reader.Metadata, content []byte) error
+	UpdateMetadata(doc writer.Document, metadata reader.Metadata) error
 	Delete(doc writer.Document) error
 }
 

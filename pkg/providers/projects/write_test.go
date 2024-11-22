@@ -35,6 +35,13 @@ func TestWrite(t *testing.T) {
 					return nil
 				},
 			},
+			MetadataUpdate: []test.MetadataUpdateValidator{
+				func(doc writer.Document, metadata reader.Metadata) error {
+					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
+					assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Active}, metadata)
+					return nil
+				},
+			},
 			Delete: []test.DeleteValidator{
 				func(doc writer.Document) error {
 					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
@@ -44,5 +51,6 @@ func TestWrite(t *testing.T) {
 		},
 	)
 	assert.NoError(t, client.CreateProject("projects/project.md", "project", projects.Backlog))
+	assert.NoError(t, client.UpdateProject(projects.NewProject(projects.NewIdentifier("projects/project.md", ""), projects.WithStatus(projects.Active))))
 	assert.NoError(t, client.DeleteProject("projects/project.md"))
 }

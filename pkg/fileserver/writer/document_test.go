@@ -119,6 +119,95 @@ const (
 	frontmatterNoContentChecksum = "cc0e785e1411c118e1341d0d69f786fca07ceb405b492ad07d26d83d142fe353"
 )
 
+func TestUpdateMetadataDocument(t *testing.T) {
+	tests := []struct {
+		name      string
+		doc       writer.Document
+		metadata  reader.Metadata
+		wantErr   bool
+		wantFinal []byte
+	}{
+		{
+			name:     "Basic file",
+			doc:      writer.Document{Path: "basic.md", Checksum: basicChecksum},
+			metadata: reader.Metadata{"test": "updated"},
+			wantFinal: []byte(`---
+test: updated
+---
+This is a basic document
+
+It has no front matter
+
+This line is here to be deleted
+
+This line is here to be updated
+`),
+		},
+		{
+			name:     "File with front matter and content",
+			doc:      writer.Document{Path: "frontmatter.md", Checksum: frontmatterChecksum},
+			metadata: reader.Metadata{"test": "updated"},
+			wantFinal: []byte(`---
+test: updated
+---
+
+This document has front matter
+`),
+		},
+		{
+			name:     "File with front matter and no content",
+			doc:      writer.Document{Path: "frontmatter_no_content.md", Checksum: frontmatterNoContentChecksum},
+			metadata: reader.Metadata{"test": "updated"},
+			wantFinal: []byte(`---
+test: updated
+---
+`),
+		},
+		{
+			name:     "Empty file",
+			doc:      writer.Document{Path: "empty.md", Checksum: emptyChecksum},
+			metadata: reader.Metadata{"test": "updated"},
+			wantFinal: []byte(`---
+test: updated
+---
+`),
+		},
+		{
+			name:     "File no longer exists",
+			doc:      writer.Document{Path: "does_not_exist.md", Checksum: ""},
+			metadata: reader.Metadata{"test": "updated"},
+			wantErr:  true,
+		},
+		{
+			name:     "File has been modified since last read",
+			doc:      writer.Document{Path: "basic.md", Checksum: "bad_checksum"},
+			metadata: reader.Metadata{"test": "updated"},
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		dir, err := copyTestData(t.Name())
+		if err != nil {
+			t.Fatalf("failed to copy test data: %v", err)
+		}
+		client := writer.NewClient(dir)
+
+		t.Run(tt.name, func(t *testing.T) {
+			err := client.UpdateMetadata(tt.doc, tt.metadata)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+
+			// Check the file contents
+			contents, err := os.ReadFile(filepath.Join(dir, tt.doc.Path))
+			assert.NoError(t, err)
+			assert.Equal(t, string(tt.wantFinal), string(contents))
+		})
+	}
+}
+
 func TestUpdateContentDocument(t *testing.T) {
 	tests := []struct {
 		name      string

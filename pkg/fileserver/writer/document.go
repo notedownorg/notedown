@@ -70,6 +70,45 @@ func (c Client) Create(path string, metadata reader.Metadata, content []byte) er
 	return os.WriteFile(c.abs(path), b.Bytes(), 0644)
 }
 
+func (c Client) UpdateMetadata(doc Document, metadata reader.Metadata) error {
+	slog.Debug("updating metadata of document", "path", doc.Path)
+
+	lines, frontmatter, err := readAndValidateFile(c.abs(doc.Path), doc.Checksum)
+	if err != nil {
+		return fmt.Errorf("failed to validate document: %w", err)
+	}
+
+	// Drop the current frontmatter if it exists
+	if frontmatter != -1 {
+		lines = lines[frontmatter:]
+	}
+
+	// Update the metadata
+	var b bytes.Buffer
+	if metadata != nil && len(metadata) > 0 {
+		md, err := yaml.Marshal(metadata)
+		if err != nil {
+			return fmt.Errorf("failed to marshal metadata: %w", err)
+		}
+		b.WriteString("---\n")
+		b.Write(md)
+		b.WriteString("---\n")
+	}
+
+	content := bytes.NewBuffer([]byte{})
+	content.Write(b.Bytes())
+	for _, line := range lines {
+		content.WriteString(line)
+		content.WriteString("\n")
+	}
+
+	if err := os.WriteFile(c.abs(doc.Path), content.Bytes(), 0644); err != nil {
+		return fmt.Errorf("failed to write document: %w", err)
+	}
+
+	return nil
+}
+
 // Update contents of a document. Mutations are applied in order and are atomeic.
 // i.e. if any mutation errors, the document will not be written to disk.
 func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
