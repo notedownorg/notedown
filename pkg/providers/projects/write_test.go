@@ -19,20 +19,30 @@ import (
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestWrite(t *testing.T) {
 	client, _ := buildClient(loadEvents(),
-		// Create
-		func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
-			assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
-			assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Backlog}, metadata)
-			assert.Equal(t, []byte("# project\n\n"), content)
-			return nil
+		test.Validators{
+			Create: []test.CreateValidator{
+				func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
+					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
+					assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Backlog}, metadata)
+					assert.Equal(t, []byte("# project\n\n"), content)
+					return nil
+				},
+			},
+			Delete: []test.DeleteValidator{
+				func(doc writer.Document) error {
+					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
+					return nil
+				},
+			},
 		},
 	)
-
 	assert.NoError(t, client.CreateProject("projects/project.md", "project", projects.Backlog))
+	assert.NoError(t, client.DeleteProject("projects/project.md"))
 }

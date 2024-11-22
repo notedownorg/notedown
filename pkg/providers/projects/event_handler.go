@@ -76,7 +76,7 @@ func extractStatus(path string, metadata reader.Metadata) Status {
 
 	str, ok := metadata[StatusKey].(string)
 	if !ok {
-		slog.Error("invalid status value, defaulting to backlog", "status", metadata[StatusKey], "path", path)
+		slog.Error("invalid status type, defaulting to backlog", "status", metadata[StatusKey], "path", path)
 		return Backlog
 	}
 

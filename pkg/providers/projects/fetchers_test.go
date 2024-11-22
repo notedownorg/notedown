@@ -17,13 +17,14 @@ package projects_test
 import (
 	"testing"
 
+	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/providers/projects"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFetchAllProjects(t *testing.T) {
 	events := loadEvents()
-	c, _ := buildClient(events)
+	c, _ := buildClient(events, test.Validators{})
 	notes := c.ListProjects(projects.FetchAllProjects())
 	assert.ElementsMatch(t, eventNotes, notes)
 }

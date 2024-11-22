@@ -97,7 +97,7 @@ func TestAddDocument(t *testing.T) {
 		client := writer.NewClient(dir)
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := client.Add(tt.path, tt.metadata, tt.content)
+			err := client.Create(tt.path, tt.metadata, tt.content)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -119,7 +119,7 @@ const (
 	frontmatterNoContentChecksum = "cc0e785e1411c118e1341d0d69f786fca07ceb405b492ad07d26d83d142fe353"
 )
 
-func TestUpdateDocument(t *testing.T) {
+func TestUpdateContentDocument(t *testing.T) {
 	tests := []struct {
 		name      string
 		doc       writer.Document
@@ -215,6 +215,49 @@ This line was updated
 			contents, err := os.ReadFile(filepath.Join(dir, tt.doc.Path))
 			assert.NoError(t, err)
 			assert.Equal(t, string(tt.wantFinal), string(contents))
+		})
+	}
+}
+
+func TestDeleteDocument(t *testing.T) {
+	tests := []struct {
+		name    string
+		doc     writer.Document
+		wantErr bool
+	}{
+		{
+			name: "File exists",
+			doc:  writer.Document{Path: "basic.md", Checksum: basicChecksum},
+		},
+		{
+			name: "File does not exist",
+			doc:  writer.Document{Path: "does_not_exist.md", Checksum: ""},
+		},
+		{
+			name: "File has been modified since last read",
+			doc:  writer.Document{Path: "basic.md", Checksum: "bad_checksum"},
+		},
+	}
+
+	for _, tt := range tests {
+		dir, err := copyTestData(t.Name())
+		if err != nil {
+			t.Fatalf("failed to copy test data: %v", err)
+		}
+		client := writer.NewClient(dir)
+
+		t.Run(tt.name, func(t *testing.T) {
+			err := client.DeleteDocument(tt.doc)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+
+			// Check the file does not exist
+			_, err = os.Stat(filepath.Join(dir, tt.doc.Path))
+			assert.Error(t, err)
+			assert.True(t, os.IsNotExist(err))
 		})
 	}
 }

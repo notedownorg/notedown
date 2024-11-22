@@ -31,7 +31,7 @@ func buildClient(events []reader.Event, validators ...test.ContentUpdateValidato
 	}()
 
 	client := tasks.NewClient(
-		&test.MockDocumentContentUpdater{Validators: validators},
+		&test.MockDocumentWriter{Validators: test.Validators{ContentUpdate: validators}},
 		feed,
 		tasks.WithInitialLoadWaiter(100*time.Millisecond),
 	)
