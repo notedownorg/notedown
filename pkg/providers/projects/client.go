@@ -15,6 +15,8 @@
 package projects
 
 import (
+	"fmt"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -33,6 +35,7 @@ type DocumentWriter interface {
 type ProjectClient struct {
 	*watcher
 	*publisher
+
 	writer DocumentWriter
 	dir    string
 
@@ -66,4 +69,9 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 	}
 
 	return client
+}
+
+// Where a new project should be created based on the name
+func (c *ProjectClient) NewProjectLocation(name string) string {
+	return filepath.Join(c.dir, fmt.Sprintf("%s.md", name))
 }
