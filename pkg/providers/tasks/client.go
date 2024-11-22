@@ -31,6 +31,8 @@ type DocumentUpdater interface {
 	UpdateContent(doc writer.Document, mutations ...writer.LineMutation) error
 }
 
+var _ DocumentUpdater = writer.Client{}
+
 type TaskClient struct {
 	*watcher
 	*publisher

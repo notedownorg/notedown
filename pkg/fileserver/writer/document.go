@@ -145,7 +145,7 @@ func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
 	return nil
 }
 
-func (c Client) DeleteDocument(doc Document) error {
+func (c Client) Delete(doc Document) error {
 	slog.Debug("deleting document", "path", doc.Path)
 	if err := os.Remove(c.abs(doc.Path)); err != nil {
 		if !os.IsNotExist(err) {
