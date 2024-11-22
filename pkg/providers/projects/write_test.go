@@ -52,5 +52,5 @@ func TestWrite(t *testing.T) {
 	)
 	assert.NoError(t, client.CreateProject("projects/project.md", "project", projects.Backlog))
 	assert.NoError(t, client.UpdateProject(projects.NewProject(projects.NewIdentifier("projects/project.md", ""), projects.WithStatus(projects.Active))))
-	assert.NoError(t, client.DeleteProject("projects/project.md"))
+	assert.NoError(t, client.DeleteProject(projects.NewProject(projects.NewIdentifier("projects/project.md", ""))))
 }

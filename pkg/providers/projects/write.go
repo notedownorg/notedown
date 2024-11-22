@@ -40,7 +40,7 @@ func (c *ProjectClient) UpdateProject(project Project) error {
 	return c.writer.UpdateMetadata(writer.Document{Path: project.Path()}, metadata)
 }
 
-func (c *ProjectClient) DeleteProject(path string) error {
-	slog.Debug("deleting project", "path", path)
-	return c.writer.Delete(writer.Document{Path: path})
+func (c *ProjectClient) DeleteProject(project Project) error {
+	slog.Debug("deleting project", "name", project.Name(), "path", project.Path())
+	return c.writer.Delete(writer.Document{Path: project.Path()})
 }
