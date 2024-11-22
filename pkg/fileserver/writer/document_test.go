@@ -336,7 +336,7 @@ func TestDeleteDocument(t *testing.T) {
 		client := writer.NewClient(dir)
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := client.DeleteDocument(tt.doc)
+			err := client.Delete(tt.doc)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

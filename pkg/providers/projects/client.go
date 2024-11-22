@@ -36,6 +36,8 @@ type DocumentWriter interface {
 	Delete(doc writer.Document) error
 }
 
+var _ DocumentWriter = writer.Client{}
+
 type ProjectClient struct {
 	*watcher
 	*publisher

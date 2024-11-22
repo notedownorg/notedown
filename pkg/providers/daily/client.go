@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 )
 
@@ -29,6 +30,8 @@ type publisher = traits.Publisher[Event]
 type DocumentWriter interface {
 	Create(path string, metadata reader.Metadata, content []byte) error
 }
+
+var _ DocumentWriter = writer.Client{}
 
 type DailyClient struct {
 	*watcher
