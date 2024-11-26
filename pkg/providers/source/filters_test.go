@@ -12,40 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package projects_test
+package source_test
 
 import (
 	"testing"
 
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/projects"
+	"github.com/notedownorg/notedown/pkg/providers/source"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestProjectFilters(t *testing.T) {
+func TestSourceFilters(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events, test.Validators{})
 
 	tests := []struct {
 		name      string
-		filter    collections.Filter[projects.Project]
-		wantNotes []projects.Project
+		filter    collections.Filter[source.Source]
+		wantNotes []source.Source
 	}{
 		{
-			name:      "Filter by status",
-			filter:    projects.FilterByStatus(projects.Active),
-			wantNotes: []projects.Project{eventNotes[0]},
+			name:      "Filter by format",
+			filter:    source.FilterByFormat(source.Article),
+			wantNotes: []source.Source{eventNotes[0], eventNotes[2], eventNotes[4]},
 		},
 		{
-			name:      "Filter by multiple statuses",
-			filter:    projects.FilterByStatus(projects.Active, projects.Archived),
-			wantNotes: []projects.Project{eventNotes[0], eventNotes[3]},
+			name:      "Filter by multiple formats",
+			filter:    source.FilterByFormat(source.Article, source.Video),
+			wantNotes: eventNotes[:5],
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.ElementsMatch(t, tt.wantNotes, c.ListProjects(projects.FetchAllProjects(), projects.WithFilter(tt.filter)))
+			assert.ElementsMatch(t, tt.wantNotes, c.ListSources(source.FetchAllSources(), source.WithFilter(tt.filter)))
 		})
 	}
 }
