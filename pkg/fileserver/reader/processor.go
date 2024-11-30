@@ -68,7 +68,7 @@ func (c *Client) processFile(path string, load bool) {
 		hash.Write(contents)
 		checksum := fmt.Sprintf("%x", hash.Sum(nil))
 		d.Checksum = checksum
-		d.lastUpdated = time.Now().Unix()
+		d.lastUpdated = time.Now().UnixNano()
 
 		slog.Debug("updating document in cache", slog.String("file", path), slog.String("relative", rel))
 
@@ -102,5 +102,5 @@ func (c *Client) isUpToDate(file string) bool {
 	c.docMutex.RLock()
 	doc, ok := c.documents[rel]
 	c.docMutex.RUnlock()
-	return ok && doc.lastUpdated >= info.ModTime().Unix()
+	return ok && doc.lastUpdated >= info.ModTime().UnixNano()
 }
