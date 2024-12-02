@@ -15,7 +15,6 @@
 package source
 
 import (
-	"path/filepath"
 	"strings"
 )
 
@@ -42,8 +41,11 @@ func (i identifier) String() string {
 	return builder.String()
 }
 
-const FormatKey = "format"
-const UrlKey = "url"
+const (
+	TitleKey  = "title"
+	FormatKey = "format"
+	UrlKey    = "url"
+)
 
 type Format string
 
@@ -60,7 +62,7 @@ var formatMap = map[string]Format{
 }
 
 type Source struct {
-	name       string
+	title      string
 	identifier identifier
 	format     Format
 	url        string
@@ -68,19 +70,18 @@ type Source struct {
 
 type SourceOption func(*Source)
 
-func NewArticle(identifier identifier, url string, opts ...SourceOption) Source {
-	return NewSource(identifier, Article, append(opts, WithUrl(url))...)
+func NewArticle(identifier identifier, title string, url string, opts ...SourceOption) Source {
+	return NewSource(identifier, title, Article, append(opts, WithUrl(url))...)
 }
 
-func NewVideo(identifier identifier, url string, opts ...SourceOption) Source {
-	return NewSource(identifier, Video, append(opts, WithUrl(url))...)
+func NewVideo(identifier identifier, title string, url string, opts ...SourceOption) Source {
+	return NewSource(identifier, title, Video, append(opts, WithUrl(url))...)
 }
 
-func NewSource(identifier identifier, format Format, opts ...SourceOption) Source {
-	name := strings.TrimSuffix(filepath.Base(identifier.path), filepath.Ext(identifier.path))
+func NewSource(identifier identifier, title string, format Format, opts ...SourceOption) Source {
 	p := Source{
 		identifier: identifier,
-		name:       name,
+		title:      title,
 		format:     format,
 	}
 	for _, opt := range opts {
@@ -92,7 +93,7 @@ func NewSource(identifier identifier, format Format, opts ...SourceOption) Sourc
 // If no name is provided, we will attempt to infer it from the file's basename
 func WithName(name string) SourceOption {
 	return func(p *Source) {
-		p.name = name
+		p.title = name
 	}
 }
 
@@ -113,7 +114,7 @@ func (p Source) Identifier() identifier {
 }
 
 func (p Source) Name() string {
-	return p.name
+	return p.title
 }
 
 func (p Source) Path() string {
