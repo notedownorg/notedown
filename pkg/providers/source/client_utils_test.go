@@ -49,12 +49,12 @@ func sourceCount(events []reader.Event) int {
 }
 
 var eventNotes = []source.Source{
-	source.NewArticle(source.NewIdentifier("library/one.md", "version"), "example.com"),
-	source.NewVideo(source.NewIdentifier("library/two.md", "version"), "example.com"),
-	source.NewArticle(source.NewIdentifier("library/three.md", "version"), "example.com"),
-	source.NewVideo(source.NewIdentifier("library/four.md", "version"), "example.com"),
-	source.NewArticle(source.NewIdentifier("library/five.md", "version"), "example.com"),
-	source.NewSource(source.NewIdentifier("library/six.md", "version"), source.Unknown),
+	source.NewArticle(source.NewIdentifier("library/one.md", "version"), "one", "example.com"),
+	source.NewVideo(source.NewIdentifier("library/two.md", "version"), "two", "example.com"),
+	source.NewArticle(source.NewIdentifier("library/three.md", "version"), "three", "example.com"),
+	source.NewVideo(source.NewIdentifier("library/four.md", "version"), "four", "example.com"),
+	source.NewArticle(source.NewIdentifier("library/five.md", "version"), "five", "example.com"),
+	source.NewSource(source.NewIdentifier("library/six.md", "version"), "six", source.Unknown),
 }
 
 func loadEvents() []reader.Event {
@@ -66,6 +66,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: source.MetadataKey,
+					source.TitleKey:        "one",
 					source.FormatKey:       string(source.Article),
 					source.UrlKey:          "example.com",
 				},
@@ -79,6 +80,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: source.MetadataKey,
+					source.TitleKey:        "two",
 					source.FormatKey:       string(source.Video),
 					source.UrlKey:          "example.com",
 				},
@@ -92,6 +94,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: source.MetadataKey,
+					source.TitleKey:        "three",
 					source.FormatKey:       string(source.Article),
 					source.UrlKey:          "example.com",
 				},
@@ -105,6 +108,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: source.MetadataKey,
+					source.TitleKey:        "four",
 					source.FormatKey:       string(source.Video),
 					source.UrlKey:          "example.com",
 				},
@@ -118,6 +122,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: source.MetadataKey,
+					source.TitleKey:        "five",
 					source.FormatKey:       string(source.Article),
 					source.UrlKey:          "example.com",
 				},
@@ -125,7 +130,7 @@ func loadEvents() []reader.Event {
 				Checksum: "version",
 			},
 		},
-		// No format set, we should prevent this where possible!
+		// No format, url or title set, we should prevent this where possible!
 		// But theres nothing stopping someone from hand editing a file...
 		{
 			Op:  reader.Load,

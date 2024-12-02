@@ -22,7 +22,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFetchAllProjects(t *testing.T) {
+func TestFetchAllSources(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events, test.Validators{})
 	notes := c.ListSources(source.FetchAllSources())

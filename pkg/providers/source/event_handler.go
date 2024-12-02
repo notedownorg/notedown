@@ -16,6 +16,8 @@ package source
 
 import (
 	"log/slog"
+	"path/filepath"
+	"strings"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
@@ -52,9 +54,10 @@ func (c *SourceClient) handleChanges(event reader.Event) bool {
 		return false
 	}
 
+	title := extractTitle(event.Key, event.Document.Metadata)
 	format := extractFormat(event.Key, event.Document.Metadata)
 	url := extractUrl(event.Document.Metadata)
-	p := NewSource(NewIdentifier(event.Key, event.Document.Checksum), format, WithUrl(url))
+	p := NewSource(NewIdentifier(event.Key, event.Document.Checksum), title, format, WithUrl(url))
 
 	c.notesMutex.Lock()
 	c.notes[event.Key] = p
@@ -92,6 +95,21 @@ func extractUrl(metadata reader.Metadata) string {
 	str, ok := metadata[UrlKey].(string)
 	if !ok {
 		slog.Error("invalid url type", "url", metadata[UrlKey])
+		return ""
+	}
+
+	return str
+}
+
+func extractTitle(path string, title reader.Metadata) string {
+	if title[TitleKey] == nil {
+		slog.Error("title key not found, defaulting to filename", "path", path)
+		return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
+	}
+
+	str, ok := title[TitleKey].(string)
+	if !ok {
+		slog.Error("invalid title type", "title", title[TitleKey])
 		return ""
 	}
 
