@@ -36,7 +36,7 @@ func TestWrite(t *testing.T) {
 						source.FormatKey:       source.Article,
 						source.UrlKey:          "example.com",
 					}, metadata)
-					assert.Equal(t, []byte("# source\n\n"), content)
+					assert.Equal(t, []byte("\n# source\n\n"), content)
 					return nil
 				},
 			},
