@@ -34,7 +34,7 @@ func (c *SourceClient) CreateSource(path string, title string, format Format, ur
 		FormatKey:              format,
 		UrlKey:                 url,
 	}
-	content := []byte(fmt.Sprintf("# %s\n\n", title))
+	content := []byte(fmt.Sprintf("\n# %s\n\n", title))
 
 	return c.writer.Create(path, metadata, content)
 }
