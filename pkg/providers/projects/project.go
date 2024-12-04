@@ -43,8 +43,8 @@ func (i identifier) String() string {
 }
 
 const (
-    StatusKey = "status"
-    NameKey   = "name"
+	StatusKey = "status"
+	NameKey   = "name"
 )
 
 type Status string
