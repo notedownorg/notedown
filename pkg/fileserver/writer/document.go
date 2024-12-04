@@ -145,6 +145,22 @@ func (c Client) UpdateContent(doc Document, mutations ...LineMutation) error {
 	return nil
 }
 
+func (c Client) Rename(oldPath, newPath string) error {
+	slog.Debug("renaming document", "oldPath", oldPath, "newPath", newPath)
+
+	// Check if the new path already exists
+	_, err := os.Stat(c.abs(newPath))
+	if err == nil {
+		return &FileExistsError{Filename: newPath}
+	}
+
+	// As we're not changing the content we don't need to validate the checksum
+	if err := os.Rename(c.abs(oldPath), c.abs(newPath)); err != nil {
+		return fmt.Errorf("failed to rename document: %w", err)
+	}
+	return nil
+}
+
 func (c Client) Delete(doc Document) error {
 	slog.Debug("deleting document", "path", doc.Path)
 	if err := os.Remove(c.abs(doc.Path)); err != nil {

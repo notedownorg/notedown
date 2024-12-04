@@ -350,3 +350,49 @@ func TestDeleteDocument(t *testing.T) {
 		})
 	}
 }
+
+func TestRenameDocument(t *testing.T) {
+	tests := []struct {
+		name    string
+		oldPath string
+		newPath string
+		wantErr bool
+	}{
+		{
+			name:    "File exists",
+			oldPath: "basic.md",
+			newPath: "renamed.md",
+		},
+		{
+			name:    "File does not exist",
+			oldPath: "does_not_exist.md",
+			newPath: "renamed.md",
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		dir, err := copyTestData(t.Name())
+		if err != nil {
+			t.Fatalf("failed to copy test data: %v", err)
+		}
+		client := writer.NewClient(dir)
+
+		t.Run(tt.name, func(t *testing.T) {
+			err := client.Rename(tt.oldPath, tt.newPath)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+
+			// Check the file does not exist
+			_, err = os.Stat(filepath.Join(dir, tt.oldPath))
+			assert.Error(t, err)
+			assert.True(t, os.IsNotExist(err))
+
+			// Check the new file exists
+			_, err = os.Stat(filepath.Join(dir, tt.newPath))
+			assert.NoError(t, err)
+		})
+	}
+}

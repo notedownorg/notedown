@@ -25,6 +25,7 @@ import (
 type CreateValidator func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error
 type MetadataUpdateValidator func(doc writer.Document, metadata reader.Metadata) error
 type ContentUpdateValidator func(doc writer.Document, mutations ...writer.LineMutation) error
+type RenameValidator func(oldPath, newPath string) error
 type DeleteValidator func(doc writer.Document) error
 
 type MockDocumentWriter struct {
@@ -36,6 +37,7 @@ type Validators struct {
 	Create         []CreateValidator
 	MetadataUpdate []MetadataUpdateValidator
 	ContentUpdate  []ContentUpdateValidator
+	Rename         []RenameValidator
 	Delete         []DeleteValidator
 }
 
@@ -77,6 +79,19 @@ func (m *MockDocumentWriter) validateContentUpdate(doc writer.Document, mutation
 	validator := m.Validators.ContentUpdate[0]
 	m.Validators.ContentUpdate = m.Validators.ContentUpdate[1:]
 	return validator(doc, mutations...)
+}
+
+func (m *MockDocumentWriter) Rename(oldPath, newPath string) error {
+	return m.validateRename(oldPath, newPath)
+}
+
+func (m *MockDocumentWriter) validateRename(oldPath, newPath string) error {
+	if len(m.Validators.Rename) == 0 {
+		return fmt.Errorf("no rename validators left")
+	}
+	validator := m.Validators.Rename[0]
+	m.Validators.Rename = m.Validators.Rename[1:]
+	return validator(oldPath, newPath)
 }
 
 func (m *MockDocumentWriter) Delete(doc writer.Document) error {

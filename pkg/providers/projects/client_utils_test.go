@@ -67,6 +67,7 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
 					projects.StatusKey:     string(projects.Active),
+					projects.NameKey:       "one",
 				},
 				Contents: []byte(`# One`),
 				Checksum: "version",
@@ -79,6 +80,7 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
 					projects.StatusKey:     string(projects.Backlog),
+					projects.NameKey:       "two",
 				},
 				Contents: []byte(`# Two`),
 				Checksum: "version",
@@ -91,6 +93,7 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
 					projects.StatusKey:     string(projects.Abandoned),
+					projects.NameKey:       "three",
 				},
 				Contents: []byte(`# Three`),
 				Checksum: "version",
@@ -103,6 +106,7 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
 					projects.StatusKey:     string(projects.Archived),
+					projects.NameKey:       "four",
 				},
 				Contents: []byte(`# Four`),
 				Checksum: "version",
@@ -115,6 +119,7 @@ func loadEvents() []reader.Event {
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
 					projects.StatusKey:     string(projects.Blocked),
+					projects.NameKey:       "five",
 				},
 				Contents: []byte(`# Five`),
 				Checksum: "version",
@@ -128,6 +133,7 @@ func loadEvents() []reader.Event {
 			Document: reader.Document{
 				Metadata: reader.Metadata{
 					reader.MetadataTypeKey: projects.MetadataKey,
+					projects.NameKey:       "six",
 				},
 				Contents: []byte(`# Six`),
 				Checksum: "version",
