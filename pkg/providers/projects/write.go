@@ -17,6 +17,7 @@ package projects
 import (
 	"fmt"
 	"log/slog"
+	"path/filepath"
 
 	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/fileserver/writer"
@@ -27,7 +28,7 @@ func (c *ProjectClient) CreateProject(path string, name string, status Status, o
 	project := NewProject(NewIdentifier(path, ""), options...)
 	slog.Debug("creating project", "identifier", project.Identifier().String(), "project", project.String())
 
-	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: status}
+	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: status, NameKey: name}
 	contents := []byte(fmt.Sprintf("# %s\n\n", name))
 
 	return c.writer.Create(path, metadata, contents)
@@ -36,8 +37,23 @@ func (c *ProjectClient) CreateProject(path string, name string, status Status, o
 func (c *ProjectClient) UpdateProject(project Project) error {
 	slog.Debug("updating project", "identifier", project.Identifier().String(), "project", project.String())
 
-	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: project.Status()}
+	metadata := reader.Metadata{reader.MetadataTypeKey: MetadataKey, StatusKey: project.Status(), NameKey: project.Name()}
 	return c.writer.UpdateMetadata(writer.Document{Path: project.Path()}, metadata)
+}
+
+func (c *ProjectClient) RenameProject(project Project, newName string) error {
+	slog.Debug("renaming project", "oldName", project.Name(), "newName", newName, "path", project.Path())
+
+	// Update the project first
+	project = NewProjectFromProject(project, withName(newName))
+	if err := c.UpdateProject(project); err != nil {
+		return fmt.Errorf("failed to update project prior to file rename: %w", err)
+	}
+
+	// Then rename the file itself, we don't change directories just the file name
+	currDir := filepath.Dir(project.Path())
+	newPath := filepath.Join(currDir, fmt.Sprintf("%s.md", newName))
+	return c.writer.Rename(project.Path(), newPath)
 }
 
 func (c *ProjectClient) DeleteProject(project Project) error {

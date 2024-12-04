@@ -30,7 +30,7 @@ func TestWrite(t *testing.T) {
 			Create: []test.CreateValidator{
 				func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
 					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
-					assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Backlog}, metadata)
+                    assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Backlog, projects.NameKey: "project"}, metadata)
 					assert.Equal(t, []byte("# project\n\n"), content)
 					return nil
 				},
@@ -38,10 +38,23 @@ func TestWrite(t *testing.T) {
 			MetadataUpdate: []test.MetadataUpdateValidator{
 				func(doc writer.Document, metadata reader.Metadata) error {
 					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
-					assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Active}, metadata)
+                    assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Active, projects.NameKey: "project"}, metadata)
 					return nil
 				},
+                // Used by rename
+                func(doc writer.Document, metadata reader.Metadata) error {
+                    assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
+                    assert.Equal(t, reader.Metadata{reader.MetadataTypeKey: projects.MetadataKey, projects.StatusKey: projects.Active, projects.NameKey: "new-project"}, metadata)
+                    return nil
+                },
 			},
+            Rename: []test.RenameValidator{
+                func(oldPath, newPath string) error {
+                    assert.Equal(t, "projects/project.md", oldPath)
+                    assert.Equal(t, "projects/new-project.md", newPath)
+                    return nil
+                },
+            },
 			Delete: []test.DeleteValidator{
 				func(doc writer.Document) error {
 					assert.Equal(t, writer.Document{Path: "projects/project.md"}, doc)
@@ -50,7 +63,9 @@ func TestWrite(t *testing.T) {
 			},
 		},
 	)
+	project := projects.NewProject(projects.NewIdentifier("projects/project.md", ""), projects.WithStatus(projects.Active))
 	assert.NoError(t, client.CreateProject("projects/project.md", "project", projects.Backlog))
-	assert.NoError(t, client.UpdateProject(projects.NewProject(projects.NewIdentifier("projects/project.md", ""), projects.WithStatus(projects.Active))))
+	assert.NoError(t, client.UpdateProject(project))
+	assert.NoError(t, client.RenameProject(project, "new-project"))
 	assert.NoError(t, client.DeleteProject(projects.NewProject(projects.NewIdentifier("projects/project.md", ""))))
 }

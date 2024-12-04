@@ -42,7 +42,10 @@ func (i identifier) String() string {
 	return builder.String()
 }
 
-const StatusKey = "status"
+const (
+    StatusKey = "status"
+    NameKey   = "name"
+)
 
 type Status string
 
@@ -82,9 +85,28 @@ func NewProject(identifier identifier, opts ...ProjectOption) Project {
 	return p
 }
 
+func NewProjectFromProject(project Project, opts ...ProjectOption) Project {
+	p := Project{
+		identifier: project.identifier,
+		name:       project.name,
+		status:     project.status,
+	}
+	for _, opt := range opts {
+		opt(&p)
+	}
+	return p
+}
+
 func WithStatus(status Status) ProjectOption {
 	return func(p *Project) {
 		p.status = status
+	}
+}
+
+// Encapsulate name changes, external consumers should use client.RenameProject
+func withName(name string) ProjectOption {
+	return func(p *Project) {
+		p.name = name
 	}
 }
 
