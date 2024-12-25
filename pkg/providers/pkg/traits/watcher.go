@@ -17,7 +17,7 @@ package traits
 import (
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/notedownorg/notedown/pkg/workspace/reader"
 )
 
 type EventHandler func(reader.Event)

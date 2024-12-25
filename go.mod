@@ -1,15 +1,14 @@
 module github.com/notedownorg/notedown
 
-go 1.22
-
-toolchain go1.22.7
+go 1.23.2
 
 require (
-	github.com/a-h/parse v0.0.0-20240121214402-3caf7543159a
 	github.com/fsnotify/fsnotify v1.8.0
+	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
+	github.com/liamawhite/parse v0.0.0-20250104122333-40e84bd95d9d
 	github.com/otiai10/copy v1.14.0
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/teambition/rrule-go v1.8.2
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	golang.org/x/sync v0.3.0

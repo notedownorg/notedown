@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package source_test
+package source
 
 import (
 	"testing"
 
 	"github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/source"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,23 +28,23 @@ func TestSourceFilters(t *testing.T) {
 
 	tests := []struct {
 		name      string
-		filter    collections.Filter[source.Source]
-		wantNotes []source.Source
+		filter    collections.Filter[Source]
+		wantNotes []Source
 	}{
 		{
 			name:      "Filter by format",
-			filter:    source.FilterByFormat(source.Article),
-			wantNotes: []source.Source{eventNotes[0], eventNotes[2], eventNotes[4]},
+			filter:    FilterByFormat(Article),
+			wantNotes: []Source{eventNotes[0], eventNotes[2], eventNotes[4]},
 		},
 		{
 			name:      "Filter by multiple formats",
-			filter:    source.FilterByFormat(source.Article, source.Video),
+			filter:    FilterByFormat(Article, Video),
 			wantNotes: eventNotes[:5],
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.ElementsMatch(t, tt.wantNotes, c.ListSources(source.FetchAllSources(), source.WithFilter(tt.filter)))
+			assert.ElementsMatch(t, tt.wantNotes, c.ListSources(FetchAllSources(), WithFilter(tt.filter)))
 		})
 	}
 }

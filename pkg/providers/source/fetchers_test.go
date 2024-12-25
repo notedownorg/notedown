@@ -12,19 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package source_test
+package source
 
 import (
 	"testing"
 
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/source"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFetchAllSources(t *testing.T) {
 	events := loadEvents()
 	c, _ := buildClient(events, test.Validators{})
-	notes := c.ListSources(source.FetchAllSources())
+	notes := c.ListSources(FetchAllSources())
 	assert.ElementsMatch(t, eventNotes, notes)
 }

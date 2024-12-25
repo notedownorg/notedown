@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package source_test
+package source
 
 import (
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/source"
+	"github.com/notedownorg/notedown/pkg/workspace"
+	"github.com/notedownorg/notedown/pkg/workspace/reader"
 )
 
-func buildClient(events []reader.Event, validators test.Validators) (*source.SourceClient, chan reader.Event) {
+func buildClient(events []reader.Event, validators test.Validators) (*SourceClient, chan reader.Event) {
 	feed := make(chan reader.Event)
 	go func() {
 		for _, event := range events {
@@ -30,10 +30,10 @@ func buildClient(events []reader.Event, validators test.Validators) (*source.Sou
 		}
 	}()
 
-	client := source.NewClient(
+	client := NewClient(
 		&test.MockDocumentWriter{Validators: validators, Feed: feed},
 		feed,
-		source.WithInitialLoadWaiter(100*time.Millisecond),
+		WithInitialLoadWaiter(100*time.Millisecond),
 	)
 	return client, feed
 }
@@ -41,20 +41,20 @@ func buildClient(events []reader.Event, validators test.Validators) (*source.Sou
 func sourceCount(events []reader.Event) int {
 	count := 0
 	for _, event := range events {
-		if event.Op == reader.Load && event.Document.Metadata[reader.MetadataTypeKey] == "source" {
+		if event.Op == reader.Load && event.Document.Metadata[workspace.MetadataTypeKey] == "source" {
 			count++
 		}
 	}
 	return count
 }
 
-var eventNotes = []source.Source{
-	source.NewArticle(source.NewIdentifier("library/one.md", "version"), "one", "example.com"),
-	source.NewVideo(source.NewIdentifier("library/two.md", "version"), "two", "example.com"),
-	source.NewArticle(source.NewIdentifier("library/three.md", "version"), "three", "example.com"),
-	source.NewVideo(source.NewIdentifier("library/four.md", "version"), "four", "example.com"),
-	source.NewArticle(source.NewIdentifier("library/five.md", "version"), "five", "example.com"),
-	source.NewSource(source.NewIdentifier("library/six.md", "version"), "six", source.Unknown),
+var eventNotes = []Source{
+	{Title: "one", Format: Article, Url: "example.com", path: "library/one.md"},
+	{Title: "two", Format: Video, Url: "example.com", path: "library/two.md"},
+	{Title: "three", Format: Article, Url: "example.com", path: "library/three.md"},
+	{Title: "four", Format: Video, Url: "example.com", path: "library/four.md"},
+	{Title: "five", Format: Article, Url: "example.com", path: "library/five.md"},
+	{Format: Unknown, Url: "", path: "library/six.md"},
 }
 
 func loadEvents() []reader.Event {
@@ -63,94 +63,88 @@ func loadEvents() []reader.Event {
 		{
 			Op:  reader.Load,
 			Key: "library/one.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
-					source.TitleKey:        "one",
-					source.FormatKey:       string(source.Article),
-					source.UrlKey:          "example.com",
+			Document: workspace.NewDocument(
+				"library/one.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
+					TitleKey:                  "one",
+					FormatKey:                 string(Article),
+					UrlKey:                    "example.com",
 				},
-				Contents: []byte(`# One`),
-				Checksum: "version",
-			},
+			),
 		},
 		{
 			Op:  reader.Load,
 			Key: "library/two.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
-					source.TitleKey:        "two",
-					source.FormatKey:       string(source.Video),
-					source.UrlKey:          "example.com",
+			Document: workspace.NewDocument(
+				"library/two.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
+					TitleKey:                  "two",
+					FormatKey:                 string(Video),
+					UrlKey:                    "example.com",
 				},
-				Contents: []byte(`# Two`),
-				Checksum: "version",
-			},
+			),
 		},
 		{
 			Op:  reader.Load,
 			Key: "library/three.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
-					source.TitleKey:        "three",
-					source.FormatKey:       string(source.Article),
-					source.UrlKey:          "example.com",
+			Document: workspace.NewDocument(
+				"library/three.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
+					TitleKey:                  "three",
+					FormatKey:                 string(Article),
+					UrlKey:                    "example.com",
 				},
-				Contents: []byte(`# Three`),
-				Checksum: "version",
-			},
+			),
 		},
 		{
 			Op:  reader.Load,
 			Key: "library/four.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
-					source.TitleKey:        "four",
-					source.FormatKey:       string(source.Video),
-					source.UrlKey:          "example.com",
+			Document: workspace.NewDocument(
+				"library/four.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
+					TitleKey:                  "four",
+					FormatKey:                 string(Video),
+					UrlKey:                    "example.com",
 				},
-				Contents: []byte(`# Four`),
-				Checksum: "version",
-			},
+			),
 		},
 		{
 			Op:  reader.Load,
 			Key: "library/five.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
-					source.TitleKey:        "five",
-					source.FormatKey:       string(source.Article),
-					source.UrlKey:          "example.com",
+			Document: workspace.NewDocument(
+				"library/five.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
+					TitleKey:                  "five",
+					FormatKey:                 string(Article),
+					UrlKey:                    "example.com",
 				},
-				Contents: []byte(`# Five`),
-				Checksum: "version",
-			},
+			),
 		},
 		// No format, url or title set, we should prevent this where possible!
 		// But theres nothing stopping someone from hand editing a file...
 		{
 			Op:  reader.Load,
 			Key: "library/six.md",
-			Document: reader.Document{
-				Metadata: reader.Metadata{
-					reader.MetadataTypeKey: source.MetadataKey,
+			Document: workspace.NewDocument(
+				"library/six.md",
+				workspace.Metadata{
+					workspace.MetadataTypeKey: MetadataKey,
 				},
-				Contents: []byte(`# Six`),
-				Checksum: "version",
-			},
+			),
 		},
 		// Non-source note
 		{
 			Op:  reader.Load,
 			Key: "someothernote.md",
-			Document: reader.Document{
-				Contents: []byte(`# Some other note`),
-				Checksum: "version",
-			},
+			Document: workspace.NewDocument(
+				"someothernote.md",
+				nil,
+			),
 		},
 		// Load complete
 		{

@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package source_test
+package source
 
 import (
 	"testing"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
-	"github.com/notedownorg/notedown/pkg/providers/source"
+	"github.com/notedownorg/notedown/pkg/workspace"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -28,26 +26,25 @@ func TestWrite(t *testing.T) {
 	client, _ := buildClient(loadEvents(),
 		test.Validators{
 			Create: []test.CreateValidator{
-				func(doc writer.Document, metadata reader.Metadata, content []byte, feed chan reader.Event) error {
-					assert.Equal(t, writer.Document{Path: "library/source.md"}, doc)
-					assert.Equal(t, reader.Metadata{
-						reader.MetadataTypeKey: source.MetadataKey,
-						source.TitleKey:        "source",
-						source.FormatKey:       source.Article,
-						source.UrlKey:          "example.com",
-					}, metadata)
-					assert.Equal(t, []byte("\n# source\n\n"), content)
+				func(doc workspace.Document) error {
+					assert.Equal(t, "library/source.md", doc.Path())
+					assert.Equal(t, workspace.Metadata{
+						workspace.MetadataTypeKey: MetadataKey,
+						TitleKey:                  "source",
+						FormatKey:                 Article,
+						UrlKey:                    "example.com",
+					}, doc.Metadata)
 					return nil
 				},
 			},
 			Delete: []test.DeleteValidator{
-				func(doc writer.Document) error {
-					assert.Equal(t, writer.Document{Path: "library/source.md"}, doc)
+				func(path string) error {
+					assert.Equal(t, "library/source.md", path)
 					return nil
 				},
 			},
 		},
 	)
-	assert.NoError(t, client.CreateSource("library/source.md", "source", source.Article, "example.com"))
-	assert.NoError(t, client.DeleteSource(source.NewArticle(source.NewIdentifier("library/source.md", ""), "source", "example.com")))
+	assert.NoError(t, client.CreateSource("library/source.md", "source", Article, "example.com"))
+	assert.NoError(t, client.DeleteSource(Source{path: "library/source.md"}))
 }

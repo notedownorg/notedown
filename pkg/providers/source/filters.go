@@ -31,7 +31,7 @@ func WithFilter(filter collections.Filter[Source]) collections.ListOption[Source
 func FilterByFormat(status ...Format) collections.Filter[Source] {
 	return func(source Source) bool {
 		for _, s := range status {
-			if source.Format() == s {
+			if source.Format == s {
 				return true
 			}
 		}
