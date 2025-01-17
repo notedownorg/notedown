@@ -16,11 +16,10 @@ package source
 
 import (
 	"log/slog"
-	"path/filepath"
-	"strings"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
+	"github.com/notedownorg/notedown/pkg/workspace/reader"
 )
 
 func onLoad(c *SourceClient) traits.EventHandler {
@@ -41,77 +40,39 @@ func onChange(c *SourceClient) traits.EventHandler {
 
 func onDelete(c *SourceClient) traits.EventHandler {
 	return func(event reader.Event) {
-		c.notesMutex.Lock()
-		delete(c.notes, event.Key)
-		c.notesMutex.Unlock()
+		c.sourcesMutex.Lock()
+		delete(c.sources, event.Key)
+		c.sourcesMutex.Unlock()
+		c.docsMutex.Lock()
+		delete(c.docs, event.Key)
+		c.docsMutex.Unlock()
 		c.publisher.Events <- Event{Op: Delete}
 		slog.Debug("removed source", "path", event.Key)
 	}
 }
 
 func (c *SourceClient) handleChanges(event reader.Event) bool {
+	if event.Document.Metadata == nil || len(event.Document.Metadata) == 0 {
+		return false
+	}
+
 	if event.Document.Metadata.Type() != MetadataKey {
 		return false
 	}
 
-	title := extractTitle(event.Key, event.Document.Metadata)
-	format := extractFormat(event.Key, event.Document.Metadata)
-	url := extractUrl(event.Document.Metadata)
-	p := NewSource(NewIdentifier(event.Key, event.Document.Checksum), title, format, WithUrl(url))
+	var source Source
+	if err := mapstructure.Decode(event.Document.Metadata, &source); err != nil {
+		slog.Error("failed to decode frontmatter", "error", err)
+		return false
+	}
+	source.path = event.Key
 
-	c.notesMutex.Lock()
-	c.notes[event.Key] = p
-	c.notesMutex.Unlock()
+	c.sourcesMutex.Lock()
+	c.sources[event.Key] = source
+	c.sourcesMutex.Unlock()
+	c.docsMutex.Lock()
+	c.docs[event.Key] = event.Document
+	c.docsMutex.Unlock()
 	slog.Debug("added source", "path", event.Key)
 	return true
-}
-
-func extractFormat(path string, metadata reader.Metadata) Format {
-	if metadata[FormatKey] == nil {
-		slog.Error("format key not found", "path", path)
-		return Unknown
-	}
-
-	str, ok := metadata[FormatKey].(string)
-	if !ok {
-		slog.Error("invalid format type", "format", metadata[FormatKey], "path", path)
-		return Unknown
-	}
-
-	format, ok := formatMap[str]
-	if !ok {
-		slog.Error("invalid format value", "format", metadata[FormatKey], "path", path)
-		return Unknown
-	}
-
-	return format
-}
-
-func extractUrl(metadata reader.Metadata) string {
-	if metadata[UrlKey] == nil {
-		return ""
-	}
-
-	str, ok := metadata[UrlKey].(string)
-	if !ok {
-		slog.Error("invalid url type", "url", metadata[UrlKey])
-		return ""
-	}
-
-	return str
-}
-
-func extractTitle(path string, title reader.Metadata) string {
-	if title[TitleKey] == nil {
-		slog.Error("title key not found, defaulting to filename", "path", path)
-		return strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
-	}
-
-	str, ok := title[TitleKey].(string)
-	if !ok {
-		slog.Error("invalid title type", "title", title[TitleKey])
-		return ""
-	}
-
-	return str
 }

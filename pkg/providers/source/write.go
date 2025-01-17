@@ -15,31 +15,25 @@
 package source
 
 import (
-	"fmt"
 	"log/slog"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
+	"github.com/notedownorg/notedown/pkg/workspace"
 )
 
 func (c *SourceClient) CreateSource(path string, title string, format Format, url string, options ...SourceOption) error {
 	options = append(options, WithUrl(url))
+	src := NewSource(title, format, options...)
+	slog.Debug("creating source", "path", src.path)
 
-	source := NewSource(NewIdentifier(path, ""), title, format, options...)
-	slog.Debug("creating source", "identifier", source.Identifier(), "source", source.String())
+	metadata := workspace.NewMetadata(MetadataKey)
+	metadata[TitleKey] = title
+	metadata[FormatKey] = format
+	metadata[UrlKey] = url
 
-	metadata := reader.Metadata{
-		reader.MetadataTypeKey: MetadataKey,
-		TitleKey:               title,
-		FormatKey:              format,
-		UrlKey:                 url,
-	}
-	content := []byte(fmt.Sprintf("\n# %s\n\n", title))
-
-	return c.writer.Create(path, metadata, content)
+	return c.writer.Create(workspace.NewDocument(path, metadata))
 }
 
 func (c *SourceClient) DeleteSource(source Source) error {
-	slog.Debug("deleting source", "identifier", source.Identifier(), "source", source.String())
-	return c.writer.Delete(writer.Document{Path: source.Path()})
+	slog.Debug("deleting source", "path", source.path)
+	return c.writer.Delete(source.path)
 }

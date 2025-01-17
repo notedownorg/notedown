@@ -21,9 +21,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/notedownorg/notedown/pkg/fileserver/reader"
-	"github.com/notedownorg/notedown/pkg/fileserver/writer"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
+	"github.com/notedownorg/notedown/pkg/workspace"
+	"github.com/notedownorg/notedown/pkg/workspace/reader"
+	"github.com/notedownorg/notedown/pkg/workspace/writer"
 )
 
 // Use a type alias to hide the implementation details of the traits
@@ -31,9 +32,8 @@ type watcher = traits.Watcher
 type publisher = traits.Publisher[Event]
 
 type DocumentWriter interface {
-	Create(path string, metadata reader.Metadata, content []byte) error
-	UpdateMetadata(doc writer.Document, metadata reader.Metadata) error
-	Delete(doc writer.Document) error
+	Create(doc workspace.Document) error
+	Delete(path string) error
 }
 
 var _ DocumentWriter = writer.Client{}
@@ -45,10 +45,15 @@ type SourceClient struct {
 	writer DocumentWriter
 	dir    string
 
-	// notes maps between file paths to notes it should ONLY be updated in response
+	// sources maps file paths to source. It should ONLY be updated in response
 	// to events from the docuuments client and should otherwise be read-only.
-	notes      map[string]Source
-	notesMutex sync.RWMutex
+	sources      map[string]Source
+	sourcesMutex sync.RWMutex
+
+	// documents maps file paths to documents. It should ONLY be updated in response
+	// to events from the documents client and should otherwise be read-only.
+	docs      map[string]workspace.Document
+	docsMutex sync.RWMutex
 }
 
 type clientOptions func(*SourceClient)
@@ -62,9 +67,10 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 
 func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *SourceClient {
 	client := &SourceClient{
-		notes:  make(map[string]Source),
-		writer: writer,
-		dir:    "library",
+		sources: make(map[string]Source),
+		docs:    make(map[string]workspace.Document),
+		writer:  writer,
+		dir:     "library",
 	}
 
 	client.publisher = traits.NewPublisher[Event]()

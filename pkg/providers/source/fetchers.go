@@ -19,11 +19,11 @@ import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 func FetchAllSources() collections.Fetcher[SourceClient, Source] {
 	return func(c *SourceClient) []Source {
 		var documents []Source
-		c.notesMutex.RLock()
-		for _, document := range c.notes {
+		c.sourcesMutex.RLock()
+		for _, document := range c.sources {
 			documents = append(documents, document)
 		}
-		c.notesMutex.RUnlock()
+		c.sourcesMutex.RUnlock()
 		return documents
 	}
 }

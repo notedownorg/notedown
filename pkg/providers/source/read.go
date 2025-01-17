@@ -19,12 +19,6 @@ import "github.com/notedownorg/notedown/pkg/providers/pkg/collections"
 type Fetcher = collections.Fetcher[SourceClient, Source]
 type ListOption = collections.ListOption[Source]
 
-func (c *SourceClient) ProjectSummary() int {
-	c.notesMutex.RLock()
-	defer c.notesMutex.RUnlock()
-	return len(c.notes)
-}
-
 // Opts are applied in order so filters should be applied before sorters
 func (c *SourceClient) ListSources(fetcher Fetcher, opts ...ListOption) []Source {
 	return collections.List(c, fetcher, opts...)

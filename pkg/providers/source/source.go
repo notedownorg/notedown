@@ -14,32 +14,7 @@
 
 package source
 
-import (
-	"strings"
-)
-
 const MetadataKey = "source"
-
-type identifier struct {
-	path    string
-	version string
-}
-
-// By default we will set line to -1 to default to end of file
-func NewIdentifier(path string, version string) identifier {
-	return identifier{path: path, version: version}
-}
-
-func (i identifier) String() string {
-	// Pipe separators are good enough for now but may need to be changed as pipes
-	// are technically valid (although unlikely to actually be used) in unix file paths
-	// We may want to consider an actual encoding scheme for this in the future.
-	var builder strings.Builder
-	builder.WriteString(i.path)
-	builder.WriteString("|")
-	builder.WriteString(i.version)
-	return builder.String()
-}
 
 const (
 	TitleKey  = "title"
@@ -62,69 +37,48 @@ var formatMap = map[string]Format{
 }
 
 type Source struct {
-	title      string
-	identifier identifier
-	format     Format
-	url        string
+	// Required to lookup the document in the workspace when we need to write it
+	path string
+
+	Format Format
+	Title  string
+	Url    string
 }
 
 type SourceOption func(*Source)
 
-func NewArticle(identifier identifier, title string, url string, opts ...SourceOption) Source {
-	return NewSource(identifier, title, Article, append(opts, WithUrl(url))...)
+func NewArticle(title string, url string, opts ...SourceOption) Source {
+	return NewSource(title, Article, append(opts, WithUrl(url))...)
 }
 
-func NewVideo(identifier identifier, title string, url string, opts ...SourceOption) Source {
-	return NewSource(identifier, title, Video, append(opts, WithUrl(url))...)
+func NewVideo(title string, url string, opts ...SourceOption) Source {
+	return NewSource(title, Video, append(opts, WithUrl(url))...)
 }
 
-func NewSource(identifier identifier, title string, format Format, opts ...SourceOption) Source {
-	p := Source{
-		identifier: identifier,
-		title:      title,
-		format:     format,
-	}
+func NewSource(title string, format Format, opts ...SourceOption) Source {
+	src := Source{Title: title, Format: format}
 	for _, opt := range opts {
-		opt(&p)
+		opt(&src)
 	}
-	return p
-}
-
-// If no name is provided, we will attempt to infer it from the file's basename
-func WithName(name string) SourceOption {
-	return func(p *Source) {
-		p.title = name
-	}
+	return src
 }
 
 func WithFormat(format Format) SourceOption {
 	return func(p *Source) {
-		p.format = format
+		p.Format = format
 	}
 }
 
 func WithUrl(url string) SourceOption {
 	return func(p *Source) {
-		p.url = url
+		p.Url = url
 	}
 }
 
-func (p Source) Identifier() identifier {
-	return p.identifier
-}
-
 func (p Source) Name() string {
-	return p.title
-}
-
-func (p Source) Path() string {
-	return p.identifier.path
-}
-
-func (p Source) Format() Format {
-	return p.format
+	return p.Title
 }
 
 func (p Source) String() string {
-	return p.Name()
+	return p.Title
 }
