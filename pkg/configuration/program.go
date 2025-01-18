@@ -19,22 +19,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-playground/validator/v10"
 	"sigs.k8s.io/yaml"
 )
 
 type ProgramConfiguration struct {
-	Workspaces       map[string]WorkspaceConfiguration `json:"workspaces" validate:"required,min=1"`
-	DefaultWorkspace string                            `json:"default_workspace" validate:"required"`
+	Workspaces       map[string]WorkspaceConfiguration `json:"workspaces"`
+	DefaultWorkspace string                            `json:"default_workspace"`
 }
 
 type WorkspaceConfiguration struct {
-	Location string `json:"location" validate:"required"`
+	Location string `json:"location"`
 }
 
 const programConfigurationPath = ".notedown/config.yaml"
-
-var validate *validator.Validate
 
 func LoadProgramConfiguration() (*ProgramConfiguration, error) {
 	home, err := os.UserHomeDir()
@@ -60,12 +57,30 @@ func NewProgramConfiguration(path string) (*ProgramConfiguration, error) {
 		return nil, fmt.Errorf("failed to unmarshal program configuration: %w", err)
 	}
 
-	validate = validator.New(validator.WithRequiredStructEnabled())
-	if err := validate.Struct(&config); err != nil {
-		for _, err := range err.(validator.ValidationErrors) {
-			return nil, fmt.Errorf("program configuration validation error: %s", err)
-		}
+	if err := config.Validate(); err != nil {
+		return nil, fmt.Errorf("program configuration is invalid: %w", err)
 	}
 
 	return &config, nil
+}
+
+func (c ProgramConfiguration) Validate() error {
+
+	// Workspaces
+	if c.Workspaces == nil || len(c.Workspaces) == 0 {
+		return fmt.Errorf("atleast one workspace must be configured")
+	}
+	for name, workspace := range c.Workspaces {
+		if workspace.Location == "" {
+			return fmt.Errorf("location is required for workspace \"%s\"", name)
+		}
+	}
+	if c.DefaultWorkspace == "" {
+		return fmt.Errorf("default workspace is required")
+	}
+	if _, ok := c.Workspaces[c.DefaultWorkspace]; !ok {
+		return fmt.Errorf("default_workspace \"%s\" does not exist", c.DefaultWorkspace)
+	}
+
+	return nil
 }
