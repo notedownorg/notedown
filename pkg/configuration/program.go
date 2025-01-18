@@ -15,12 +15,16 @@
 package configuration
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"sigs.k8s.io/yaml"
 )
+
+//go:embed program_default.yaml
+var defaultProgramConfiguration []byte
 
 type ProgramConfiguration struct {
 	Workspaces       map[string]WorkspaceConfiguration `json:"workspaces"`
@@ -32,6 +36,27 @@ type WorkspaceConfiguration struct {
 }
 
 const programConfigurationPath = ".notedown/config.yaml"
+
+func InitializeProgramConfiguration() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", fmt.Errorf("failed to get user home directory: %w", err)
+	}
+
+	path := filepath.Join(home, programConfigurationPath)
+	if _, err := os.Stat(path); !os.IsNotExist(err) {
+		return "", fmt.Errorf("program configuration file already exists at %s", path)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+		return "", fmt.Errorf("failed to create directory for program configuration file: %w", err)
+	}
+
+	if err := os.WriteFile(path, defaultProgramConfiguration, 0644); err != nil {
+		return "", fmt.Errorf("failed to write program configuration file: %w", err)
+	}
+	return path, nil
+}
 
 func LoadProgramConfiguration() (*ProgramConfiguration, error) {
 	home, err := os.UserHomeDir()

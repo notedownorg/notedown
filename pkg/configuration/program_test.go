@@ -15,6 +15,7 @@
 package configuration_test
 
 import (
+	_ "embed"
 	"testing"
 
 	. "github.com/notedownorg/notedown/pkg/configuration"
@@ -67,6 +68,17 @@ func TestNewProgramConfiguration(t *testing.T) {
 		{
 			file:    "testdata/defaultworkspace_notexist.yaml",
 			wantErr: true,
+		},
+		{
+			file: "program_default.yaml", // ensure we dont break the init command
+			want: &ProgramConfiguration{
+				Workspaces: map[string]WorkspaceConfiguration{
+					"personal": {
+						Location: "~/notes",
+					},
+				},
+				DefaultWorkspace: "personal",
+			},
 		},
 	}
 	for _, tt := range tests {
