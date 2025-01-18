@@ -127,5 +127,9 @@ func (d Document) Mutated() bool {
 
 // Is the document in memory stale compared to the file on disk
 func (d Document) Modified(lastModified time.Time) bool {
+	if d.path == "basic.md" {
+		fmt.Println("lastModified: ", lastModified.UnixNano())
+		fmt.Println("d.lastModified: ", d.lastModified.UnixNano())
+	}
 	return lastModified.UnixNano() > d.lastModified.UnixNano()
 }

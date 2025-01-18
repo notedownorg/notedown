@@ -15,6 +15,7 @@
 package writer_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -120,16 +121,19 @@ func TestUpdateDocument(t *testing.T) {
 	assert.NoError(t, err)
 	client := writer.NewClient(dir)
 	fullPath := filepath.Join(dir, "basic.md")
+	doc, _ := workspace.LoadDocument(dir, "basic.md", time.Now())
+	// Not sleeping here caused GH runners to fail stale check on linux
+	// As the whole test runs too quickly for nanosecond precision 🤯
+	time.Sleep(time.Millisecond)
 
 	// Test valid update
-	doc, _ := workspace.LoadDocument(dir, "basic.md", time.Now())
 	doc.Blocks = Bl(P("some new content"))
 	err = client.Update(doc)
 	assert.NoError(t, err)
 	contents, _ := os.ReadFile(fullPath)
 	assert.Equal(t, "some new content\n", string(contents))
 
-	// Now that we updated the file the one we have in memory is out of date
+	// Now that we updated the file the original one is out of date
 	// Validate that if we try to update it again we get an error and the file is not modified further
 	doc.Blocks = Bl(P("some even newer content"))
 	err = client.Update(doc)
@@ -220,4 +224,12 @@ func TestDeleteDocument(t *testing.T) {
 			assert.True(t, os.IsNotExist(err))
 		})
 	}
+}
+
+func deepCopy[T any](src, dst *T) error {
+	bytes, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(bytes, dst)
 }
