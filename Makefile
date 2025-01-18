@@ -30,3 +30,6 @@ test:
 
 licenser:
 	licenser apply -r "Notedown Authors"
+
+install:
+	go install -ldflags "-X 'github.com/notedownorg/notedown/cmd.CommitHash=$(shell git rev-parse HEAD)'"
