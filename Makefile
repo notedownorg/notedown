@@ -26,7 +26,7 @@ format: licenser
 	gofmt -w .
 
 test:
-	go test -v ./...
+	go test ./...
 
 licenser:
 	licenser apply -r "Notedown Authors"
