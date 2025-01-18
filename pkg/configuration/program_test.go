@@ -64,6 +64,10 @@ func TestNewProgramConfiguration(t *testing.T) {
 			file:    "testdata/missing.yaml",
 			wantErr: true,
 		},
+		{
+			file:    "testdata/defaultworkspace_notexist.yaml",
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.file, func(t *testing.T) {
