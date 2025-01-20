@@ -15,12 +15,10 @@
 package source
 
 import (
-	"fmt"
-	"path/filepath"
-	"strings"
 	"sync"
 	"time"
 
+	"github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/traits"
 	"github.com/notedownorg/notedown/pkg/workspace"
 	"github.com/notedownorg/notedown/pkg/workspace/reader"
@@ -65,12 +63,12 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	}
 }
 
-func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *SourceClient {
+func NewClient(config *configuration.WorkspaceConfiguration, writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *SourceClient {
 	client := &SourceClient{
 		sources: make(map[string]Source),
 		docs:    make(map[string]workspace.Document),
 		writer:  writer,
-		dir:     "library",
+		dir:     config.Sources.DefaultDirectory,
 	}
 
 	client.publisher = traits.NewPublisher[Event]()
@@ -81,15 +79,4 @@ func NewClient(writer DocumentWriter, feed <-chan reader.Event, opts ...clientOp
 	}
 
 	return client
-}
-
-// Where a new source should be created based on the name
-func (c *SourceClient) NewSourceLocation(name string) string {
-	if name == "" {
-		return ""
-	}
-	if strings.ContainsAny(name, "./\\") {
-		return ""
-	}
-	return filepath.Join(c.dir, fmt.Sprintf("%s.md", name))
 }
