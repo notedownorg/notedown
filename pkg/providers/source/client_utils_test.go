@@ -17,10 +17,17 @@ package source
 import (
 	"time"
 
+	"github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/notedownorg/notedown/pkg/providers/pkg/test"
 	"github.com/notedownorg/notedown/pkg/workspace"
 	"github.com/notedownorg/notedown/pkg/workspace/reader"
 )
+
+var workspaceConfig = &configuration.WorkspaceConfiguration{
+	Sources: configuration.Sources{
+		DefaultDirectory: "sources",
+	},
+}
 
 func buildClient(events []reader.Event, validators test.Validators) (*SourceClient, chan reader.Event) {
 	feed := make(chan reader.Event)
@@ -31,6 +38,7 @@ func buildClient(events []reader.Event, validators test.Validators) (*SourceClie
 	}()
 
 	client := NewClient(
+		workspaceConfig,
 		&test.MockDocumentWriter{Validators: validators, Feed: feed},
 		feed,
 		WithInitialLoadWaiter(100*time.Millisecond),

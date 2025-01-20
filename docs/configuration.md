@@ -1,12 +1,12 @@
 # Configuration
 
-Notedown can be configured at the program level or per-workspace with the more specific (per-workspace) taking precedence when settings can be configured in multiple places.
+Notedown can be configured at the program level or per-workspace. To reduce complexity settings are either available at the program level or the workspace level never both.
 
 ## Program Level Configuration
 
-Program-level configuration can be found at `$HOME/.notedown/config.yaml`.
+Program-level configuration is located at `$HOME/.notedown/config.yaml`.
 
-### Workspaces (Program-Level Only)
+### Workspaces
 
 Workspaces tells Notedown where the roots of each of your sources of notes can be found. 
 
@@ -21,3 +21,18 @@ workspaces:
 # Which workspace tools should default to if no override is set
 default_workspace: personal
 ```
+
+## Workspace Level Configuration
+
+Workspace-level configuration is located at `${WORKSPACE_ROOT}/.notedown/config.yaml`
+
+### Sources
+
+Sources are external content (articles, videos, podcasts, etc.) added to your workspace. The only thing that can be configured is the directory they are added to.
+
+```yaml
+sources:
+    default_directory: sources
+```
+
+

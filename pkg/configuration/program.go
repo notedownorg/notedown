@@ -17,6 +17,7 @@ package configuration
 import (
 	_ "embed"
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -27,51 +28,38 @@ import (
 var defaultProgramConfiguration []byte
 
 type ProgramConfiguration struct {
-	Workspaces       map[string]WorkspaceConfiguration `json:"workspaces"`
-	DefaultWorkspace string                            `json:"default_workspace"`
+	Workspaces       map[string]Workspace `json:"workspaces"`
+	DefaultWorkspace string               `json:"default_workspace"`
 }
 
-type WorkspaceConfiguration struct {
+type Workspace struct {
 	Location string `json:"location"`
 }
 
 const programConfigurationPath = ".notedown/config.yaml"
 
-func InitializeProgramConfiguration() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", fmt.Errorf("failed to get user home directory: %w", err)
-	}
-
-	path := filepath.Join(home, programConfigurationPath)
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		return "", fmt.Errorf("program configuration file already exists at %s", path)
-	}
-
-	if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
-		return "", fmt.Errorf("failed to create directory for program configuration file: %w", err)
-	}
-
-	if err := os.WriteFile(path, defaultProgramConfiguration, 0644); err != nil {
-		return "", fmt.Errorf("failed to write program configuration file: %w", err)
-	}
-	return path, nil
-}
-
-func LoadProgramConfiguration() (*ProgramConfiguration, error) {
+func EnsureProgramConfiguration() (*ProgramConfiguration, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user home directory: %w", err)
 	}
 
 	path := filepath.Join(home, programConfigurationPath)
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("program configuration file does not exist at %s: %w", path, err)
+	_, err = os.Stat(path)
+	if os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
+			return nil, fmt.Errorf("failed to create directory for program configuration file: %w", err)
+		}
+
+		if err := os.WriteFile(path, defaultProgramConfiguration, 0644); err != nil {
+			return nil, fmt.Errorf("failed to write program configuration file: %w", err)
+		}
+		slog.Info("initialized program configuration", "path", path)
 	}
-	return NewProgramConfiguration(path)
+	return loadProgramConfiguration(path)
 }
 
-func NewProgramConfiguration(path string) (*ProgramConfiguration, error) {
+func loadProgramConfiguration(path string) (*ProgramConfiguration, error) {
 	contents, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read program configuration file at %s: %w", path, err)

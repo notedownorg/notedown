@@ -12,14 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package configuration_test
+package configuration
 
 import (
 	_ "embed"
+	"os"
+	"path/filepath"
 	"testing"
 
-	. "github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/stretchr/testify/assert"
+)
+
+var (
+	defaultProgram = &ProgramConfiguration{
+		Workspaces: map[string]Workspace{
+			"personal": {
+				Location: "~/notes",
+			},
+		},
+		DefaultWorkspace: "personal",
+	}
+	fullProgram = &ProgramConfiguration{
+		Workspaces: map[string]Workspace{
+			"personal": {
+				Location: "~/notes",
+			},
+			"work": {
+				Location: "~/worknotes",
+			},
+		},
+		DefaultWorkspace: "personal",
+	}
 )
 
 func TestNewProgramConfiguration(t *testing.T) {
@@ -29,23 +52,13 @@ func TestNewProgramConfiguration(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			file: "testdata/full.yaml",
-			want: &ProgramConfiguration{
-				Workspaces: map[string]WorkspaceConfiguration{
-					"personal": {
-						Location: "~/notes",
-					},
-					"work": {
-						Location: "~/worknotes",
-					},
-				},
-				DefaultWorkspace: "personal",
-			},
+			file: "testdata/program/full.yaml",
+			want: fullProgram,
 		},
 		{
-			file: "testdata/minimal.yaml",
+			file: "testdata/program/minimal.yaml",
 			want: &ProgramConfiguration{
-				Workspaces: map[string]WorkspaceConfiguration{
+				Workspaces: map[string]Workspace{
 					"personal": {
 						Location: "~/notes",
 					},
@@ -54,36 +67,29 @@ func TestNewProgramConfiguration(t *testing.T) {
 			},
 		},
 		{
-			file:    "testdata/empty.yaml",
+			file:    "testdata/program/empty.yaml",
 			wantErr: true,
 		},
 		{
-			file:    "testdata/invalid.yaml",
+			file:    "testdata/program/invalid.yaml",
 			wantErr: true,
 		},
 		{
-			file:    "testdata/missing.yaml",
+			file:    "testdata/program/missing.yaml",
 			wantErr: true,
 		},
 		{
-			file:    "testdata/defaultworkspace_notexist.yaml",
+			file:    "testdata/program/workspace_default_notexist.yaml",
 			wantErr: true,
 		},
 		{
-			file: "program_default.yaml", // ensure we dont break the init command
-			want: &ProgramConfiguration{
-				Workspaces: map[string]WorkspaceConfiguration{
-					"personal": {
-						Location: "~/notes",
-					},
-				},
-				DefaultWorkspace: "personal",
-			},
+			file: "program_default.yaml", // dont accidentally create an invalid configuratio
+			want: defaultProgram,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.file, func(t *testing.T) {
-			got, err := NewProgramConfiguration(tt.file)
+			got, err := loadProgramConfiguration(tt.file)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -92,4 +98,22 @@ func TestNewProgramConfiguration(t *testing.T) {
 			assert.Equal(t, tt.want, got)
 		})
 	}
+}
+
+func TestEnsureProgramConfiguration(t *testing.T) {
+	tmpdir := t.TempDir()
+	os.Setenv("HOME", tmpdir) // override the home directory so we dont mess with the real one
+
+	// Test that the default configuration is created
+	config, err := EnsureProgramConfiguration()
+	assert.NoError(t, err)
+	assert.Equal(t, defaultProgram, config)
+
+	// Overwrite the configuration file with a custom one and check we don't overwrite it
+	full, _ := os.ReadFile("testdata/program/full.yaml")
+	assert.NoError(t, os.WriteFile(filepath.Join(tmpdir, programConfigurationPath), full, 0644))
+	config, err = EnsureProgramConfiguration()
+	assert.NoError(t, err)
+	assert.Equal(t, fullProgram, config)
+
 }
