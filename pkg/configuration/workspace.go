@@ -35,7 +35,7 @@ type Sources struct {
 	DefaultDirectory string `json:"default_directory"`
 }
 
-const workspaceConfigurationPath = ".notedown/config.yaml"
+const workspaceConfigurationPath = ".config/notedown.yaml"
 
 func EnsureWorkspaceConfiguration(location string) (*WorkspaceConfiguration, error) {
 	path := filepath.Join(ExpandPath(location), workspaceConfigurationPath)
