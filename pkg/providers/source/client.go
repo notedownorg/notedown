@@ -63,12 +63,12 @@ func WithInitialLoadWaiter(tick time.Duration) clientOptions {
 	}
 }
 
-func NewClient(config *configuration.WorkspaceConfiguration, writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *SourceClient {
+func NewClient(config *configuration.Sources, writer DocumentWriter, feed <-chan reader.Event, opts ...clientOptions) *SourceClient {
 	client := &SourceClient{
 		sources: make(map[string]Source),
 		docs:    make(map[string]workspace.Document),
 		writer:  writer,
-		dir:     config.Sources.DefaultDirectory,
+		dir:     config.DefaultDirectory,
 	}
 
 	client.publisher = traits.NewPublisher[Event]()

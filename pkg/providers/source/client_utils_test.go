@@ -38,7 +38,7 @@ func buildClient(events []reader.Event, validators test.Validators) (*SourceClie
 	}()
 
 	client := NewClient(
-		workspaceConfig,
+		&workspaceConfig.Sources,
 		&test.MockDocumentWriter{Validators: validators, Feed: feed},
 		feed,
 		WithInitialLoadWaiter(100*time.Millisecond),
