@@ -25,7 +25,7 @@ type Client struct {
 }
 
 func NewClient(ws *configuration.Workspace) *Client {
-	return &Client{root: ws.Location}
+	return &Client{root: configuration.ExpandPath(ws.Location)}
 }
 
 func (c Client) abs(doc string) string {

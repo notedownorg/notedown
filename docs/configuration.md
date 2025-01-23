@@ -4,7 +4,7 @@ Notedown can be configured at the program level or per-workspace. To reduce comp
 
 ## Program Level Configuration
 
-Program-level configuration is located at `$HOME/.notedown/config.yaml`.
+Program-level configuration is located at `$HOME/.config/notedown/config.yaml`.
 
 ### Workspaces
 

@@ -49,14 +49,15 @@ type Client struct {
 }
 
 func NewClient(ws *configuration.Workspace, application string) (*Client, error) {
+	location := configuration.ExpandPath(ws.Location)
 	ignoredDirs := []string{".git", ".vscode", ".debug", ".stversions", ".stfolder"}
-	watcher, err := fsnotify.NewRecursiveWatcher(ws.Location, fsnotify.WithIgnoredDirs(ignoredDirs))
+	watcher, err := fsnotify.NewRecursiveWatcher(location, fsnotify.WithIgnoredDirs(ignoredDirs))
 	if err != nil {
 		return nil, err
 	}
 
 	client := &Client{
-		root:        ws.Location,
+		root:        location,
 		documents:   make(map[string]workspace.Document),
 		docMutex:    sync.RWMutex{},
 		watcher:     watcher,
