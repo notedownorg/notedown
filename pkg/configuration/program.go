@@ -20,6 +20,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"sigs.k8s.io/yaml"
 )
@@ -36,7 +37,20 @@ type Workspace struct {
 	Location string `json:"location"`
 }
 
-const programConfigurationPath = ".notedown/config.yaml"
+// Handle expansion of ~ if present
+func ExpandPath(path string) string {
+	if strings.HasPrefix(path, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			slog.Error("failed to get home directory, defaulting to current directory", "error", err)
+			return path
+		}
+		return filepath.Join(home, path[2:])
+	}
+	return path
+}
+
+const programConfigurationPath = ".config/notedown/config.yaml"
 
 func EnsureProgramConfiguration() (*ProgramConfiguration, error) {
 	home, err := os.UserHomeDir()
