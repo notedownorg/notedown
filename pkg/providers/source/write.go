@@ -16,11 +16,12 @@ package source
 
 import (
 	"log/slog"
+	"path/filepath"
 
 	"github.com/notedownorg/notedown/pkg/workspace"
 )
 
-func (c *SourceClient) CreateSource(path string, title string, format Format, url string, options ...SourceOption) error {
+func (c *SourceClient) CreateSource(title string, format Format, url string, options ...SourceOption) error {
 	options = append(options, WithUrl(url))
 	src := NewSource(title, format, options...)
 	slog.Debug("creating source", "path", src.path)
@@ -30,7 +31,7 @@ func (c *SourceClient) CreateSource(path string, title string, format Format, ur
 	metadata[FormatKey] = format
 	metadata[UrlKey] = url
 
-	return c.writer.Create(workspace.NewDocument(path, metadata))
+	return c.writer.Create(workspace.NewDocument(filepath.Join(c.dir, title+".md"), metadata))
 }
 
 func (c *SourceClient) DeleteSource(source Source) error {

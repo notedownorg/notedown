@@ -27,7 +27,7 @@ func TestWrite(t *testing.T) {
 		test.Validators{
 			Create: []test.CreateValidator{
 				func(doc workspace.Document) error {
-					assert.Equal(t, "library/source.md", doc.Path())
+					assert.Equal(t, "sources/source.md", doc.Path())
 					assert.Equal(t, workspace.Metadata{
 						workspace.MetadataTypeKey: MetadataKey,
 						TitleKey:                  "source",
@@ -39,12 +39,12 @@ func TestWrite(t *testing.T) {
 			},
 			Delete: []test.DeleteValidator{
 				func(path string) error {
-					assert.Equal(t, "library/source.md", path)
+					assert.Equal(t, "sources/source.md", path)
 					return nil
 				},
 			},
 		},
 	)
-	assert.NoError(t, client.CreateSource("library/source.md", "source", Article, "example.com"))
-	assert.NoError(t, client.DeleteSource(Source{path: "library/source.md"}))
+	assert.NoError(t, client.CreateSource("source", Article, "example.com"))
+	assert.NoError(t, client.DeleteSource(Source{path: "sources/source.md"}))
 }

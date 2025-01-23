@@ -24,7 +24,7 @@ default_workspace: personal
 
 ## Workspace Level Configuration
 
-Workspace-level configuration is located at `${WORKSPACE_ROOT}/.notedown/config.yaml`
+Workspace-level configuration is located at `${WORKSPACE_ROOT}/.config/notedown.yaml`
 
 ### Sources
 
