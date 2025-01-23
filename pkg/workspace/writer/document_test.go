@@ -23,6 +23,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/notedownorg/notedown/pkg/parse/ast"
 	. "github.com/notedownorg/notedown/pkg/parse/test"
 	"github.com/notedownorg/notedown/pkg/workspace"
@@ -98,7 +99,8 @@ func TestAddDocument(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
-		client := writer.NewClient(dir)
+		ws := &configuration.Workspace{Location: dir}
+		client := writer.NewClient(ws)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Create(workspace.NewDocument(tt.path, tt.metadata, tt.blocks...))
@@ -119,7 +121,8 @@ func TestAddDocument(t *testing.T) {
 func TestUpdateDocument(t *testing.T) {
 	dir, err := copyTestData("TestUpdateDocument")
 	assert.NoError(t, err)
-	client := writer.NewClient(dir)
+	ws := &configuration.Workspace{Location: dir}
+	client := writer.NewClient(ws)
 	fullPath := filepath.Join(dir, "basic.md")
 	doc, _ := workspace.LoadDocument(dir, "basic.md", time.Now())
 	// Not sleeping here caused GH runners to fail stale check on linux
@@ -171,7 +174,8 @@ func TestRenameDocument(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
-		client := writer.NewClient(dir)
+		ws := &configuration.Workspace{Location: dir}
+		client := writer.NewClient(ws)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Rename(tt.oldPath, tt.newPath)
@@ -212,7 +216,8 @@ func TestDeleteDocument(t *testing.T) {
 		if err != nil {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
-		client := writer.NewClient(dir)
+		ws := &configuration.Workspace{Location: dir}
+		client := writer.NewClient(ws)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Delete(tt.path)

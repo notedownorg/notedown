@@ -14,14 +14,18 @@
 
 package writer
 
-import "path/filepath"
+import (
+	"path/filepath"
+
+	"github.com/notedownorg/notedown/pkg/configuration"
+)
 
 type Client struct {
 	root string
 }
 
-func NewClient(root string) *Client {
-	return &Client{root: root}
+func NewClient(ws *configuration.Workspace) *Client {
+	return &Client{root: ws.Location}
 }
 
 func (c Client) abs(doc string) string {

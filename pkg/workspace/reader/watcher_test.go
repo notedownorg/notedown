@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,7 +30,8 @@ func TestDocuments_Client_Watcher(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client, err := NewClient(dir, "testclient")
+	ws := &configuration.Workspace{Location: dir}
+	client, err := NewClient(ws, "testclient")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +60,8 @@ func TestDocuments_Client_Watcher_Fuzz(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	client, err := NewClient(dir, "testclient")
+	ws := &configuration.Workspace{Location: dir}
+	client, err := NewClient(ws, "testclient")
 	if err != nil {
 		t.Fatal(err)
 	}

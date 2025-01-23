@@ -77,8 +77,17 @@ func loadProgramConfiguration(path string) (*ProgramConfiguration, error) {
 	return &config, nil
 }
 
-func (c ProgramConfiguration) Validate() error {
+func DefaultWorkspace() (*Workspace, error) {
+	programConfig, err := EnsureProgramConfiguration()
+	if err != nil {
+		return nil, err
+	}
+	// Ensure errors if the default workspace is not set or does not exist so this is safe
+	ws := programConfig.Workspaces[programConfig.DefaultWorkspace]
+	return &ws, nil
+}
 
+func (c ProgramConfiguration) Validate() error {
 	// Workspaces
 	if c.Workspaces == nil || len(c.Workspaces) == 0 {
 		return fmt.Errorf("atleast one workspace must be configured")

@@ -1,3 +1,3 @@
 sources:
+  # Location that new notes with type: "source" will be added by default
   default_directory: sources
-  
