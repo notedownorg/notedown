@@ -22,6 +22,7 @@ import (
 	"sync"
 
 	"github.com/notedownorg/notedown/internal/fsnotify"
+	"github.com/notedownorg/notedown/pkg/configuration"
 	"github.com/notedownorg/notedown/pkg/workspace"
 	"golang.org/x/sync/semaphore"
 )
@@ -47,15 +48,15 @@ type Client struct {
 	events chan Event
 }
 
-func NewClient(root string, application string) (*Client, error) {
+func NewClient(ws *configuration.Workspace, application string) (*Client, error) {
 	ignoredDirs := []string{".git", ".vscode", ".debug", ".stversions", ".stfolder"}
-	watcher, err := fsnotify.NewRecursiveWatcher(root, fsnotify.WithIgnoredDirs(ignoredDirs))
+	watcher, err := fsnotify.NewRecursiveWatcher(ws.Location, fsnotify.WithIgnoredDirs(ignoredDirs))
 	if err != nil {
 		return nil, err
 	}
 
 	client := &Client{
-		root:        root,
+		root:        ws.Location,
 		documents:   make(map[string]workspace.Document),
 		docMutex:    sync.RWMutex{},
 		watcher:     watcher,
@@ -85,7 +86,7 @@ func NewClient(root string, application string) (*Client, error) {
 
 	// Recurse through the root directory and process all the files to build the initial state
 	slog.Debug("walking workspace to build initial state")
-	err = filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(client.root, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
