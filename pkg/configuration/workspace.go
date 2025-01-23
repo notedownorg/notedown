@@ -38,7 +38,7 @@ type Sources struct {
 const workspaceConfigurationPath = ".notedown/config.yaml"
 
 func EnsureWorkspaceConfiguration(location string) (*WorkspaceConfiguration, error) {
-	path := filepath.Join(location, workspaceConfigurationPath)
+	path := filepath.Join(ExpandPath(location), workspaceConfigurationPath)
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		if err := os.MkdirAll(filepath.Dir(path), 0755); err != nil {
@@ -54,7 +54,7 @@ func EnsureWorkspaceConfiguration(location string) (*WorkspaceConfiguration, err
 }
 
 func loadWorkspaceConfiguration(path string) (*WorkspaceConfiguration, error) {
-	contents, err := os.ReadFile(path)
+	contents, err := os.ReadFile(ExpandPath(path))
 	if err != nil {
 		return nil, fmt.Errorf("failed to read workspace configuration file at %s: %w", path, err)
 	}
