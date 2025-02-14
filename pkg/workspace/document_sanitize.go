@@ -1,4 +1,4 @@
-// Copyright 2024 Notedown Authors
+// Copyright 2025 Notedown Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,29 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package writer
+package workspace
 
 import (
-	"fmt"
-	"path/filepath"
-
 	"github.com/notedownorg/notedown/pkg/configuration"
 )
 
-type Client struct {
-	root   string
-	config *configuration.WorkspaceConfiguration
-}
-
-func NewClient(ws *configuration.Workspace) (*Client, error) {
-	root := configuration.ExpandPath(ws.Location)
-	config, err := configuration.EnsureWorkspaceConfiguration(root)
-	if err != nil {
-		return nil, fmt.Errorf("failed to ensure workspace configuration: %w", err)
+// Should be run prior to saving a document to ensure that the document is in a valid state
+func Sanitize(config configuration.WorkspaceConfiguration, d *Document) {
+	if d.Metadata == nil || len(d.Metadata) == 0 {
+		return
 	}
-	return &Client{root: root, config: config}, nil
-}
-
-func (c Client) abs(doc string) string {
-	return filepath.Join(c.root, doc)
+	sanitizeTags(d.Metadata, config.Tags.DefaultFormat)
 }

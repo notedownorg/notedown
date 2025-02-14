@@ -27,28 +27,50 @@ import (
 	"github.com/notedownorg/notedown/pkg/parse/blocks"
 )
 
-type Metadata map[string]interface{}
-
-func (m Metadata) Type() string {
-	if m == nil {
-		return ""
-	}
-	typeValue, ok := m[MetadataTypeKey]
-	if !ok {
-		return ""
-	}
-	if res, ok := typeValue.(string); ok {
-		return res
-	}
-	return ""
-}
-
 const (
-	MetadataTypeKey = "type"
+	MetadataTagsKey = "tags"
 )
 
-func NewMetadata(metadataType string) Metadata {
-	return Metadata{MetadataTypeKey: metadataType}
+type Metadata map[string]interface{}
+
+func (m Metadata) Types() []string {
+	tags := make([]string, 0)
+	if m == nil {
+		return tags
+	}
+	tagsValue, ok := m[MetadataTagsKey]
+	if !ok {
+		return tags
+	}
+	res, ok := tagsValue.([]string)
+	if !ok {
+		// Check if tags is set to a single string instead of a list
+		tagsValue, ok = m[MetadataTagsKey].(string)
+		if !ok {
+			return tags
+		}
+		res = []string{tagsValue.(string)}
+	}
+
+	for _, tag := range res {
+		split := strings.Split(tag, "/")
+		tags = append(tags, split[0])
+	}
+	return tags
+}
+
+func (m Metadata) HasType(t string) bool {
+	types := m.Types()
+	for _, typ := range types {
+		if typ == t {
+			return true
+		}
+	}
+	return false
+}
+
+func NewMetadata() Metadata {
+	return Metadata{MetadataTagsKey: make([]string, 0)}
 }
 
 type Document struct {

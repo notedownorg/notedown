@@ -47,10 +47,10 @@ func TestAddDocument(t *testing.T) {
 		{
 			name:      "Parent exists and file does not exist",
 			path:      unique("parent"),
-			metadata:  workspace.Metadata{"type": "note"},
+			metadata:  workspace.Metadata{"tags": []string{"test/foo/bar"}},
 			blocks:    Bl(P("Hello, world!")),
 			wantErr:   false,
-			wantFinal: []byte("---\ntype: note\n---\nHello, world!\n"),
+			wantFinal: []byte("---\ntags:\n- test/foo/bar\n---\nHello, world!\n"),
 		},
 		{
 			name:    "Parent exists and file exists",
@@ -100,7 +100,8 @@ func TestAddDocument(t *testing.T) {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
 		ws := &configuration.Workspace{Location: dir}
-		client := writer.NewClient(ws)
+		client, err := writer.NewClient(ws)
+		assert.NoError(t, err)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Create(workspace.NewDocument(tt.path, tt.metadata, tt.blocks...))
@@ -122,7 +123,8 @@ func TestUpdateDocument(t *testing.T) {
 	dir, err := copyTestData("TestUpdateDocument")
 	assert.NoError(t, err)
 	ws := &configuration.Workspace{Location: dir}
-	client := writer.NewClient(ws)
+	client, err := writer.NewClient(ws)
+	assert.NoError(t, err)
 	fullPath := filepath.Join(dir, "basic.md")
 	doc, _ := workspace.LoadDocument(dir, "basic.md", time.Now())
 	// Not sleeping here caused GH runners to fail stale check on linux
@@ -175,7 +177,8 @@ func TestRenameDocument(t *testing.T) {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
 		ws := &configuration.Workspace{Location: dir}
-		client := writer.NewClient(ws)
+		client, err := writer.NewClient(ws)
+		assert.NoError(t, err)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Rename(tt.oldPath, tt.newPath)
@@ -217,7 +220,8 @@ func TestDeleteDocument(t *testing.T) {
 			t.Fatalf("failed to copy test data: %v", err)
 		}
 		ws := &configuration.Workspace{Location: dir}
-		client := writer.NewClient(ws)
+		client, err := writer.NewClient(ws)
+		assert.NoError(t, err)
 
 		t.Run(tt.name, func(t *testing.T) {
 			err := client.Delete(tt.path)

@@ -35,4 +35,12 @@ sources:
     default_directory: sources
 ```
 
+### Tags
+
+```yaml
+tags:
+    # Which format tooling will use for spaces in tags when creating or updating notes.
+    # Possible values: "kebab-case" (default), "snake_case", "camelCase", "PascalCase"
+    default_format: kebab-case
+
 

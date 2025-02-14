@@ -14,3 +14,5 @@
 
 sources:
   default_directory: ""
+tags:
+  default_format: snake_case

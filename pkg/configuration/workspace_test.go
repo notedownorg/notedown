@@ -28,10 +28,16 @@ var (
 		Sources: Sources{
 			DefaultDirectory: "sources",
 		},
+		Tags: Tags{
+			DefaultFormat: TagFormatKebabCase,
+		},
 	}
 	fullWorkspace = &WorkspaceConfiguration{
 		Sources: Sources{
 			DefaultDirectory: "library",
+		},
+		Tags: Tags{
+			DefaultFormat: TagFormatPascalCase,
 		},
 	}
 )
@@ -52,6 +58,9 @@ func TestNewWorkspaceConfiguration(t *testing.T) {
 				Sources: Sources{
 					DefaultDirectory: "sources",
 				},
+				Tags: Tags{
+					DefaultFormat: TagFormatCamelCase,
+				},
 			},
 		},
 		{
@@ -59,6 +68,9 @@ func TestNewWorkspaceConfiguration(t *testing.T) {
 			want: &WorkspaceConfiguration{
 				Sources: Sources{
 					DefaultDirectory: "",
+				},
+				Tags: Tags{
+					DefaultFormat: TagFormatKebabCase,
 				},
 			},
 		},
@@ -76,7 +88,14 @@ func TestNewWorkspaceConfiguration(t *testing.T) {
 				Sources: Sources{
 					DefaultDirectory: "",
 				},
+				Tags: Tags{
+					DefaultFormat: TagFormatSnakeCase,
+				},
 			},
+		},
+		{
+			file:    "testdata/workspace/source_tagdefaultformat_invalid.yaml",
+			wantErr: true,
 		},
 		{
 			file: "workspace_default.yaml", // dont accidentally create an invalid configuration

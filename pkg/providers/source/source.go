@@ -14,7 +14,16 @@
 
 package source
 
-const MetadataKey = "source"
+import (
+	"strings"
+)
+
+const MetadataTagsKey = "source"
+
+// Ordered tiers with name last. Source is added automatically
+func SourceTag(tiers ...string) string {
+	return strings.Join(append([]string{MetadataTagsKey}, tiers...), "/")
+}
 
 const (
 	TitleKey  = "title"
