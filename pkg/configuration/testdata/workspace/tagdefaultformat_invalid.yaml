@@ -13,6 +13,6 @@
 # limitations under the License.
 
 sources:
-  default_directory: library
+  default_directory: ""
 tags:
-  default_format: PascalCase
+  default_format: made-upFormat

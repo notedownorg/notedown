@@ -32,6 +32,11 @@ func (e *FileExistsError) Error() string {
 }
 
 func (c Client) Create(doc workspace.Document) error {
+	slog.Debug("creating document", "path", doc.Path())
+
+	// Ensure the document is in a valid state
+	workspace.Sanitize(*c.config, &doc)
+
 	// Ensure the file does not exist
 	_, err := os.Stat(c.abs(doc.Path()))
 	if err == nil {
@@ -52,6 +57,9 @@ func (c Client) Create(doc workspace.Document) error {
 
 func (c Client) Update(doc workspace.Document) error {
 	slog.Debug("updating document", "path", doc.Path())
+
+	// Ensure the document is in a valid state
+	workspace.Sanitize(*c.config, &doc)
 
 	// Ensure the file exists
 	stat, err := os.Stat(c.abs(doc.Path()))

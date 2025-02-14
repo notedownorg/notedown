@@ -15,6 +15,8 @@
 package source
 
 import (
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/configuration"
@@ -27,6 +29,10 @@ var workspaceConfig = &configuration.WorkspaceConfiguration{
 	Sources: configuration.Sources{
 		DefaultDirectory: "sources",
 	},
+}
+
+func enableDebug() {
+	slog.SetDefault(slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug})))
 }
 
 func buildClient(events []reader.Event, validators test.Validators) (*SourceClient, chan reader.Event) {
@@ -49,7 +55,7 @@ func buildClient(events []reader.Event, validators test.Validators) (*SourceClie
 func sourceCount(events []reader.Event) int {
 	count := 0
 	for _, event := range events {
-		if event.Op == reader.Load && event.Document.Metadata[workspace.MetadataTypeKey] == "source" {
+		if event.Op == reader.Load && event.Document.Metadata.HasType("source") {
 			count++
 		}
 	}
@@ -74,7 +80,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/one.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: []string{SourceTag("one")},
 					TitleKey:                  "one",
 					FormatKey:                 string(Article),
 					UrlKey:                    "example.com",
@@ -87,7 +93,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/two.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: SourceTag("two"),
 					TitleKey:                  "two",
 					FormatKey:                 string(Video),
 					UrlKey:                    "example.com",
@@ -100,7 +106,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/three.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: SourceTag("three"),
 					TitleKey:                  "three",
 					FormatKey:                 string(Article),
 					UrlKey:                    "example.com",
@@ -113,7 +119,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/four.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: SourceTag("four"),
 					TitleKey:                  "four",
 					FormatKey:                 string(Video),
 					UrlKey:                    "example.com",
@@ -126,7 +132,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/five.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: SourceTag("five"),
 					TitleKey:                  "five",
 					FormatKey:                 string(Article),
 					UrlKey:                    "example.com",
@@ -141,7 +147,7 @@ func loadEvents() []reader.Event {
 			Document: workspace.NewDocument(
 				"library/six.md",
 				workspace.Metadata{
-					workspace.MetadataTypeKey: MetadataKey,
+					workspace.MetadataTagsKey: SourceTag("six"),
 				},
 			),
 		},

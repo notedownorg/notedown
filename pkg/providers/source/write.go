@@ -26,7 +26,8 @@ func (c *SourceClient) CreateSource(title string, format Format, url string, opt
 	src := NewSource(title, format, options...)
 	slog.Debug("creating source", "path", src.path)
 
-	metadata := workspace.NewMetadata(MetadataKey)
+	metadata := workspace.NewMetadata()
+	metadata[workspace.MetadataTagsKey] = SourceTag(title)
 	metadata[TitleKey] = title
 	metadata[FormatKey] = format
 	metadata[UrlKey] = url

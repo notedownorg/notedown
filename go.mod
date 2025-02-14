@@ -12,6 +12,7 @@ require (
 	github.com/teambition/rrule-go v1.8.2
 	github.com/tjarratt/babble v0.0.0-20210505082055-cbca2a4833c1
 	golang.org/x/sync v0.10.0
+	golang.org/x/text v0.21.0
 	sigs.k8s.io/yaml v1.4.0
 )
 

@@ -52,10 +52,16 @@ func TestEventBroadcast_Fuzz(t *testing.T) {
 	c.Subscribe(sub1)
 	c.Subscribe(sub2)
 
-	// Throw some events at the daily client and ensure we are notified correctly
+	// Throw some events at the sources client and ensure we are notified correctly
 	want := make([]Operation, 0)
 	count := 1000
-	d := workspace.Document{Metadata: workspace.Metadata{workspace.MetadataTypeKey: MetadataKey, FormatKey: string(Article), UrlKey: "example.com"}}
+	d := workspace.Document{
+		Metadata: workspace.Metadata{
+			workspace.MetadataTagsKey: SourceTag("test"),
+			TitleKey:                  "test",
+			FormatKey:                 string(Article),
+			UrlKey:                    "example.com"},
+	}
 	for i := 0; i < count; i++ {
 		switch rand.Intn(3) {
 		case 0:

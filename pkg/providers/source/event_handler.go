@@ -56,7 +56,9 @@ func (c *SourceClient) handleChanges(event reader.Event) bool {
 		return false
 	}
 
-	if event.Document.Metadata.Type() != MetadataKey {
+	// If one of the types is not a source, return false and ignore it
+	if !event.Document.Metadata.HasType(MetadataTagsKey) {
+		slog.Debug("skipping document as no matching tag found", "path", event.Key)
 		return false
 	}
 

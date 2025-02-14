@@ -29,7 +29,7 @@ func TestWrite(t *testing.T) {
 				func(doc workspace.Document) error {
 					assert.Equal(t, "sources/source.md", doc.Path())
 					assert.Equal(t, workspace.Metadata{
-						workspace.MetadataTypeKey: MetadataKey,
+						workspace.MetadataTagsKey: SourceTag("source"),
 						TitleKey:                  "source",
 						FormatKey:                 Article,
 						UrlKey:                    "example.com",

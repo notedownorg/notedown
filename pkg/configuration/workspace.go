@@ -29,11 +29,25 @@ var defaultWorkspaceConfiguration []byte
 
 type WorkspaceConfiguration struct {
 	Sources Sources `json:"sources"`
+	Tags    Tags    `json:"tags"`
 }
 
 type Sources struct {
 	DefaultDirectory string `json:"default_directory"`
 }
+
+type Tags struct {
+	DefaultFormat TagFormat `json:"default_format"`
+}
+
+type TagFormat string
+
+const (
+	TagFormatKebabCase  TagFormat = "kebab-case"
+	TagFormatSnakeCase  TagFormat = "snake_case"
+	TagFormatCamelCase  TagFormat = "camelCase"
+	TagFormatPascalCase TagFormat = "PascalCase"
+)
 
 const workspaceConfigurationPath = ".config/notedown.yaml"
 
@@ -71,6 +85,17 @@ func loadWorkspaceConfiguration(path string) (*WorkspaceConfiguration, error) {
 	return &config, nil
 }
 
-func (c WorkspaceConfiguration) Validate() error {
+func (c *WorkspaceConfiguration) Validate() error {
+	// Tag format can be empty (default to kebab-case) but cannot be invalid
+	if c.Tags.DefaultFormat == "" {
+		c.Tags.DefaultFormat = TagFormatKebabCase
+	}
+	switch c.Tags.DefaultFormat {
+	case TagFormatKebabCase, TagFormatSnakeCase, TagFormatCamelCase, TagFormatPascalCase:
+		break
+	default:
+		return fmt.Errorf("invalid tag format: %s, must be one of %s, %s, %s, %s", c.Tags.DefaultFormat, TagFormatKebabCase, TagFormatSnakeCase, TagFormatCamelCase, TagFormatPascalCase)
+	}
+
 	return nil
 }
