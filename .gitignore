@@ -22,3 +22,5 @@ go.work
 
 # Build output
 bin/
+
+notedown-lsp

@@ -14,7 +14,8 @@
       "WebFetch(domain:microsoft.github.io)",
       "Bash(go mod:*)",
       "WebFetch(domain:docs.anthropic.com)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(grep:*)"
     ],
     "deny": []
   }

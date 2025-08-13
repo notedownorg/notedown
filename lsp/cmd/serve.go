@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/lsp/pkg/notedownls"
 	"github.com/notedownorg/notedown/pkg/log"
 	"github.com/notedownorg/notedown/pkg/version"
 	"github.com/spf13/cobra"
@@ -39,7 +40,13 @@ The server communicates via stdin/stdout using the LSP protocol.`,
 		reader := bufio.NewReader(os.Stdin)
 		writer := bufio.NewWriter(os.Stdout)
 
+		// Create Notedown-specific LSP server
+		server := notedownls.NewServer(version.Get(), logger)
+
+		// Create mux and set the server
 		mux := lsp.NewMux(reader, writer, version.Get(), logger)
+		mux.SetServer(server)
+
 		if err := mux.Run(); err != nil {
 			logger.Error("lSP server failed", "error", err)
 			os.Exit(1)

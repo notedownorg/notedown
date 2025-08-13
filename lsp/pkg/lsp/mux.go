@@ -3,6 +3,7 @@ package lsp
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"sync"
 
 	"github.com/notedownorg/notedown/lsp/pkg/jsonrpc"
@@ -29,6 +30,7 @@ type Mux struct {
 
 	version string
 	logger  *log.Logger
+	server  LanguageServer
 }
 
 func NewMux(reader *bufio.Reader, writer *bufio.Writer, version string, logger *log.Logger) *Mux {
@@ -49,6 +51,10 @@ func (m *Mux) RegisterNotification(method method, handler NotificationHandler) {
 
 func (m *Mux) RegisterMethod(method method, handler MethodHandler) {
 	m.methodHandlers[method] = handler
+}
+
+func (m *Mux) SetServer(server LanguageServer) {
+	m.server = server
 }
 
 func (m *Mux) write(response jsonrpc.Message) error {
@@ -93,4 +99,42 @@ func (m *Mux) process() error {
 		}
 	}(request)
 	return nil
+}
+
+func (m *Mux) Run() error {
+	if m.server == nil {
+		m.logger.Error("no LSP server set")
+		return fmt.Errorf("no LSP server set")
+	}
+
+	// Register initialize handler
+	m.RegisterMethod(MethodInitialize, func(params json.RawMessage) (any, error) {
+		var initParams InitializeParams
+		if err := json.Unmarshal(params, &initParams); err != nil {
+			m.logger.Error("failed to unmarshal initialize params", "error", err)
+			return nil, err
+		}
+
+		result, err := m.server.Initialize(initParams)
+		if err != nil {
+			m.logger.Error("server initialization failed", "error", err)
+			return nil, err
+		}
+
+		// Register all other handlers after successful initialization
+		if err := m.server.RegisterHandlers(m); err != nil {
+			m.logger.Error("failed to register server handlers", "error", err)
+			return nil, err
+		}
+
+		return result, nil
+	})
+
+	m.logger.Info("starting LSP message processing loop")
+	for {
+		if err := m.process(); err != nil {
+			m.logger.Error("lSP processing error", "error", err)
+			return err
+		}
+	}
 }
