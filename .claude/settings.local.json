@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git grep:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(go test:*)",
+      "Bash(mv:*)",
+      "Bash(go build:*)",
+      "Bash(go get:*)",
+      "Bash(go env:*)",
+      "Bash(go doc:*)",
+      "Bash(go run:*)",
+      "WebFetch(domain:microsoft.github.io)",
+      "Bash(go mod:*)",
+      "WebFetch(domain:docs.anthropic.com)"
+    ],
+    "deny": []
+  }
+}

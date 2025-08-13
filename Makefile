@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Version information
+VERSION := $(shell git describe --tags --always --dirty)
+COMMIT := $(shell git rev-parse HEAD)
+DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
+
 all: format mod test dirty
 
 hygiene: format mod
@@ -27,6 +32,15 @@ format: licenser
 
 test:
 	go test ./...
+
+install:
+	go build -ldflags "\
+		-w -s \
+		-X github.com/notedownorg/notedown/pkg/version.version=$(VERSION) \
+		-X github.com/notedownorg/notedown/pkg/version.commit=$(COMMIT) \
+		-X github.com/notedownorg/notedown/pkg/version.date=$(DATE)" \
+		-o $(shell go env GOPATH)/bin/notedown-language-server \
+		./lsp/
 
 licenser:
 	licenser apply -r "Notedown Authors"
