@@ -20,13 +20,13 @@ func (w *Walker) Walk(node Node) error {
 	if err := node.Accept(w.visitor); err != nil {
 		return err
 	}
-	
+
 	for _, child := range node.Children() {
 		if err := w.Walk(child); err != nil {
 			return err
 		}
 	}
-	
+
 	return nil
 }
 

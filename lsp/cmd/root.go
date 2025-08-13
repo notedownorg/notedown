@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/notedownorg/notedown/lsp/pkg/constants"
 	"github.com/notedownorg/notedown/pkg/version"
+	"github.com/spf13/cobra"
 )
 
 var rootCmd = &cobra.Command{

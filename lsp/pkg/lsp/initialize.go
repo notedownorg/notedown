@@ -7,41 +7,16 @@ type InitializeParams struct {
 	Capabilities ClientCapabilities `json:"capabilities"`
 }
 
-type ClientInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-}
-
-type ClientCapabilities struct {
-}
-
 type InitializeResult struct {
 	ServerInfo   *ServerInfo        `json:"serverInfo,omitempty"`
 	Capabilities ServerCapabilities `json:"capabilities"`
 }
 
-type ServerInfo struct {
-	Name    string `json:"name"`
-	Version string `json:"version"`
-}
-
-type ServerCapabilities struct {
-	TextDocumentSync TextDocumentSyncKind `json:"textDocumentSync"`
-}
-
-type TextDocumentSyncKind int
-
-const (
-	TextDocumentSyncKindNone TextDocumentSyncKind = iota
-	TextDocumentSyncKindFull
-	TextDocumentSyncKindIncremental
-)
-
 func (m *Mux) Run() error {
 	m.RegisterMethod(MethodInitialize, func(params json.RawMessage) (any, error) {
 		var initParams InitializeParams
 		if err := json.Unmarshal(params, &initParams); err != nil {
-			m.logger.Error("Failed to unmarshal initialize params", "error", err)
+			m.logger.Error("failed to unmarshal initialize params", "error", err)
 			return nil, err
 		}
 
@@ -49,13 +24,17 @@ func (m *Mux) Run() error {
 		if initParams.ClientInfo != nil {
 			clientName = initParams.ClientInfo.Name
 		}
-		
-		m.logger.Info("LSP client initialized", "client", clientName, "server_version", m.version)
 
+		m.logger.Info("lSP client initialized", "client", clientName, "server_version", m.version)
+
+		syncKind := TextDocumentSyncKindFull
 		result := InitializeResult{
 			ServerInfo: &ServerInfo{Name: "Notedown LSP Server", Version: m.version},
 			Capabilities: ServerCapabilities{
-				TextDocumentSync: TextDocumentSyncKindFull,
+				TextDocumentSync: &TextDocumentSyncOptions{
+					OpenClose: &[]bool{true}[0],
+					Change:    &syncKind,
+				},
 			},
 		}
 		return result, nil
@@ -63,10 +42,10 @@ func (m *Mux) Run() error {
 
 	// TODO: Handle initialized message?
 
-	m.logger.Info("Starting LSP message processing loop")
+	m.logger.Info("starting LSP message processing loop")
 	for {
 		if err := m.process(); err != nil {
-			m.logger.Error("LSP processing error", "error", err)
+			m.logger.Error("lSP processing error", "error", err)
 			return err
 		}
 	}

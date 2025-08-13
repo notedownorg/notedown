@@ -46,7 +46,7 @@ func GetInfo() Info {
 }
 
 func (i Info) String() string {
-	return fmt.Sprintf("notedown-language-server %s (commit: %s, built: %s, go: %s)", 
+	return fmt.Sprintf("notedown-language-server %s (commit: %s, built: %s, go: %s)",
 		i.Version, i.Commit, i.Date, i.GoVersion)
 }
 

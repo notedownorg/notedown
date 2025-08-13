@@ -42,7 +42,7 @@ func NewParser() Parser {
 func (p *NotedownParser) Parse(source []byte) (*Document, error) {
 	reader := text.NewReader(source)
 	doc := p.goldmark.Parser().Parse(reader)
-	
+
 	return p.convertAST(doc, source), nil
 }
 
@@ -57,7 +57,7 @@ func (p *NotedownParser) convertAST(node ast.Node, source []byte) *Document {
 		Start: Position{Line: 1, Column: 1, Offset: 0},
 		End:   Position{Line: bytes.Count(source, []byte("\n")) + 1, Column: 1, Offset: len(source)},
 	})
-	
+
 	p.convertNode(node, doc, source)
 	return doc
 }
@@ -68,7 +68,7 @@ func (p *NotedownParser) convertNode(astNode ast.Node, parentNode Node, source [
 		treeNode := p.astToTreeNode(child, source)
 		if treeNode != nil {
 			parentNode.AddChild(treeNode)
-			
+
 			// Only recurse for container nodes, not leaf nodes like headings
 			switch child.(type) {
 			case *ast.Heading:
@@ -103,27 +103,27 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 			End:   Position{Line: 1, Column: 1, Offset: 0},
 		}
 	}
-	
+
 	// Handle wikilink nodes
 	if wikilink, ok := astNode.(*extensions.WikilinkAST); ok {
 		return NewWikilink(wikilink.Target, wikilink.DisplayText, rng)
 	}
-	
+
 	// Debug: Check for heading first
 	if heading, ok := astNode.(*ast.Heading); ok {
 		text := string(heading.Text(source))
 		result := NewHeading(heading.Level, text, rng)
 		return result
 	}
-	
+
 	switch n := astNode.(type) {
 	case *ast.Paragraph:
 		return NewParagraph(rng)
-		
+
 	case *ast.Text:
 		content := string(n.Segment.Value(source))
 		return NewText(content, rng)
-		
+
 	case *ast.CodeBlock:
 		var content bytes.Buffer
 		lines := n.Lines()
@@ -131,9 +131,9 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 			line := lines.At(i)
 			content.Write(line.Value(source))
 		}
-		
+
 		return NewCodeBlock("", content.String(), false, rng)
-		
+
 	case *ast.FencedCodeBlock:
 		var language string
 		if n.Info != nil {
@@ -142,16 +142,16 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 				language = string(info)
 			}
 		}
-		
+
 		var content bytes.Buffer
 		lines := n.Lines()
 		for i := 0; i < lines.Len(); i++ {
 			line := lines.At(i)
 			content.Write(line.Value(source))
 		}
-		
+
 		return NewCodeBlock(language, content.String(), true, rng)
-		
+
 	case *ast.Link:
 		url := string(n.Destination)
 		var title string
@@ -159,23 +159,23 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 			title = string(n.Title)
 		}
 		return NewLink(url, title, rng)
-		
+
 	case *ast.List:
 		return NewList(n.IsOrdered(), n.IsTight, rng)
-		
+
 	case *ast.ListItem:
 		return NewListItem(false, false, rng) // TODO: Handle task lists
-		
+
 	case *ast.Emphasis:
 		return NewEmphasis(rng)
-		
+
 	case *ast.CodeSpan:
 		content := string(n.Text(source))
 		return NewCode(content, rng)
-		
+
 	default:
 		// Debug: Log unhandled node types
-		// For unknown node types, create a generic container  
+		// For unknown node types, create a generic container
 		node := NewBaseNode(NodeContainer, rng)
 		// If this was supposed to be a heading, fix it
 		if heading, ok := astNode.(*ast.Heading); ok {
@@ -192,10 +192,10 @@ func (p *NotedownParser) offsetToPosition(offset int, source []byte) Position {
 	if offset > len(source) {
 		offset = len(source)
 	}
-	
+
 	line := 1
 	column := 1
-	
+
 	for i := 0; i < offset; i++ {
 		if source[i] == '\n' {
 			line++
@@ -204,7 +204,7 @@ func (p *NotedownParser) offsetToPosition(offset int, source []byte) Position {
 			column++
 		}
 	}
-	
+
 	return Position{
 		Line:   line,
 		Column: column,

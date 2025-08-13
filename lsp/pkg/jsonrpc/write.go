@@ -20,4 +20,3 @@ func Write(w *bufio.Writer, msg Message) error {
 	}
 	return w.Flush()
 }
-

@@ -22,7 +22,6 @@ func NewLsp(level Level, format Format) *Logger {
 	return NewWithFormat(os.Stderr, level, format)
 }
 
-
 func New(w io.Writer, level Level) *Logger {
 	return NewWithFormat(w, level, FormatText)
 }
@@ -31,7 +30,7 @@ func NewWithFormat(w io.Writer, level Level, format Format) *Logger {
 	opts := &slog.HandlerOptions{
 		Level: level.ToSlogLevel(),
 	}
-	
+
 	var handler slog.Handler
 	switch format {
 	case FormatJSON:
@@ -39,7 +38,7 @@ func NewWithFormat(w io.Writer, level Level, format Format) *Logger {
 	default:
 		handler = slog.NewTextHandler(w, opts)
 	}
-	
+
 	return &Logger{
 		slog: slog.New(handler),
 	}
@@ -70,4 +69,3 @@ func (l *Logger) With(args ...any) *Logger {
 		slog: l.slog.With(args...),
 	}
 }
-

@@ -34,14 +34,14 @@ The server communicates via stdin/stdout using the LSP protocol.`,
 			logger = log.NewLsp(level, format)
 		}
 
-		logger.Info("Starting Notedown LSP server", "version", version.Get())
+		logger.Info("starting Notedown LSP server", "version", version.Get())
 
 		reader := bufio.NewReader(os.Stdin)
 		writer := bufio.NewWriter(os.Stdout)
 
 		mux := lsp.NewMux(reader, writer, version.Get(), logger)
 		if err := mux.Run(); err != nil {
-			logger.Error("LSP server failed", "error", err)
+			logger.Error("lSP server failed", "error", err)
 			os.Exit(1)
 		}
 	},
@@ -54,4 +54,3 @@ func init() {
 	serveCmd.Flags().StringP("log-level", "", "info", "Log level (debug, info, warn, error)")
 	serveCmd.Flags().StringP("log-format", "", "text", "Log format (text, json)")
 }
-

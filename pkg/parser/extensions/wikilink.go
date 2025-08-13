@@ -64,10 +64,10 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 
 	// Note: For now, we'll rely on goldmark's internal segment handling
-	
+
 	// Advance the reader
 	block.Advance(len(match[0]))
-	
+
 	return node
 }
 

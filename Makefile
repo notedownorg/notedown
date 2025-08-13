@@ -27,7 +27,7 @@ dirty:
 mod:
 	go mod tidy
 
-format: licenser
+format:
 	gofmt -w .
 
 test:

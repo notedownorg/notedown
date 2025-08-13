@@ -13,34 +13,34 @@ import (
 
 func TestRead(t *testing.T) {
 	tests := []struct {
-		name        string
-		input       string
-		expectError bool
-		expectID    *json.RawMessage
+		name         string
+		input        string
+		expectError  bool
+		expectID     *json.RawMessage
 		expectMethod string
 	}{
 		{
 			name: "valid request with id",
 			input: "Content-Length: 67\r\n\r\n" +
 				`{"jsonrpc":"2.0","id":1,"method":"test","params":{"key":"value"}}`,
-			expectError: false,
-			expectID:    func() *json.RawMessage { raw := json.RawMessage(`1`); return &raw }(),
+			expectError:  false,
+			expectID:     func() *json.RawMessage { raw := json.RawMessage(`1`); return &raw }(),
 			expectMethod: "test",
 		},
 		{
 			name: "valid notification without id",
 			input: "Content-Length: 61\r\n\r\n" +
 				`{"jsonrpc":"2.0","method":"notification","params":{"data":1}}`,
-			expectError: false,
-			expectID:    nil,
+			expectError:  false,
+			expectID:     nil,
 			expectMethod: "notification",
 		},
 		{
 			name: "valid request with string id",
 			input: "Content-Length: 67\r\n\r\n" +
 				`{"jsonrpc":"2.0","id":"test-id","method":"method","params":{"x":1}}`,
-			expectError: false,
-			expectID:    func() *json.RawMessage { raw := json.RawMessage(`"test-id"`); return &raw }(),
+			expectError:  false,
+			expectID:     func() *json.RawMessage { raw := json.RawMessage(`"test-id"`); return &raw }(),
 			expectMethod: "method",
 		},
 		{
@@ -71,8 +71,8 @@ func TestRead(t *testing.T) {
 			name: "content shorter than declared",
 			input: "Content-Length: 100\r\n\r\n" +
 				`{"jsonrpc":"2.0","id":1,"method":"test"}`,
-			expectError: false, // Should still parse valid JSON within limit
-			expectID: func() *json.RawMessage { raw := json.RawMessage(`1`); return &raw }(),
+			expectError:  false, // Should still parse valid JSON within limit
+			expectID:     func() *json.RawMessage { raw := json.RawMessage(`1`); return &raw }(),
 			expectMethod: "test",
 		},
 	}

@@ -123,7 +123,7 @@ func TestWrite(t *testing.T) {
 			lines := strings.Split(output, "\r\n")
 			assert.GreaterOrEqual(t, len(lines), 3, "expected at least 3 lines in output")
 
-			assert.True(t, strings.HasPrefix(lines[0], "Content-Length: "), 
+			assert.True(t, strings.HasPrefix(lines[0], "Content-Length: "),
 				"expected Content-Length header, got: %s", lines[0])
 
 			assert.Empty(t, lines[1], "expected empty line after headers")
@@ -132,14 +132,14 @@ func TestWrite(t *testing.T) {
 			body := strings.Join(lines[2:], "\r\n")
 			expectedLength := len(body)
 			headerValue := strings.TrimPrefix(lines[0], "Content-Length: ")
-			
+
 			actualLength, err := strconv.Atoi(headerValue)
 			require.NoError(t, err, "Content-Length header should be a valid number, got: %s", headerValue)
-			
+
 			// Allow some tolerance for JSON formatting differences
 			if abs(actualLength-expectedLength) > 5 {
-				assert.Equal(t, expectedLength, actualLength, 
-					"Content-Length mismatch: header says %d, actual body length is %d", 
+				assert.Equal(t, expectedLength, actualLength,
+					"Content-Length mismatch: header says %d, actual body length is %d",
 					actualLength, expectedLength)
 			}
 		})
@@ -192,10 +192,10 @@ func TestReadWriteRoundtrip(t *testing.T) {
 			require.NoError(t, err, "failed to read request")
 
 			// Verify request
-			assert.Equal(t, tt.request.ProtocolVersion, parsedRequest.ProtocolVersion, 
+			assert.Equal(t, tt.request.ProtocolVersion, parsedRequest.ProtocolVersion,
 				"protocol version mismatch")
 
-			assert.Equal(t, tt.request.Method, parsedRequest.Method, 
+			assert.Equal(t, tt.request.Method, parsedRequest.Method,
 				"method mismatch")
 
 			// Test response writing (if not a notification)
@@ -207,10 +207,10 @@ func TestReadWriteRoundtrip(t *testing.T) {
 				require.NoError(t, err, "failed to write response")
 
 				output := buf.String()
-				assert.Contains(t, output, "Content-Length:", 
+				assert.Contains(t, output, "Content-Length:",
 					"response should contain Content-Length header")
 
-				assert.Contains(t, output, `"jsonrpc":"2.0"`, 
+				assert.Contains(t, output, `"jsonrpc":"2.0"`,
 					"response should contain JSON-RPC version")
 			}
 		})

@@ -33,7 +33,7 @@ Another paragraph with ` + "`inline code`" + `.`
 	if len(doc.Children()) == 0 {
 		t.Error("Expected document to have children")
 	}
-	
+
 	// Debug: Print children info
 	t.Logf("Document has %d children", len(doc.Children()))
 	for i, child := range doc.Children() {
@@ -130,7 +130,7 @@ func TestParseHeadings(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Expected no error, got %v", err)
 	}
-	
+
 	// Debug: Print all nodes with more detail
 	walker := NewWalker(WalkFunc(func(node Node) error {
 		if heading, ok := node.(*Heading); ok {
@@ -194,7 +194,7 @@ Paragraph`
 	// Check document range
 	docRange := doc.Range()
 	if docRange.Start.Line != 1 || docRange.Start.Column != 1 {
-		t.Errorf("Expected document start at line 1, column 1, got line %d, column %d", 
+		t.Errorf("Expected document start at line 1, column 1, got line %d, column %d",
 			docRange.Start.Line, docRange.Start.Column)
 	}
 
