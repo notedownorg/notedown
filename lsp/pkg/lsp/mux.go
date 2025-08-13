@@ -12,6 +12,14 @@ import (
 type NotificationHandler func(params json.RawMessage) error
 type MethodHandler func(params json.RawMessage) (any, error)
 
+// formatRequestID formats a request ID for logging purposes
+func formatRequestID(id *json.RawMessage) string {
+	if id == nil {
+		return "null"
+	}
+	return string(*id)
+}
+
 type Mux struct {
 	reader               *bufio.Reader
 	writer               *bufio.Writer
@@ -67,20 +75,20 @@ func (m *Mux) process() error {
 				m.logger.Warn("no handler for notification", "method", request.Method)
 			}
 		} else {
-			m.logger.Debug("processing request", "method", request.Method, "id", request.ID)
+			m.logger.Debug("processing request", "method", request.Method, "id", formatRequestID(request.ID))
 			handler, ok := m.methodHandlers[method(request.Method)]
 			if !ok {
-				m.logger.Warn("method not found", "method", request.Method, "id", request.ID)
+				m.logger.Warn("method not found", "method", request.Method, "id", formatRequestID(request.ID))
 				m.write(jsonrpc.NewMethodNotFoundError(request.ID, request.Method))
 				return
 			}
 			result, err := handler(request.Params)
 			if err != nil {
-				m.logger.Error("method handler failed", "method", request.Method, "id", request.ID, "error", err)
+				m.logger.Error("method handler failed", "method", request.Method, "id", formatRequestID(request.ID), "error", err)
 				m.write(jsonrpc.NewInternalError(request.ID, err))
 				return
 			}
-			m.logger.Debug("method completed successfully", "method", request.Method, "id", request.ID)
+			m.logger.Debug("method completed successfully", "method", request.Method, "id", formatRequestID(request.ID))
 			m.write(jsonrpc.NewResponse(request.ID, result))
 		}
 	}(request)

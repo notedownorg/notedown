@@ -11,6 +11,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make hygiene` - Run format and mod tidy
 - `make all` - Full build pipeline: format, mod, test, and check for dirty working tree
 - `make dirty` - Check if working tree is clean (exit code 1 if dirty)
+- `make install` - Build and install binary to GOPATH/bin with version info
+- `make licenser` - Apply license headers to all files
 
 ### Testing Individual Components
 - `go test ./pkg/parser/...` - Test parser package
@@ -20,9 +22,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### Building
 - `go build -o notedown-lsp ./lsp/` - Build LSP server binary
 - `go run ./lsp/ serve` - Run LSP server directly
+- `make install` - Build with version info and install to GOPATH/bin
 
 ### Code Quality
-- Uses `licenser` tool for license header management
+- Uses `licenser` tool for license header management (run `make licenser`)
 - All code must be gofmt formatted
 - Working tree must be clean after running hygiene tasks
 
@@ -43,26 +46,40 @@ Key files:
 - `extensions/wikilink.go` - Wikilink syntax support
 
 ### 2. LSP Server (`lsp/`)
-- **Server Implementation**: Uses `tliron/glsp` library for LSP protocol handling
-- **JSON-RPC**: Custom JSON-RPC implementation with batch support and error handling
+- **Server Implementation**: Custom LSP server implementation with JSON-RPC protocol handling
+- **JSON-RPC**: Custom JSON-RPC implementation with batch support and error handling in `pkg/jsonrpc/`
 - **Command Structure**: Cobra-based CLI with `serve` command for LSP mode
-- **Protocol Support**: LSP 3.17 with fallback to 3.16 features
+- **Protocol Support**: Full LSP 3.17 specification with comprehensive client/server capabilities
 
 Key components:
-- `main.go` + `cmd/` - CLI entry point and commands
-- `pkg/server/` - LSP server implementation
-- `pkg/jsonrpc/` - JSON-RPC protocol handling with batch support
+- `main.go` + `cmd/` - CLI entry point and commands (serve, version, root)
+- `pkg/lsp/` - Core LSP server implementation with mux-based request routing
+- `pkg/jsonrpc/` - JSON-RPC protocol handling with batch support, request/response types
 - `pkg/constants/` - Server constants and configuration
+
+#### LSP Implementation Details
+- **Request Multiplexer**: `mux.go` handles JSON-RPC request routing with structured logging
+- **Capability Negotiation**: Comprehensive LSP 3.17 client/server capabilities in separate files:
+  - `capabilities_client.go` - Complete client capability structures with LSP spec documentation
+  - `capabilities_server.go` - Complete server capability structures with LSP spec documentation
+- **Protocol Methods**: All LSP 3.17 methods defined in `methods.go`
+- **Initialization**: Proper LSP lifecycle with initialize/initialized sequence
+
+### 3. Shared Packages (`pkg/`)
+- **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
+- **Versioning**: Build-time version information (`pkg/version/`)
 
 ### Dependencies
 - `goldmark` - Markdown parser foundation
-- `tliron/glsp` - LSP protocol implementation
+- `tliron/glsp` - LSP protocol utilities (used minimally)
 - `spf13/cobra` - CLI framework
+- `tliron/commonlog` - Structured logging
 - Custom wikilink extension for NFM-specific syntax
 
 ### Testing Strategy
 - Unit tests for parser components (`parser_test.go`)
-- JSON-RPC protocol tests with batch handling
+- JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
+- Logger tests with different output formats and levels
 - Test files use standard Go testing conventions
 - Focus on AST conversion accuracy and position tracking
 
@@ -72,4 +89,11 @@ Key components:
 - **Standard Markdown**: GitHub Flavored Markdown support plus footnotes
 - **Semantic Focus**: Emphasizes semantic meaning over HTML rendering
 
-The codebase follows standard Go project structure with clear separation between parsing logic and LSP server functionality.
+### Development Notes
+- All log messages should start with lowercase characters
+- Request IDs are properly formatted in logs using `formatRequestID()` helper
+- LSP capabilities are split into client (`capabilities_client.go`) and server (`capabilities_server.go`) files
+- Uses `any` instead of `interface{}` throughout the codebase
+- Comprehensive LSP spec documentation comments on all capability structures
+
+The codebase follows standard Go project structure with clear separation between parsing logic and LSP server functionality. The LSP implementation uses a custom JSON-RPC layer rather than external LSP libraries for maximum control and customization.
