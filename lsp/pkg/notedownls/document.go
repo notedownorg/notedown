@@ -12,6 +12,10 @@ type Document struct {
 	URI string
 	// Basepath is the filename without extension (e.g., "README" for "README.md")
 	Basepath string
+	// Content is the current text content of the document
+	Content string
+	// Version is the current version number of the document
+	Version int
 }
 
 // NewDocument creates a new Document from a URI
@@ -24,7 +28,30 @@ func NewDocument(uri string) (*Document, error) {
 	return &Document{
 		URI:      uri,
 		Basepath: basepath,
+		Content:  "",
+		Version:  0,
 	}, nil
+}
+
+// NewDocumentWithContent creates a new Document with initial content
+func NewDocumentWithContent(uri, content string, version int) (*Document, error) {
+	basepath, err := uriToBasepath(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Document{
+		URI:      uri,
+		Basepath: basepath,
+		Content:  content,
+		Version:  version,
+	}, nil
+}
+
+// UpdateContent updates the document content and version
+func (d *Document) UpdateContent(content string, version int) {
+	d.Content = content
+	d.Version = version
 }
 
 // uriToBasepath converts a file:// URI to filename without extension

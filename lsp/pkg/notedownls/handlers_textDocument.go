@@ -15,11 +15,18 @@ func (s *Server) handleDidOpen(params json.RawMessage) error {
 	}
 
 	uri := didOpenParams.TextDocument.URI
-	_, err := s.AddDocument(uri)
+	content := didOpenParams.TextDocument.Text
+	version := didOpenParams.TextDocument.Version
+
+	doc, err := NewDocumentWithContent(uri, content, version)
 	if err != nil {
-		s.logger.Error("failed to add document", "uri", uri, "error", err)
+		s.logger.Error("failed to create document", "uri", uri, "error", err)
 		return err
 	}
+
+	s.documentsMutex.Lock()
+	s.documents[uri] = doc
+	s.documentsMutex.Unlock()
 
 	s.logger.Info("document opened", "uri", uri, "languageId", didOpenParams.TextDocument.LanguageID)
 	return nil
@@ -48,8 +55,21 @@ func (s *Server) handleDidChange(params json.RawMessage) error {
 	}
 
 	uri := didChangeParams.TextDocument.URI
-	version := didChangeParams.TextDocument.Version
+	version := *didChangeParams.TextDocument.Version
 	changeCount := len(didChangeParams.ContentChanges)
+
+	// For full text sync, we expect a single change with the full content
+	if changeCount > 0 {
+		// Get the document
+		s.documentsMutex.Lock()
+		doc, exists := s.documents[uri]
+		if exists && len(didChangeParams.ContentChanges) > 0 {
+			// Update with the new content (assuming full text sync)
+			newContent := didChangeParams.ContentChanges[0].Text
+			doc.UpdateContent(newContent, version)
+		}
+		s.documentsMutex.Unlock()
+	}
 
 	s.logger.Debug("document changed", "uri", uri, "version", version, "changes", changeCount)
 	return nil

@@ -233,7 +233,28 @@ type FileOperationPatternOptions struct {
 // These would be fully defined based on specific LSP feature requirements when implementing specific features
 
 // CompletionOptions defines server capability options for completion
-type CompletionOptions struct{}
+type CompletionOptions struct {
+	// The characters that trigger completion automatically.
+	TriggerCharacters []string `json:"triggerCharacters,omitempty"`
+	// The list of all possible characters that commit a completion. This field can be used
+	// if clients don't support individual commit characters per completion item. See
+	// `ClientCapabilities.textDocument.completion.completionItem.commitCharactersSupport`
+	AllCommitCharacters []string `json:"allCommitCharacters,omitempty"`
+	// The server provides support to resolve additional
+	// information for a completion item.
+	ResolveProvider *bool `json:"resolveProvider,omitempty"`
+	// The server supports the following `CompletionItem` specific
+	// capabilities.
+	CompletionItem *CompletionItemOptions `json:"completionItem,omitempty"`
+}
+
+// CompletionItemOptions defines completion item specific options
+type CompletionItemOptions struct {
+	// The server has support for completion item label
+	// details (see also `CompletionItemLabelDetails`) when
+	// receiving a completion item in a resolve call.
+	LabelDetailsSupport *bool `json:"labelDetailsSupport,omitempty"`
+}
 
 // HoverOptions defines server capability options for hover
 type HoverOptions struct{}
