@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/lsp/pkg/notedownls/indexes"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 
@@ -240,6 +241,7 @@ func TestGenerateWikilinkTargets(t *testing.T) {
 func TestGetWikilinkCompletions(t *testing.T) {
 	server := &Server{
 		logger: log.NewDefault(),
+		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
 		workspace: &WorkspaceManager{
 			fileIndex: map[string]*FileInfo{
 				"file:///workspace/readme.md": {
@@ -273,7 +275,7 @@ func TestGetWikilinkCompletions(t *testing.T) {
 			name:         "empty prefix returns all files except current",
 			prefix:       "",
 			currentURI:   "file:///workspace/readme.md",
-			wantCount:    6, // 3 files * 2 targets each (base name + path), minus current file
+			wantCount:    8, // 3 files * 2 targets each (base name + path), minus current file, plus directory suggestions
 			wantContains: []string{"api", "docs/api", "alpha", "projects/alpha"},
 		},
 		{
@@ -287,7 +289,7 @@ func TestGetWikilinkCompletions(t *testing.T) {
 			name:         "prefix 'proj' filters to project files",
 			prefix:       "proj",
 			currentURI:   "file:///workspace/readme.md",
-			wantCount:    2, // "projects/alpha" and "projects/beta"
+			wantCount:    4, // "projects/alpha", "projects/beta", "projects/", "projects/new-file"
 			wantContains: []string{"projects/alpha", "projects/beta"},
 		},
 		{
@@ -322,5 +324,41 @@ func TestGetWikilinkCompletions(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+
+func TestGetNonExistentTargetCompletions(t *testing.T) {
+	server := &Server{
+		logger: log.NewDefault(),
+		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
+	}
+	
+	// Add some non-existent targets
+	server.wikilinkIndex.AddTarget("missing-doc", "file:///other.md", false)
+	server.wikilinkIndex.AddTarget("shared-concept", "file:///doc1.md", false)
+	server.wikilinkIndex.AddTarget("shared-concept", "file:///doc2.md", false)
+
+	got := server.getNonExistentTargetCompletions("", "file:///current.md")
+
+	if len(got) != 2 {
+		t.Errorf("got %d completions, want 2", len(got))
+	}
+
+	foundItems := make(map[string]bool)
+	for _, item := range got {
+		foundItems[item.Label] = true
+		
+		// Verify completion item properties
+		if item.Kind == nil || *item.Kind != lsp.CompletionItemKindReference {
+			t.Errorf("item %s should have Reference kind", item.Label)
+		}
+	}
+
+	expected := []string{"missing-doc", "shared-concept"}
+	for _, exp := range expected {
+		if !foundItems[exp] {
+			t.Errorf("expected to find completion item %q but didnt", exp)
+		}
 	}
 }

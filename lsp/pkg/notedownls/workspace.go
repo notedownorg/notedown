@@ -40,6 +40,16 @@ type FileInfo struct {
 	Size    int64     // file size in bytes
 }
 
+// GetURI returns the file URI (implements indexes.WorkspaceFile)
+func (f *FileInfo) GetURI() string {
+	return f.URI
+}
+
+// GetPath returns the file path (implements indexes.WorkspaceFile)
+func (f *FileInfo) GetPath() string {
+	return f.Path
+}
+
 // NewWorkspaceManager creates a new workspace manager
 func NewWorkspaceManager(logger *log.Logger) *WorkspaceManager {
 	return &WorkspaceManager{

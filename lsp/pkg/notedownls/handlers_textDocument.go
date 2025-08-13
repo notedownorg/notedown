@@ -28,6 +28,9 @@ func (s *Server) handleDidOpen(params json.RawMessage) error {
 	s.documents[uri] = doc
 	s.documentsMutex.Unlock()
 
+	// Extract wikilinks from the document content
+	s.extractWikilinksFromDocument(uri, content)
+
 	s.logger.Info("document opened", "uri", uri, "languageId", didOpenParams.TextDocument.LanguageID)
 	return nil
 }
@@ -41,6 +44,10 @@ func (s *Server) handleDidClose(params json.RawMessage) error {
 	}
 
 	uri := didCloseParams.TextDocument.URI
+	
+	// Remove wikilink references from this document
+	s.removeWikilinksFromDocument(uri)
+	
 	s.RemoveDocument(uri)
 	s.logger.Info("document closed", "uri", uri)
 	return nil
@@ -67,6 +74,9 @@ func (s *Server) handleDidChange(params json.RawMessage) error {
 			// Update with the new content (assuming full text sync)
 			newContent := didChangeParams.ContentChanges[0].Text
 			doc.UpdateContent(newContent, version)
+			
+			// Update wikilinks for this document
+			s.refreshWikilinksFromDocument(uri, newContent)
 		}
 		s.documentsMutex.Unlock()
 	}

@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/lsp/pkg/notedownls/indexes"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 
@@ -22,16 +23,20 @@ type Server struct {
 
 	// Workspace management
 	workspace *WorkspaceManager
+	
+	// Wikilink management
+	wikilinkIndex *indexes.WikilinkIndex
 }
 
 // NewServer creates a new Notedown LSP server
 func NewServer(version string, logger *log.Logger) *Server {
 	scopedLogger := logger.WithScope("lsp/pkg/notedownls")
 	return &Server{
-		version:   version,
-		logger:    scopedLogger,
-		documents: make(map[string]*Document),
-		workspace: NewWorkspaceManager(scopedLogger.WithScope("workspace")),
+		version:       version,
+		logger:        scopedLogger,
+		documents:     make(map[string]*Document),
+		workspace:     NewWorkspaceManager(scopedLogger.WithScope("workspace")),
+		wikilinkIndex: indexes.NewWikilinkIndex(scopedLogger.WithScope("wikilink")),
 	}
 }
 
@@ -254,6 +259,22 @@ func (s *Server) getWikilinkContext(doc *Document, position lsp.Position) *Wikil
 // getWikilinkCompletions generates completion items for wikilinks
 func (s *Server) getWikilinkCompletions(prefix, currentDocURI string) []lsp.CompletionItem {
 	var items []lsp.CompletionItem
+	
+	// Priority 1: Existing files
+	items = append(items, s.getExistingFileCompletions(prefix, currentDocURI)...)
+	
+	// Priority 2: Non-existent targets referenced in other documents
+	items = append(items, s.getNonExistentTargetCompletions(prefix, currentDocURI)...)
+	
+	// Priority 3: Directory path suggestions
+	items = append(items, s.getDirectoryPathCompletions(prefix, currentDocURI)...)
+	
+	return items
+}
+
+// getExistingFileCompletions generates completions for existing workspace files
+func (s *Server) getExistingFileCompletions(prefix, currentDocURI string) []lsp.CompletionItem {
+	var items []lsp.CompletionItem
 
 	// Get all markdown files from workspace
 	files := s.GetWorkspaceFiles()
@@ -284,6 +305,133 @@ func (s *Server) getWikilinkCompletions(prefix, currentDocURI string) []lsp.Comp
 	}
 
 	return items
+}
+
+// getNonExistentTargetCompletions generates completions for non-existent wikilink targets
+func (s *Server) getNonExistentTargetCompletions(prefix, currentDocURI string) []lsp.CompletionItem {
+	var items []lsp.CompletionItem
+	
+	// Get non-existent targets from the wikilink index
+	nonExistentTargets := s.wikilinkIndex.GetNonExistentTargets()
+	
+	for _, targetInfo := range nonExistentTargets {
+		target := targetInfo.Target
+		
+		// Filter based on prefix
+		if prefix == "" || strings.HasPrefix(strings.ToLower(target), strings.ToLower(prefix)) {
+			refCount := len(targetInfo.ReferencedBy)
+			
+			// Skip if this is the only document referencing it (avoid self-reference)
+			if refCount == 1 && targetInfo.ReferencedBy[currentDocURI] {
+				continue
+			}
+			
+			kind := lsp.CompletionItemKindReference
+			detail := fmt.Sprintf("Referenced in %d file(s) (create new)", refCount)
+			sortKey := fmt.Sprintf("2_%s", target) // Lower priority than existing files
+			
+			items = append(items, lsp.CompletionItem{
+				Label:      target,
+				Kind:       &kind,
+				Detail:     &detail,
+				InsertText: &target,
+				FilterText: &target,
+				SortText:   &sortKey,
+			})
+		}
+	}
+	
+	return items
+}
+
+// getDirectoryPathCompletions generates completions based on existing directory structure
+func (s *Server) getDirectoryPathCompletions(prefix, currentDocURI string) []lsp.CompletionItem {
+	var items []lsp.CompletionItem
+	
+	// Get all workspace files to analyze directory structure
+	files := s.GetWorkspaceFiles()
+	directorySet := make(map[string]bool)
+	
+	// Extract all directory paths from existing files
+	for _, fileInfo := range files {
+		dir := filepath.Dir(fileInfo.Path)
+		if dir != "." {
+			// Add the directory and all parent directories
+			parts := strings.Split(strings.ReplaceAll(dir, "\\", "/"), "/")
+			currentPath := ""
+			for _, part := range parts {
+				if currentPath == "" {
+					currentPath = part
+				} else {
+					currentPath += "/" + part
+				}
+				directorySet[currentPath] = true
+			}
+		}
+	}
+	
+	// Generate completions for directories that match the prefix
+	for dirPath := range directorySet {
+		// Complete directory paths (e.g., "docs/", "projects/")
+		dirCompletion := dirPath + "/"
+		
+		if prefix == "" || strings.HasPrefix(strings.ToLower(dirCompletion), strings.ToLower(prefix)) {
+			kind := lsp.CompletionItemKindFolder
+			detail := fmt.Sprintf("Directory path completion")
+			sortKey := fmt.Sprintf("3_%s", dirCompletion) // Lower priority than files and referenced targets
+			
+			items = append(items, lsp.CompletionItem{
+				Label:      dirCompletion,
+				Kind:       &kind,
+				Detail:     &detail,
+				InsertText: &dirCompletion,
+				FilterText: &dirCompletion,
+				SortText:   &sortKey,
+			})
+		}
+		
+		// If prefix matches the directory, also suggest common file patterns within it
+		if prefix != "" && strings.HasPrefix(strings.ToLower(dirPath), strings.ToLower(prefix)) {
+			// Suggest a generic file in this directory
+			suggestedFile := dirPath + "/new-file"
+			
+			if !s.targetAlreadyExists(suggestedFile, files) {
+				kind := lsp.CompletionItemKindValue
+				detail := fmt.Sprintf("Create new file in %s/", dirPath)
+				sortKey := fmt.Sprintf("4_%s", suggestedFile)
+				
+				items = append(items, lsp.CompletionItem{
+					Label:      suggestedFile,
+					Kind:       &kind,
+					Detail:     &detail,
+					InsertText: &suggestedFile,
+					FilterText: &suggestedFile,
+					SortText:   &sortKey,
+				})
+			}
+		}
+	}
+	
+	return items
+}
+
+// targetAlreadyExists checks if a target would conflict with existing files or targets
+func (s *Server) targetAlreadyExists(target string, files []*FileInfo) bool {
+	// Check existing files
+	for _, fileInfo := range files {
+		pathWithoutExt := strings.TrimSuffix(fileInfo.Path, filepath.Ext(fileInfo.Path))
+		baseWithoutExt := strings.TrimSuffix(filepath.Base(fileInfo.Path), filepath.Ext(fileInfo.Path))
+		
+		if target == pathWithoutExt || target == baseWithoutExt {
+			return true
+		}
+	}
+	
+	// Check existing wikilink targets
+	allTargets := s.wikilinkIndex.GetAllTargets()
+	_, exists := allTargets[target]
+	
+	return exists
 }
 
 // WikilinkTarget represents a possible wikilink target
@@ -322,6 +470,42 @@ func (s *Server) generateWikilinkTargets(fileInfo *FileInfo, currentDocURI strin
 	}
 
 	return targets
+}
+
+// extractWikilinksFromDocument extracts wikilinks from a document and adds them to the index
+func (s *Server) extractWikilinksFromDocument(documentURI, content string) {
+	// Get workspace files as a map for the interface
+	workspaceFiles := s.getWorkspaceFilesMap()
+	
+	// Extract wikilinks
+	s.wikilinkIndex.ExtractWikilinksFromDocument(content, documentURI, workspaceFiles)
+}
+
+// refreshWikilinksFromDocument refreshes wikilinks for a document (removes old, adds new)
+func (s *Server) refreshWikilinksFromDocument(documentURI, content string) {
+	// Get workspace files as a map for the interface
+	workspaceFiles := s.getWorkspaceFilesMap()
+	
+	// Refresh wikilinks
+	s.wikilinkIndex.RefreshDocumentWikilinks(content, documentURI, workspaceFiles)
+}
+
+// removeWikilinksFromDocument removes all wikilink references from a document
+func (s *Server) removeWikilinksFromDocument(documentURI string) {
+	// Remove references by refreshing with empty content
+	s.wikilinkIndex.RefreshDocumentWikilinks("", documentURI, nil)
+}
+
+// getWorkspaceFilesMap converts workspace files to the interface map
+func (s *Server) getWorkspaceFilesMap() map[string]indexes.WorkspaceFile {
+	workspaceFiles := s.GetWorkspaceFiles()
+	result := make(map[string]indexes.WorkspaceFile)
+	
+	for _, fileInfo := range workspaceFiles {
+		result[fileInfo.URI] = fileInfo
+	}
+	
+	return result
 }
 
 // Shutdown handles cleanup when the server is shutting down
