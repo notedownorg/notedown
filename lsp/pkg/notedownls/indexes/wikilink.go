@@ -12,11 +12,11 @@ import (
 
 // WikilinkTargetInfo contains information about a wikilink target
 type WikilinkTargetInfo struct {
-	Target       string            // The wikilink target (e.g., "project-alpha", "docs/api")
-	Exists       bool              // Whether the target file actually exists
-	ReferencedBy map[string]bool   // Set of document URIs that reference this target
-	LastSeen     time.Time         // When this target was last seen during scanning
-	SuggestedURI string            // Suggested file URI if this target were to be created
+	Target       string          // The wikilink target (e.g., "project-alpha", "docs/api")
+	Exists       bool            // Whether the target file actually exists
+	ReferencedBy map[string]bool // Set of document URIs that reference this target
+	LastSeen     time.Time       // When this target was last seen during scanning
+	SuggestedURI string          // Suggested file URI if this target were to be created
 }
 
 // WikilinkIndex manages all wikilink targets across the workspace
@@ -64,9 +64,9 @@ func (wi *WikilinkIndex) AddTarget(target, sourceURI string, exists bool) {
 		targetInfo.SuggestedURI = wi.generateSuggestedURI(target)
 	}
 
-	wi.logger.Debug("added wikilink target", 
-		"target", target, 
-		"exists", targetInfo.Exists, 
+	wi.logger.Debug("added wikilink target",
+		"target", target,
+		"exists", targetInfo.Exists,
 		"references", len(targetInfo.ReferencedBy))
 }
 
@@ -77,7 +77,7 @@ func (wi *WikilinkIndex) RemoveTargetReference(target, sourceURI string) {
 
 	if targetInfo, found := wi.targets[target]; found {
 		delete(targetInfo.ReferencedBy, sourceURI)
-		
+
 		// If no references remain and target doesn't exist, remove it
 		if len(targetInfo.ReferencedBy) == 0 && !targetInfo.Exists {
 			delete(wi.targets, target)
@@ -160,10 +160,10 @@ func (wi *WikilinkIndex) generateSuggestedURI(target string) string {
 
 	// Add .md extension for markdown files
 	suggestedPath := target + ".md"
-	
+
 	// Ensure proper path separators
 	suggestedPath = strings.ReplaceAll(suggestedPath, "\\", "/")
-	
+
 	return suggestedPath
 }
 
@@ -182,7 +182,7 @@ func (wi *WikilinkIndex) GetReferenceCount(target string) int {
 func (wi *WikilinkIndex) Clear() {
 	wi.mutex.Lock()
 	defer wi.mutex.Unlock()
-	
+
 	wi.targets = make(map[string]*WikilinkTargetInfo)
 	wi.logger.Debug("cleared wikilink index")
 }
@@ -194,7 +194,7 @@ func (wi *WikilinkIndex) GetTargetsByPrefix(prefix string) map[string]*WikilinkT
 
 	result := make(map[string]*WikilinkTargetInfo)
 	lowerPrefix := strings.ToLower(prefix)
-	
+
 	for target, info := range wi.targets {
 		if strings.HasPrefix(strings.ToLower(target), lowerPrefix) {
 			// Create a copy
@@ -225,31 +225,31 @@ func (wi *WikilinkIndex) ExtractWikilinksFromDocument(content, documentURI strin
 	// Use regex to extract wikilinks for now (simpler approach while parser issues are resolved)
 	wikilinkRegex := regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
 	matches := wikilinkRegex.FindAllStringSubmatch(content, -1)
-	
+
 	var targets []string
-	
+
 	for _, match := range matches {
 		if len(match) > 1 {
 			target := strings.TrimSpace(match[1])
 			targets = append(targets, target)
-			
+
 			// Check if this target corresponds to an existing file
 			exists := wi.targetExistsInWorkspace(target, workspaceFiles)
-			
+
 			// Add to index
 			wi.AddTarget(target, documentURI, exists)
-			
-			wi.logger.Debug("extracted wikilink", 
-				"target", target, 
-				"exists", exists, 
+
+			wi.logger.Debug("extracted wikilink",
+				"target", target,
+				"exists", exists,
 				"source", documentURI)
 		}
 	}
-	
-	wi.logger.Debug("extracted wikilinks from document", 
-		"uri", documentURI, 
+
+	wi.logger.Debug("extracted wikilinks from document",
+		"uri", documentURI,
 		"count", len(targets))
-	
+
 	return targets
 }
 
@@ -263,14 +263,14 @@ func (wi *WikilinkIndex) targetExistsInWorkspace(target string, workspaceFiles m
 		if target == pathWithoutExt {
 			return true
 		}
-		
+
 		// Check if target matches just the filename without extension
 		baseWithoutExt := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 		if target == baseWithoutExt {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -278,7 +278,7 @@ func (wi *WikilinkIndex) targetExistsInWorkspace(target string, workspaceFiles m
 func (wi *WikilinkIndex) RefreshDocumentWikilinks(content, documentURI string, workspaceFiles map[string]WorkspaceFile) {
 	// Remove existing references from this document
 	wi.removeDocumentReferences(documentURI)
-	
+
 	// Extract new wikilinks
 	wi.ExtractWikilinksFromDocument(content, documentURI, workspaceFiles)
 }
@@ -287,28 +287,28 @@ func (wi *WikilinkIndex) RefreshDocumentWikilinks(content, documentURI string, w
 func (wi *WikilinkIndex) removeDocumentReferences(documentURI string) {
 	wi.mutex.Lock()
 	defer wi.mutex.Unlock()
-	
+
 	// Find all targets that reference this document and remove the reference
 	targetsToRemove := make([]string, 0)
-	
+
 	for target, info := range wi.targets {
 		if info.ReferencedBy[documentURI] {
 			delete(info.ReferencedBy, documentURI)
-			
+
 			// If no references remain and target doesn't exist, mark for removal
 			if len(info.ReferencedBy) == 0 && !info.Exists {
 				targetsToRemove = append(targetsToRemove, target)
 			}
 		}
 	}
-	
+
 	// Remove targets with no references
 	for _, target := range targetsToRemove {
 		delete(wi.targets, target)
 		wi.logger.Debug("removed unreferenced wikilink target", "target", target)
 	}
-	
-	wi.logger.Debug("removed document references", 
-		"uri", documentURI, 
+
+	wi.logger.Debug("removed document references",
+		"uri", documentURI,
 		"removedTargets", len(targetsToRemove))
 }

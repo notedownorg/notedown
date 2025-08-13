@@ -104,7 +104,7 @@ Also has [[docs/new-guide]] and [[existing|display text]].`
 
 	// Check that targets were added to index
 	allTargets := index.GetAllTargets()
-	
+
 	// Should have 3 unique targets (existing appears twice)
 	expectedUniqueTargets := map[string]bool{
 		"existing":       true,
@@ -189,7 +189,7 @@ func TestWikilinkIndex_GetTargetsByPrefix(t *testing.T) {
 	for _, tt := range tests {
 		t.Run("prefix_"+tt.prefix, func(t *testing.T) {
 			results := index.GetTargetsByPrefix(tt.prefix)
-			
+
 			if len(results) != len(tt.expected) {
 				t.Errorf("prefix '%s': expected %d results, got %d", tt.prefix, len(tt.expected), len(results))
 			}
@@ -230,16 +230,16 @@ func TestWikilinkIndex_RefreshDocumentWikilinks(t *testing.T) {
 
 	// Verify updated state
 	allTargets = index.GetAllTargets()
-	
+
 	// Should have new-link and shared-link, but not old-link
 	if _, found := allTargets["new-link"]; !found {
 		t.Error("new-link should be present after refresh")
 	}
-	
+
 	if _, found := allTargets["shared-link"]; !found {
 		t.Error("shared-link should still be present after refresh")
 	}
-	
+
 	if _, found := allTargets["old-link"]; found {
 		t.Error("old-link should be removed after refresh")
 	}

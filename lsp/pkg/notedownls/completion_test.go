@@ -240,7 +240,7 @@ func TestGenerateWikilinkTargets(t *testing.T) {
 
 func TestGetWikilinkCompletions(t *testing.T) {
 	server := &Server{
-		logger: log.NewDefault(),
+		logger:        log.NewDefault(),
 		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
 		workspace: &WorkspaceManager{
 			fileIndex: map[string]*FileInfo{
@@ -303,7 +303,7 @@ func TestGetWikilinkCompletions(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := server.getWikilinkCompletions(tt.prefix, tt.currentURI)
+			got := server.getWikilinkCompletions(tt.prefix, tt.currentURI, false)
 
 			if len(got) != tt.wantCount {
 				t.Errorf("got %d completions, want %d", len(got), tt.wantCount)
@@ -327,19 +327,18 @@ func TestGetWikilinkCompletions(t *testing.T) {
 	}
 }
 
-
 func TestGetNonExistentTargetCompletions(t *testing.T) {
 	server := &Server{
-		logger: log.NewDefault(),
+		logger:        log.NewDefault(),
 		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
 	}
-	
+
 	// Add some non-existent targets
 	server.wikilinkIndex.AddTarget("missing-doc", "file:///other.md", false)
 	server.wikilinkIndex.AddTarget("shared-concept", "file:///doc1.md", false)
 	server.wikilinkIndex.AddTarget("shared-concept", "file:///doc2.md", false)
 
-	got := server.getNonExistentTargetCompletions("", "file:///current.md")
+	got := server.getNonExistentTargetCompletions("", "file:///current.md", false)
 
 	if len(got) != 2 {
 		t.Errorf("got %d completions, want 2", len(got))
@@ -348,7 +347,7 @@ func TestGetNonExistentTargetCompletions(t *testing.T) {
 	foundItems := make(map[string]bool)
 	for _, item := range got {
 		foundItems[item.Label] = true
-		
+
 		// Verify completion item properties
 		if item.Kind == nil || *item.Kind != lsp.CompletionItemKindReference {
 			t.Errorf("item %s should have Reference kind", item.Label)
@@ -360,5 +359,109 @@ func TestGetNonExistentTargetCompletions(t *testing.T) {
 		if !foundItems[exp] {
 			t.Errorf("expected to find completion item %q but didnt", exp)
 		}
+	}
+}
+
+func TestGetNonExistentTargetCompletionsInSameDocument(t *testing.T) {
+	server := &Server{
+		logger:        log.NewDefault(),
+		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
+	}
+
+	// Add a non-existent target that's only referenced in the current document
+	server.wikilinkIndex.AddTarget("same-doc-target", "file:///current.md", false)
+
+	// Also add a target referenced by multiple documents for comparison
+	server.wikilinkIndex.AddTarget("multi-doc-target", "file:///current.md", false)
+	server.wikilinkIndex.AddTarget("multi-doc-target", "file:///other.md", false)
+
+	got := server.getNonExistentTargetCompletions("", "file:///current.md", false)
+
+	// Should get both targets - the same-document one and the multi-document one
+	if len(got) != 2 {
+		t.Errorf("got %d completions, want 2", len(got))
+		for _, item := range got {
+			t.Logf("  - %s", item.Label)
+		}
+	}
+
+	foundItems := make(map[string]bool)
+	for _, item := range got {
+		foundItems[item.Label] = true
+
+		// Verify completion item properties
+		if item.Kind == nil || *item.Kind != lsp.CompletionItemKindReference {
+			t.Errorf("item %s should have Reference kind", item.Label)
+		}
+	}
+
+	expected := []string{"same-doc-target", "multi-doc-target"}
+	for _, exp := range expected {
+		if !foundItems[exp] {
+			t.Errorf("expected to find completion item %q but didn't", exp)
+		}
+	}
+}
+
+func TestWikilinkCompletionWithClosingBrackets(t *testing.T) {
+	server := &Server{
+		logger:        log.NewDefault(),
+		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
+		workspace: &WorkspaceManager{
+			fileIndex: map[string]*FileInfo{
+				"file:///project-alpha.md": {
+					URI:  "file:///project-alpha.md",
+					Path: "project-alpha.md",
+				},
+			},
+		},
+	}
+
+	// Add a non-existent target
+	server.wikilinkIndex.AddTarget("missing-doc", "file:///other.md", false)
+
+	tests := []struct {
+		name         string
+		needsClosing bool
+		wantSuffix   string
+	}{
+		{
+			name:         "incomplete wikilink includes closing brackets",
+			needsClosing: true,
+			wantSuffix:   "]]",
+		},
+		{
+			name:         "complete wikilink does not include closing brackets",
+			needsClosing: false,
+			wantSuffix:   "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			completions := server.getWikilinkCompletions("proj", "file:///current.md", tt.needsClosing)
+
+			// Find the project-alpha completion
+			var projectAlphaItem *lsp.CompletionItem
+			for _, item := range completions {
+				if item.Label == "project-alpha" {
+					projectAlphaItem = &item
+					break
+				}
+			}
+
+			if projectAlphaItem == nil {
+				t.Fatal("project-alpha completion not found")
+			}
+
+			if projectAlphaItem.InsertText == nil {
+				t.Fatal("InsertText should not be nil")
+			}
+
+			expectedInsert := "project-alpha" + tt.wantSuffix
+			if *projectAlphaItem.InsertText != expectedInsert {
+				t.Errorf("InsertText = %q, want %q", *projectAlphaItem.InsertText, expectedInsert)
+			}
+		})
 	}
 }

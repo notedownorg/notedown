@@ -53,3 +53,40 @@ type Position struct {
 	Line      int `json:"line"`
 	Character int `json:"character"`
 }
+
+// Location represents a location inside a resource, such as a line inside a text file
+type Location struct {
+	URI   string `json:"uri"`
+	Range Range  `json:"range"`
+}
+
+// LocationLink represents a link between a source and a target location
+type LocationLink struct {
+	OriginSelectionRange *Range `json:"originSelectionRange,omitempty"`
+	TargetURI            string `json:"targetUri"`
+	TargetRange          Range  `json:"targetRange"`
+	TargetSelectionRange *Range `json:"targetSelectionRange,omitempty"`
+}
+
+// TextDocumentPositionParams represents parameters for requests that require a text document and position
+type TextDocumentPositionParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
+}
+
+// DefinitionParams represents the parameters for textDocument/definition requests
+type DefinitionParams struct {
+	TextDocumentPositionParams
+	WorkDoneProgressParams
+	PartialResultParams
+}
+
+// WorkDoneProgressParams represents work done progress parameters
+type WorkDoneProgressParams struct {
+	WorkDoneToken *string `json:"workDoneToken,omitempty"`
+}
+
+// PartialResultParams represents partial result parameters
+type PartialResultParams struct {
+	PartialResultToken *string `json:"partialResultToken,omitempty"`
+}
