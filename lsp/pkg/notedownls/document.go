@@ -10,7 +10,7 @@ import (
 type Document struct {
 	// URI is the document identifier as per LSP specification
 	URI string
-	// Basepath is the file path relative to the workspace root, derived from URI
+	// Basepath is the filename without extension (e.g., "README" for "README.md")
 	Basepath string
 }
 
@@ -27,7 +27,7 @@ func NewDocument(uri string) (*Document, error) {
 	}, nil
 }
 
-// uriToBasepath converts a file:// URI to a relative basepath
+// uriToBasepath converts a file:// URI to filename without extension
 func uriToBasepath(uri string) (string, error) {
 	parsedURI, err := url.Parse(uri)
 	if err != nil {
@@ -37,6 +37,12 @@ func uriToBasepath(uri string) (string, error) {
 	if parsedURI.Scheme != "file" {
 		return "", nil // Non-file URIs don't have basepaths
 	}
-	path := strings.TrimPrefix(parsedURI.Path, "/")
-	return filepath.Clean(path), nil
+
+	// Get the filename from the path
+	filename := filepath.Base(parsedURI.Path)
+
+	// Remove the extension to get the base name
+	baseName := strings.TrimSuffix(filename, filepath.Ext(filename))
+
+	return baseName, nil
 }

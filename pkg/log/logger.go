@@ -69,3 +69,9 @@ func (l *Logger) With(args ...any) *Logger {
 		slog: l.slog.With(args...),
 	}
 }
+
+func (l *Logger) WithScope(scope string) *Logger {
+	return &Logger{
+		slog: l.slog.With("scope", scope),
+	}
+}

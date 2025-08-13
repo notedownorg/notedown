@@ -53,7 +53,7 @@ func TestMuxRunWithoutServer(t *testing.T) {
 	err := mux.Run()
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "no LSP server set")
+	assert.Contains(t, err.Error(), "no lsp server set")
 }
 
 func TestMuxInitializeHandling(t *testing.T) {

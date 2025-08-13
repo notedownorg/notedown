@@ -35,7 +35,7 @@ The server communicates via stdin/stdout using the LSP protocol.`,
 			logger = log.NewLsp(level, format)
 		}
 
-		logger.Info("starting Notedown LSP server", "version", version.Get())
+		logger.WithScope("lsp/cmd").Info("starting notedown lsp server", "version", version.Get())
 
 		reader := bufio.NewReader(os.Stdin)
 		writer := bufio.NewWriter(os.Stdout)
@@ -48,7 +48,7 @@ The server communicates via stdin/stdout using the LSP protocol.`,
 		mux.SetServer(server)
 
 		if err := mux.Run(); err != nil {
-			logger.Error("lSP server failed", "error", err)
+			logger.WithScope("lsp/cmd").Error("lsp server failed", "error", err)
 			os.Exit(1)
 		}
 	},

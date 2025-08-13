@@ -41,7 +41,7 @@ func NewMux(reader *bufio.Reader, writer *bufio.Writer, version string, logger *
 		methodHandlers:       make(map[method]MethodHandler),
 		writeMutex:           &sync.Mutex{},
 		version:              version,
-		logger:               logger,
+		logger:               logger.WithScope("lsp/pkg/lsp"),
 	}
 }
 
@@ -103,8 +103,8 @@ func (m *Mux) process() error {
 
 func (m *Mux) Run() error {
 	if m.server == nil {
-		m.logger.Error("no LSP server set")
-		return fmt.Errorf("no LSP server set")
+		m.logger.Error("no lsp server set")
+		return fmt.Errorf("no lsp server set")
 	}
 
 	// Register initialize handler
@@ -130,10 +130,10 @@ func (m *Mux) Run() error {
 		return result, nil
 	})
 
-	m.logger.Info("starting LSP message processing loop")
+	m.logger.Info("starting lsp message processing loop")
 	for {
 		if err := m.process(); err != nil {
-			m.logger.Error("lSP processing error", "error", err)
+			m.logger.Error("lsp processing error", "error", err)
 			return err
 		}
 	}

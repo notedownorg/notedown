@@ -15,14 +15,19 @@ type Server struct {
 	// Document storage
 	documents      map[string]*Document
 	documentsMutex sync.RWMutex
+
+	// Workspace management
+	workspace *WorkspaceManager
 }
 
 // NewServer creates a new Notedown LSP server
 func NewServer(version string, logger *log.Logger) *Server {
+	scopedLogger := logger.WithScope("lsp/pkg/notedownls")
 	return &Server{
 		version:   version,
-		logger:    logger,
+		logger:    scopedLogger,
 		documents: make(map[string]*Document),
+		workspace: NewWorkspaceManager(scopedLogger.WithScope("workspace")),
 	}
 }
 
@@ -35,6 +40,19 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 
 	s.logger.Info("lsp client initialized", "client", clientName, "server_version", s.version)
 
+	// Initialize workspace from parameters
+	if err := s.workspace.InitializeFromParams(params); err != nil {
+		s.logger.Error("failed to initialize workspace", "error", err)
+		return lsp.InitializeResult{}, err
+	}
+
+	// Start workspace file discovery in background
+	go func() {
+		if err := s.workspace.DiscoverMarkdownFiles(); err != nil {
+			s.logger.Error("workspace file discovery failed", "error", err)
+		}
+	}()
+
 	syncKind := lsp.TextDocumentSyncKindFull
 	result := lsp.InitializeResult{
 		ServerInfo: &lsp.ServerInfo{Name: "Notedown Language Server", Version: s.version},
@@ -42,6 +60,12 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 			TextDocumentSync: &lsp.TextDocumentSyncOptions{
 				OpenClose: &[]bool{true}[0],
 				Change:    &syncKind,
+			},
+			Workspace: &lsp.WorkspaceServerCapabilities{
+				WorkspaceFolders: &lsp.WorkspaceFoldersServerCapabilities{
+					Supported:           &[]bool{true}[0],
+					ChangeNotifications: true,
+				},
 			},
 		},
 	}
@@ -55,7 +79,10 @@ func (s *Server) RegisterHandlers(mux *lsp.Mux) error {
 	mux.RegisterNotification(lsp.MethodTextDocumentDidChange, s.handleDidChange)
 	mux.RegisterNotification(lsp.MethodTextDocumentDidClose, s.handleDidClose)
 
-	s.logger.Debug("registered document lifecycle handlers")
+	// Register workspace handlers
+	mux.RegisterNotification(lsp.MethodWorkspaceDidChangeWatchedFiles, s.handleDidChangeWatchedFiles)
+
+	s.logger.Debug("registered document lifecycle and workspace handlers")
 	return nil
 }
 
@@ -99,6 +126,21 @@ func (s *Server) HasDocument(uri string) bool {
 	defer s.documentsMutex.RUnlock()
 	_, exists := s.documents[uri]
 	return exists
+}
+
+// GetWorkspace returns the workspace manager
+func (s *Server) GetWorkspace() *WorkspaceManager {
+	return s.workspace
+}
+
+// GetWorkspaceFiles returns all indexed Markdown files
+func (s *Server) GetWorkspaceFiles() []*FileInfo {
+	return s.workspace.GetMarkdownFiles()
+}
+
+// GetWorkspaceRoots returns the workspace roots
+func (s *Server) GetWorkspaceRoots() []WorkspaceRoot {
+	return s.workspace.GetWorkspaceRoots()
 }
 
 // Shutdown handles cleanup when the server is shutting down

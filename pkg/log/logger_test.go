@@ -80,3 +80,18 @@ func TestWith(t *testing.T) {
 		t.Errorf("Expected log output to contain 'key=value', got: %s", output)
 	}
 }
+
+func TestWithScope(t *testing.T) {
+	var buf bytes.Buffer
+	logger := New(&buf, Info).WithScope("lsp/pkg/notedownls")
+
+	logger.Info("test message", "key", "value")
+
+	output := buf.String()
+	if !strings.Contains(output, "scope=lsp/pkg/notedownls") {
+		t.Errorf("Expected log output to contain 'scope=lsp/pkg/notedownls', got: %s", output)
+	}
+	if !strings.Contains(output, "key=value") {
+		t.Errorf("Expected log output to contain 'key=value', got: %s", output)
+	}
+}

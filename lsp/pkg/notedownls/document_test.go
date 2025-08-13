@@ -14,17 +14,27 @@ func TestNewDocument(t *testing.T) {
 		{
 			name:     "file URI",
 			uri:      "file:///path/to/document.md",
-			wantPath: "path/to/document.md",
+			wantPath: "document",
 		},
 		{
 			name:     "file URI with relative path",
 			uri:      "file://./README.md",
-			wantPath: "README.md",
+			wantPath: "README",
 		},
 		{
 			name:     "non-file URI",
 			uri:      "http://example.com/doc",
 			wantPath: "",
+		},
+		{
+			name:     "file with multiple extensions",
+			uri:      "file:///path/to/archive.tar.gz",
+			wantPath: "archive.tar",
+		},
+		{
+			name:     "file without extension",
+			uri:      "file:///path/to/LICENSE",
+			wantPath: "LICENSE",
 		},
 	}
 
