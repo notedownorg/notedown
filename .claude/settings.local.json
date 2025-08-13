@@ -13,7 +13,8 @@
       "Bash(go run:*)",
       "WebFetch(domain:microsoft.github.io)",
       "Bash(go mod:*)",
-      "WebFetch(domain:docs.anthropic.com)"
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(cat:*)"
     ],
     "deny": []
   }
