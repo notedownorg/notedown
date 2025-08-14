@@ -17,7 +17,9 @@
       "Bash(cat:*)",
       "Bash(grep:*)",
       "Bash(./node_modules/.bin/tree-sitter:*)",
-      "Bash(make:*)"
+      "Bash(make:*)",
+      "Bash(nvim:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": []
   }

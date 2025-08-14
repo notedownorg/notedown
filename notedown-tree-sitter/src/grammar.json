@@ -447,17 +447,8 @@
       "type": "SEQ",
       "members": [
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "```"
-            },
-            {
-              "type": "STRING",
-              "value": "~~~"
-            }
-          ]
+          "type": "STRING",
+          "value": "```"
         },
         {
           "type": "CHOICE",
@@ -467,7 +458,7 @@
               "name": "language",
               "content": {
                 "type": "PATTERN",
-                "value": "[^\\n]+"
+                "value": "[^\\n]*"
               }
             },
             {
@@ -483,22 +474,41 @@
           "type": "FIELD",
           "name": "code",
           "content": {
-            "type": "PATTERN",
-            "value": "[^`~]*"
+            "type": "REPEAT",
+            "content": {
+              "type": "PREC",
+              "value": -1,
+              "content": {
+                "type": "CHOICE",
+                "members": [
+                  {
+                    "type": "PATTERN",
+                    "value": "[^\\n`]+"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "\n"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "`"
+                  },
+                  {
+                    "type": "STRING",
+                    "value": "``"
+                  }
+                ]
+              }
+            }
           }
         },
         {
-          "type": "CHOICE",
-          "members": [
-            {
-              "type": "STRING",
-              "value": "```"
-            },
-            {
-              "type": "STRING",
-              "value": "~~~"
-            }
-          ]
+          "type": "STRING",
+          "value": "\n"
+        },
+        {
+          "type": "STRING",
+          "value": "```"
         }
       ]
     },

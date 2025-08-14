@@ -144,10 +144,11 @@ function M.setup(opts)
         end,
     })
 
-    -- Set up LSP for both markdown and notedown filetypes
+    -- Set up LSP and folding for both markdown and notedown filetypes
     vim.api.nvim_create_autocmd("FileType", {
         pattern = { "markdown", "notedown" },
         callback = function()
+            -- Start LSP
             vim.lsp.start({
                 name = final_config.server.name,
                 cmd = final_config.server.cmd,
@@ -160,6 +161,14 @@ function M.setup(opts)
                     }
                 }
             })
+            
+            -- Enable treesitter-based folding for notedown files
+            if vim.bo.filetype == "notedown" then
+                vim.opt_local.foldmethod = "expr"
+                vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                vim.opt_local.foldenable = true
+                vim.opt_local.foldlevel = 99  -- Start with all folds open
+            end
         end,
     })
 end

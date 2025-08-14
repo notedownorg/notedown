@@ -45,7 +45,6 @@
 ; Code
 (code_span "`" @punctuation.delimiter)
 (fenced_code_block "```" @punctuation.delimiter)
-(fenced_code_block "~~~" @punctuation.delimiter)
 
 ; Links
 (link "[" @punctuation.bracket)

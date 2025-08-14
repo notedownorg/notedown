@@ -145,7 +145,26 @@
   {
     "type": "fenced_code_block",
     "named": true,
-    "fields": {}
+    "fields": {
+      "code": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "\n",
+            "named": false
+          },
+          {
+            "type": "`",
+            "named": false
+          },
+          {
+            "type": "``",
+            "named": false
+          }
+        ]
+      }
+    }
   },
   {
     "type": "image",
@@ -299,6 +318,10 @@
     "named": false
   },
   {
+    "type": "``",
+    "named": false
+  },
+  {
     "type": "```",
     "named": false
   },
@@ -340,10 +363,6 @@
   },
   {
     "type": "~~",
-    "named": false
-  },
-  {
-    "type": "~~~",
     "named": false
   }
 ]

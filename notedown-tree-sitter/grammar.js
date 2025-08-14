@@ -76,11 +76,12 @@ module.exports = grammar({
 
     // Fenced code blocks
     fenced_code_block: $ => seq(
-      choice('```', '~~~'),
-      optional(field('language', /[^\n]+/)),
+      '```',
+      optional(field('language', /[^\n]*/)),
       '\n',
-      field('code', /[^`~]*/),
-      choice('```', '~~~')
+      field('code', repeat(prec(-1, choice(/[^\n`]+/, '\n', '`', '``')))),
+      '\n',
+      '```'
     ),
 
     // Links
