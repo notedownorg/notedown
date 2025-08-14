@@ -3,12 +3,8 @@ if vim.g.loaded_notedown then
 end
 vim.g.loaded_notedown = 1
 
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-  pattern = "*.md",
-  callback = function()
-    vim.bo.filetype = "markdown"
-  end,
-})
+-- Note: Filetype detection is now handled in init.lua based on workspace detection
+-- This autocmd is kept for compatibility but may be overridden
 
 vim.api.nvim_create_user_command("NotedownReload", function()
   -- Stop existing LSP clients
@@ -30,4 +26,39 @@ vim.api.nvim_create_user_command("NotedownReload", function()
   vim.notify("Notedown plugin and LSP reloaded", vim.log.levels.INFO)
 end, {
   desc = "Reload the Notedown plugin and restart LSP",
+})
+
+vim.api.nvim_create_user_command("NotedownWorkspaceStatus", function()
+  local notedown = require('notedown')
+  local status = notedown.get_workspace_status()
+  
+  local message = string.format([[
+Notedown Workspace Status:
+  File: %s
+  Parser Mode: %s
+  In Notedown Workspace: %s
+  Should Use Notedown Parser: %s
+  ]], 
+    status.file_path or "No file",
+    status.parser_mode,
+    status.is_notedown_workspace and "Yes" or "No",
+    status.should_use_notedown and "Yes" or "No"
+  )
+  
+  if status.workspace_path then
+    message = message .. string.format("  Matched Workspace: %s\n", status.workspace_path)
+  end
+  
+  if status.configured_workspaces and #status.configured_workspaces > 0 then
+    message = message .. "  Configured Workspaces:\n"
+    for _, workspace in ipairs(status.configured_workspaces) do
+      message = message .. string.format("    - %s\n", workspace)
+    end
+  else
+    message = message .. "  No workspaces configured\n"
+  end
+  
+  print(message)
+end, {
+  desc = "Show workspace status for current buffer",
 })
