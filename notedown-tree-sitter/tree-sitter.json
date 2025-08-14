@@ -1,0 +1,16 @@
+{
+  "parser-directories": [
+    "src"
+  ],
+  "plugin-directories": [
+    "queries"
+  ],
+  "abi-version": 15,
+  "metadata": {
+    "name": "notedown",
+    "version": "1.0.0",
+    "scope": "source.notedown",
+    "file-types": ["nd", "notedown", "md"]
+  },
+  "grammars": []
+}

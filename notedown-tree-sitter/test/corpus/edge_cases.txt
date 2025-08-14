@@ -1,0 +1,86 @@
+================================================================================
+Wikilink with spaces in target
+================================================================================
+
+[[target with spaces]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target)))
+
+================================================================================
+Wikilink with complex display text
+================================================================================
+
+[[simple|Display with spaces and symbols!]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display)))
+
+================================================================================
+Multiple headings without content
+================================================================================
+
+#
+##
+###
+
+--------------------------------------------------------------------------------
+
+(document
+  (heading)
+  (heading)
+  (heading))
+
+================================================================================
+Text before and after wikilinks
+================================================================================
+
+Before [[link]] middle [[other|text]] after.
+
+--------------------------------------------------------------------------------
+
+(document
+  (text)
+  (wikilink
+    target: (wikilink_target))
+  (text)
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display))
+  (text))
+
+================================================================================
+Long wikilink targets and displays
+================================================================================
+
+[[very-long-target-name-with-dashes-and-underscores_here|This is a very long display text that spans multiple words]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display)))
+
+================================================================================
+Wikilinks with numbers and special characters
+================================================================================
+
+[[123-file]] [[file_2024|Year 2024 File]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target))
+  (text)
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display)))

@@ -1,0 +1,30 @@
+{
+  "name": "tree-sitter-notedown",
+  "version": "1.0.0",
+  "description": "Tree-sitter grammar for Notedown Flavored Markdown",
+  "main": "bindings/node",
+  "keywords": [
+    "tree-sitter",
+    "parser",
+    "markdown",
+    "notedown"
+  ],
+  "author": "Notedown Authors",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "tree-sitter test",
+    "test-highlights": "tree-sitter query queries/highlights.scm test/highlight/basic.txt",
+    "generate": "tree-sitter generate",
+    "build": "tree-sitter generate && gcc -o parser.so -shared -fPIC -Os src/parser.c",
+    "clean": "rm -f parser.so"
+  },
+  "dependencies": {
+    "tree-sitter-cli": "^0.25.8"
+  },
+  "tree-sitter": [
+    {
+      "scope": "source.notedown",
+      "file-types": ["nd", "notedown", "md"]
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+================================================================================
+Complex document with mixed content
+================================================================================
+
+# Main Title
+
+This paragraph contains [[wikilink]] and more text.
+
+## Section with [[link|Display Text]]
+
+Another paragraph here.
+
+### Subsection
+
+Final paragraph with [[multiple]] [[links|here]].
+
+--------------------------------------------------------------------------------
+
+(document
+  (heading
+    content: (text))
+  (text)
+  (wikilink
+    target: (wikilink_target))
+  (text)
+  (heading
+    content: (text)
+    content: (wikilink
+      target: (wikilink_target)
+      display: (wikilink_display)))
+  (text)
+  (heading
+    content: (text))
+  (text)
+  (wikilink
+    target: (wikilink_target))
+  (text)
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display))
+  (text))
+
+================================================================================
+Wikilinks with special characters
+================================================================================
+
+[[file-name]] and [[with_underscore|Display]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target))
+  (text)
+  (wikilink
+    target: (wikilink_target)
+    display: (wikilink_display)))
+
+================================================================================
+Nested wikilinks in headings
+================================================================================
+
+# Documentation for [[project|Our Project]]
+## [[Getting Started]]
+### Working with [[files|File System]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (heading
+    content: (text)
+    content: (wikilink
+      target: (wikilink_target)
+      display: (wikilink_display)))
+  (heading
+    content: (wikilink
+      target: (wikilink_target)))
+  (heading
+    content: (text)
+    content: (wikilink
+      target: (wikilink_target)
+      display: (wikilink_display))))
+
+================================================================================
+Edge case: Empty content
+================================================================================
+
+#  
+
+--------------------------------------------------------------------------------
+
+(document
+  (heading))
+
+================================================================================
+Edge case: Just wikilinks
+================================================================================
+
+[[first]][[second]]
+
+--------------------------------------------------------------------------------
+
+(document
+  (wikilink
+    target: (wikilink_target))
+  (wikilink
+    target: (wikilink_target)))

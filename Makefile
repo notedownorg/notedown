@@ -30,10 +30,14 @@ mod:
 format:
 	gofmt -w .
 
-test:
+test: generate
 	go test ./...
+	cd notedown-tree-sitter && npm test
 
-install: clean
+generate:
+	cd notedown-tree-sitter && npm install && npm run build
+
+install: clean generate
 	go build -ldflags "\
 		-w -s \
 		-X github.com/notedownorg/notedown/pkg/version.version=$(VERSION) \
@@ -43,6 +47,11 @@ install: clean
 		./lsp/
 	mkdir -p ~/.config/notedown/nvim
 	cp -r notedown-nvim/* ~/.config/notedown/nvim/
+	mkdir -p ~/.config/notedown/nvim/parser
+	# Copy the compiled shared library
+	cp notedown-tree-sitter/parser.so ~/.config/notedown/nvim/parser/notedown.so
+	mkdir -p ~/.config/notedown/nvim/queries/notedown
+	cp -r notedown-tree-sitter/queries/* ~/.config/notedown/nvim/queries/notedown/
 
 clean:
 	rm -f $(shell go env GOPATH)/bin/notedown-language-server

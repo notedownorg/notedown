@@ -13,11 +13,10 @@ local function is_notedown_workspace(file_path)
     local resolved_file = vim.fn.resolve(file_path)
 
     for _, workspace in ipairs(final_config.parser.notedown_workspaces) do
-        local resolved_workspace = vim.fn.resolve(vim.fn.expand(workspace))
-
+        -- Workspace paths are already expanded and resolved during setup
         -- Check if file path starts with workspace path
-        if resolved_file:find("^" .. vim.pesc(resolved_workspace)) then
-            return true, resolved_workspace
+        if resolved_file:find("^" .. vim.pesc(workspace)) then
+            return true, workspace
         end
     end
 
@@ -78,6 +77,15 @@ function M.setup(opts)
     opts = opts or {}
 
     final_config = vim.tbl_deep_extend("force", config.defaults, opts)
+    
+    -- Expand and normalize workspace paths during setup
+    if final_config.parser and final_config.parser.notedown_workspaces then
+        for i, workspace in ipairs(final_config.parser.notedown_workspaces) do
+            -- Expand ~ and resolve the path
+            local expanded = vim.fn.expand(workspace)
+            final_config.parser.notedown_workspaces[i] = vim.fn.resolve(expanded)
+        end
+    end
 
     -- Set up parser selection based on workspace detection
     vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
@@ -98,7 +106,6 @@ function M.setup(opts)
                 vim.bo[bufnr].filetype = "markdown"
             end
         end,
-        priority = 10, -- Higher priority than default filetype detection
     })
 
     -- Set up LSP for both markdown and notedown filetypes

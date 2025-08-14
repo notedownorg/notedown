@@ -1,0 +1,114 @@
+[
+  {
+    "type": "document",
+    "named": true,
+    "root": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "heading",
+          "named": true
+        },
+        {
+          "type": "text",
+          "named": true
+        },
+        {
+          "type": "wikilink",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "heading",
+    "named": true,
+    "fields": {
+      "content": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "text",
+            "named": true
+          },
+          {
+            "type": "wikilink",
+            "named": true
+          }
+        ]
+      },
+      "level": {
+        "multiple": true,
+        "required": true,
+        "types": [
+          {
+            "type": "#",
+            "named": false
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "wikilink",
+    "named": true,
+    "fields": {
+      "display": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "wikilink_display",
+            "named": true
+          }
+        ]
+      },
+      "target": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "wikilink_target",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "\n",
+    "named": false
+  },
+  {
+    "type": "#",
+    "named": false
+  },
+  {
+    "type": "[[",
+    "named": false
+  },
+  {
+    "type": "]]",
+    "named": false
+  },
+  {
+    "type": "text",
+    "named": true
+  },
+  {
+    "type": "wikilink_display",
+    "named": true
+  },
+  {
+    "type": "wikilink_target",
+    "named": true
+  },
+  {
+    "type": "|",
+    "named": false
+  }
+]

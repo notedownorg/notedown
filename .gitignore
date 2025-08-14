@@ -24,3 +24,6 @@ go.work
 bin/
 
 notedown-lsp
+
+# Node things..
+node_modules/

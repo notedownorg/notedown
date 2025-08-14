@@ -3,6 +3,7 @@ if vim.g.loaded_notedown then
 end
 vim.g.loaded_notedown = 1
 
+
 -- Note: Filetype detection is now handled in init.lua based on workspace detection
 -- This autocmd is kept for compatibility but may be overridden
 

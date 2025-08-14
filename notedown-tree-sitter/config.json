@@ -1,0 +1,21 @@
+{
+  "parser-directories": [
+    "."
+  ],
+  "theme": {
+    "comment": { "color": 144, "italic": true },
+    "constant": { "color": 166 },
+    "function": { "color": 33 },
+    "keyword": { "color": 99, "bold": true },
+    "string": { "color": 34 },
+    "type": { "color": 136 },
+    "variable": { "color": 131 },
+    "markup.heading": { "color": 202, "bold": true },
+    "markup.heading.content": { "color": 202, "bold": true },
+    "markup.link.url": { "color": 33, "underline": true },
+    "markup.link.label": { "color": 34 },
+    "punctuation.bracket": { "color": 244 },
+    "punctuation.separator": { "color": 244 },
+    "text": { "color": 251 }
+  }
+}

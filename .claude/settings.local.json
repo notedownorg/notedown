@@ -15,7 +15,8 @@
       "Bash(go mod:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(cat:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(./node_modules/.bin/tree-sitter:*)"
     ],
     "deny": []
   }
