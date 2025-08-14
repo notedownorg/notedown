@@ -46,9 +46,10 @@ Heading with wikilink
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text)
-    content: (wikilink
+  (atx_heading
+    (atx_h1_marker)
+    (text)
+    (wikilink
       target: (wikilink_target))))
 
 ================================================================================

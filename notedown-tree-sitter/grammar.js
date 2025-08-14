@@ -1,3 +1,7 @@
+// Notedown Tree-sitter Grammar
+// Enhanced markdown grammar with wikilink support
+// Focus on core functionality with good syntax highlighting
+
 module.exports = grammar({
   name: 'notedown',
 
@@ -5,20 +9,41 @@ module.exports = grammar({
     document: $ => repeat($._content),
 
     _content: $ => choice(
-      $.heading,
+      $.atx_heading,
       $.wikilink,
+      $.emphasis,
+      $.strong,
+      $.strikethrough,
+      $.code_span,
+      $.link,
+      $.image,
+      $.fenced_code_block,
       $.text,
       '\n'
     ),
 
-    // Headings
-    heading: $ => prec.right(seq(
-      field('level', repeat1('#')),
+    // ATX Headings - following standard treesitter markdown conventions
+    atx_heading: $ => prec.right(seq(
+      choice(
+        $.atx_h1_marker,
+        $.atx_h2_marker,
+        $.atx_h3_marker,
+        $.atx_h4_marker,
+        $.atx_h5_marker,
+        $.atx_h6_marker
+      ),
       /\s+/,
-      field('content', repeat(choice($.text, $.wikilink)))
+      repeat(choice($.text, $.wikilink, $.emphasis, $.strong, $.code_span, $.link))
     )),
 
-    // Wikilinks - Notedown-specific syntax
+    atx_h1_marker: $ => '#',
+    atx_h2_marker: $ => '##',
+    atx_h3_marker: $ => '###',
+    atx_h4_marker: $ => '####',
+    atx_h5_marker: $ => '#####',
+    atx_h6_marker: $ => '######',
+
+    // Wikilinks - our key feature
     wikilink: $ => choice(
       // [[target]]
       seq('[[', field('target', $.wikilink_target), ']]'),
@@ -29,7 +54,57 @@ module.exports = grammar({
     wikilink_target: $ => /[^\|\]]+/,
     wikilink_display: $ => /[^\]]+/,
 
-    // Basic text
-    text: $ => /[^\[\]#\n]+/
+    // Emphasis and strong
+    emphasis: $ => choice(
+      seq('*', repeat1(choice($.text, $.strong, $.code_span, $.wikilink)), '*'),
+      seq('_', repeat1(choice($.text, $.strong, $.code_span, $.wikilink)), '_')
+    ),
+
+    strong: $ => choice(
+      seq('**', repeat1(choice($.text, $.emphasis, $.code_span, $.wikilink)), '**'),
+      seq('__', repeat1(choice($.text, $.emphasis, $.code_span, $.wikilink)), '__')
+    ),
+
+    strikethrough: $ => seq(
+      '~~',
+      repeat1(choice($.text, $.emphasis, $.strong, $.code_span, $.wikilink)),
+      '~~'
+    ),
+
+    // Code spans
+    code_span: $ => seq('`', field('code', /[^`]+/), '`'),
+
+    // Fenced code blocks
+    fenced_code_block: $ => seq(
+      choice('```', '~~~'),
+      optional(field('language', /[^\n]+/)),
+      '\n',
+      field('code', /[^`~]*/),
+      choice('```', '~~~')
+    ),
+
+    // Links
+    link: $ => seq(
+      '[',
+      field('text', /[^\]]+/),
+      ']',
+      '(',
+      field('destination', /[^\)]+/),
+      ')'
+    ),
+
+    // Images
+    image: $ => seq(
+      '!',
+      '[',
+      field('alt', /[^\]]*/),
+      ']',
+      '(',
+      field('destination', /[^\)]+/),
+      ')'
+    ),
+
+    // Basic text - avoid conflicts by being more specific
+    text: $ => /[^\[\]#\*_`~!\n]+/
   }
 });

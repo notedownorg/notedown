@@ -7,8 +7,9 @@ Simple heading
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text)))
+  (atx_heading
+    (atx_h1_marker)
+    (text)))
 
 ================================================================================
 Multiple level heading
@@ -19,8 +20,9 @@ Multiple level heading
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text)))
+  (atx_heading
+    (atx_h2_marker)
+    (text)))
 
 ================================================================================
 Heading with multiple levels
@@ -33,9 +35,12 @@ Heading with multiple levels
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text))
-  (heading
-    content: (text))
-  (heading
-    content: (text)))
+  (atx_heading
+    (atx_h1_marker)
+    (text))
+  (atx_heading
+    (atx_h2_marker)
+    (text))
+  (atx_heading
+    (atx_h3_marker)
+    (text)))

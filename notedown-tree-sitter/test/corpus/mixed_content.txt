@@ -17,20 +17,23 @@ Final paragraph with [[multiple]] [[links|here]].
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text))
+  (atx_heading
+    (atx_h1_marker)
+    (text))
   (text)
   (wikilink
     target: (wikilink_target))
   (text)
-  (heading
-    content: (text)
-    content: (wikilink
+  (atx_heading
+    (atx_h2_marker)
+    (text)
+    (wikilink
       target: (wikilink_target)
       display: (wikilink_display)))
   (text)
-  (heading
-    content: (text))
+  (atx_heading
+    (atx_h3_marker)
+    (text))
   (text)
   (wikilink
     target: (wikilink_target))
@@ -67,17 +70,20 @@ Nested wikilinks in headings
 --------------------------------------------------------------------------------
 
 (document
-  (heading
-    content: (text)
-    content: (wikilink
+  (atx_heading
+    (atx_h1_marker)
+    (text)
+    (wikilink
       target: (wikilink_target)
       display: (wikilink_display)))
-  (heading
-    content: (wikilink
+  (atx_heading
+    (atx_h2_marker)
+    (wikilink
       target: (wikilink_target)))
-  (heading
-    content: (text)
-    content: (wikilink
+  (atx_heading
+    (atx_h3_marker)
+    (text)
+    (wikilink
       target: (wikilink_target)
       display: (wikilink_display))))
 
@@ -90,7 +96,8 @@ Edge case: Empty content
 --------------------------------------------------------------------------------
 
 (document
-  (heading))
+  (atx_heading
+    (atx_h1_marker)))
 
 ================================================================================
 Edge case: Just wikilinks

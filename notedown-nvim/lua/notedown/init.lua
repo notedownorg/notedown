@@ -78,6 +78,42 @@ function M.setup(opts)
 
     final_config = vim.tbl_deep_extend("force", config.defaults, opts)
     
+    -- Copy markdown highlight groups to notedown for colorscheme compatibility
+    local function copy_markdown_highlights()
+        local markdown_groups = {
+            "@markup.heading.1.markdown",
+            "@markup.heading.2.markdown", 
+            "@markup.heading.3.markdown",
+            "@markup.heading.4.markdown",
+            "@markup.heading.5.markdown",
+            "@markup.heading.6.markdown"
+        }
+        
+        local notedown_groups = {
+            "@markup.heading.1.notedown",
+            "@markup.heading.2.notedown",
+            "@markup.heading.3.notedown", 
+            "@markup.heading.4.notedown",
+            "@markup.heading.5.notedown",
+            "@markup.heading.6.notedown"
+        }
+        
+        for i, md_group in ipairs(markdown_groups) do
+            local hl = vim.api.nvim_get_hl(0, { name = md_group })
+            if next(hl) then -- If highlight group exists and is not empty
+                vim.api.nvim_set_hl(0, notedown_groups[i], hl)
+            end
+        end
+    end
+    
+    -- Copy highlights after colorscheme loads
+    vim.api.nvim_create_autocmd("ColorScheme", {
+        callback = copy_markdown_highlights
+    })
+    
+    -- Copy highlights now if colorscheme is already loaded
+    vim.defer_fn(copy_markdown_highlights, 100)
+    
     -- Expand and normalize workspace paths during setup
     if final_config.parser and final_config.parser.notedown_workspaces then
         for i, workspace in ipairs(final_config.parser.notedown_workspaces) do

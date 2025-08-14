@@ -1,13 +1,14 @@
 {
   "name": "tree-sitter-notedown",
   "version": "1.0.0",
-  "description": "Tree-sitter grammar for Notedown Flavored Markdown",
+  "description": "Tree-sitter grammar for Notedown Flavored Markdown (extended from tree-sitter-markdown)",
   "main": "bindings/node",
   "keywords": [
     "tree-sitter",
     "parser",
     "markdown",
-    "notedown"
+    "notedown",
+    "wikilinks"
   ],
   "author": "Notedown Authors",
   "license": "Apache-2.0",

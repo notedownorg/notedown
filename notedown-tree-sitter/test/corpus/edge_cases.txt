@@ -34,9 +34,12 @@ Multiple headings without content
 --------------------------------------------------------------------------------
 
 (document
-  (heading)
-  (heading)
-  (heading))
+  (atx_heading
+    (atx_h1_marker))
+  (atx_heading
+    (atx_h2_marker))
+  (atx_heading
+    (atx_h3_marker)))
 
 ================================================================================
 Text before and after wikilinks
