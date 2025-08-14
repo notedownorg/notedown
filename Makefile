@@ -33,7 +33,7 @@ format:
 test:
 	go test ./...
 
-install:
+install: clean
 	go build -ldflags "\
 		-w -s \
 		-X github.com/notedownorg/notedown/pkg/version.version=$(VERSION) \
@@ -41,6 +41,12 @@ install:
 		-X github.com/notedownorg/notedown/pkg/version.date=$(DATE)" \
 		-o $(shell go env GOPATH)/bin/notedown-language-server \
 		./lsp/
+	mkdir -p ~/.config/notedown/nvim
+	cp -r notedown-nvim/* ~/.config/notedown/nvim/
+
+clean:
+	rm -f $(shell go env GOPATH)/bin/notedown-language-server
+	rm -rf ~/.config/notedown/nvim
 
 licenser:
 	licenser apply -r "Notedown Authors"

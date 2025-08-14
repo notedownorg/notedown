@@ -30,6 +30,7 @@ Links to `document-name.md` but shows "Display Text" as the link text.
 - **Automatic Resolution**: Searches for matching files in your workspace
 - **Markdown Only**: Links only resolve to `.md` files
 - **Fuzzy Matching**: Intelligent matching of document names
+- **Document Creation Not Required**: Links work even if the target document doesn't exist yet
 
 ## Examples
 
