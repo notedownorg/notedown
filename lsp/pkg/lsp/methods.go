@@ -82,6 +82,7 @@ const (
 
 	// Diagnostic methods
 	MethodTextDocumentPublishDiagnostics method = "textDocument/publishDiagnostics"
+	MethodTextDocumentDiagnostic         method = "textDocument/diagnostic"
 
 	// Progress methods
 	MethodProgress method = "$/progress"

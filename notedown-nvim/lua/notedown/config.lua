@@ -13,14 +13,15 @@ M.defaults = {
         mode = "auto", -- "auto" | "notedown" | "markdown"
         notedown_workspaces = {
             -- Add your notedown workspace paths here
-            -- Note: This will includes any child directories
-            -- For example if we set ~/notes I could have ~/notes/workspace1, ~/notes/workspace2, etc
-            -- and could open neovim in any of three or their children but maintain workspace separation
             "~/notes",
             "~/github.com/notedownorg/notedown",
         },
     },
+    keybindings = {
+        -- Keybindings for list item movement
+        move_list_item_up = "<leader>lk",
+        move_list_item_down = "<leader>lj",
+    },
 }
 
 return M
-

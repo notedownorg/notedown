@@ -3,6 +3,15 @@ if vim.g.loaded_notedown then
 end
 vim.g.loaded_notedown = 1
 
+-- Register treesitter language if treesitter is available
+if vim.treesitter and vim.treesitter.language then
+  vim.treesitter.language.register('markdown', 'notedown')
+else
+  vim.notify("TreeSitter not available - syntax highlighting may be limited", vim.log.levels.WARN)
+end
+
+-- Initialize the plugin with default settings
+require('notedown').setup()
 
 -- Note: Filetype detection is now handled in init.lua based on workspace detection
 -- This autocmd is kept for compatibility but may be overridden
@@ -62,4 +71,16 @@ Notedown Workspace Status:
   print(message)
 end, {
   desc = "Show workspace status for current buffer",
+})
+
+vim.api.nvim_create_user_command("NotedownMoveUp", function()
+  require('notedown').move_list_item_up()
+end, {
+  desc = "Move list item up",
+})
+
+vim.api.nvim_create_user_command("NotedownMoveDown", function()
+  require('notedown').move_list_item_down()
+end, {
+  desc = "Move list item down",
 })

@@ -19,7 +19,11 @@
       "Bash(./node_modules/.bin/tree-sitter:*)",
       "Bash(make:*)",
       "Bash(nvim:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pkg.go.dev)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

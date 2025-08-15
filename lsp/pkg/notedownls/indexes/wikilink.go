@@ -2,12 +2,12 @@ package indexes
 
 import (
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/notedownorg/notedown/pkg/log"
+	"github.com/notedownorg/notedown/pkg/parser"
 )
 
 // WikilinkTargetInfo contains information about a wikilink target
@@ -17,6 +17,8 @@ type WikilinkTargetInfo struct {
 	ReferencedBy map[string]bool // Set of document URIs that reference this target
 	LastSeen     time.Time       // When this target was last seen during scanning
 	SuggestedURI string          // Suggested file URI if this target were to be created
+	MatchingFiles []string       // All files that match this target (for conflict detection)
+	IsAmbiguous  bool            // Whether this target has multiple matching files
 }
 
 // WikilinkIndex manages all wikilink targets across the workspace
@@ -24,6 +26,7 @@ type WikilinkIndex struct {
 	targets map[string]*WikilinkTargetInfo // target -> info
 	mutex   sync.RWMutex
 	logger  *log.Logger
+	parser  parser.Parser
 }
 
 // NewWikilinkIndex creates a new wikilink index
@@ -31,23 +34,37 @@ func NewWikilinkIndex(logger *log.Logger) *WikilinkIndex {
 	return &WikilinkIndex{
 		targets: make(map[string]*WikilinkTargetInfo),
 		logger:  logger,
+		parser:  parser.NewParser(),
 	}
 }
 
 // AddTarget adds or updates a wikilink target in the index
 func (wi *WikilinkIndex) AddTarget(target, sourceURI string, exists bool) {
+	wi.AddTargetWithMatches(target, sourceURI, exists, nil)
+}
+
+// AddTargetWithMatches adds or updates a wikilink target with conflict information
+func (wi *WikilinkIndex) AddTargetWithMatches(target, sourceURI string, exists bool, matchingFiles []string) {
 	wi.mutex.Lock()
 	defer wi.mutex.Unlock()
 
 	targetInfo, found := wi.targets[target]
 	if !found {
 		targetInfo = &WikilinkTargetInfo{
-			Target:       target,
-			Exists:       exists,
-			ReferencedBy: make(map[string]bool),
-			LastSeen:     time.Now(),
+			Target:        target,
+			Exists:        exists,
+			ReferencedBy:  make(map[string]bool),
+			LastSeen:      time.Now(),
+			MatchingFiles: matchingFiles,
+			IsAmbiguous:   len(matchingFiles) > 1,
 		}
 		wi.targets[target] = targetInfo
+	} else {
+		// Update matching files if provided
+		if matchingFiles != nil {
+			targetInfo.MatchingFiles = matchingFiles
+			targetInfo.IsAmbiguous = len(matchingFiles) > 1
+		}
 	}
 
 	// Update existence status (prioritize true if any source claims it exists)
@@ -67,7 +84,9 @@ func (wi *WikilinkIndex) AddTarget(target, sourceURI string, exists bool) {
 	wi.logger.Debug("added wikilink target",
 		"target", target,
 		"exists", targetInfo.Exists,
-		"references", len(targetInfo.ReferencedBy))
+		"references", len(targetInfo.ReferencedBy),
+		"matches", len(targetInfo.MatchingFiles),
+		"ambiguous", targetInfo.IsAmbiguous)
 }
 
 // RemoveTargetReference removes a reference to a target from a specific document
@@ -96,11 +115,13 @@ func (wi *WikilinkIndex) GetAllTargets() map[string]*WikilinkTargetInfo {
 	for target, info := range wi.targets {
 		// Create a copy of the target info
 		infoCopy := &WikilinkTargetInfo{
-			Target:       info.Target,
-			Exists:       info.Exists,
-			ReferencedBy: make(map[string]bool),
-			LastSeen:     info.LastSeen,
-			SuggestedURI: info.SuggestedURI,
+			Target:        info.Target,
+			Exists:        info.Exists,
+			ReferencedBy:  make(map[string]bool),
+			LastSeen:      info.LastSeen,
+			SuggestedURI:  info.SuggestedURI,
+			MatchingFiles: append([]string(nil), info.MatchingFiles...),
+			IsAmbiguous:   info.IsAmbiguous,
 		}
 		for uri := range info.ReferencedBy {
 			infoCopy.ReferencedBy[uri] = true
@@ -187,6 +208,33 @@ func (wi *WikilinkIndex) Clear() {
 	wi.logger.Debug("cleared wikilink index")
 }
 
+// GetAmbiguousTargets returns all targets that have multiple matching files
+func (wi *WikilinkIndex) GetAmbiguousTargets() map[string]*WikilinkTargetInfo {
+	wi.mutex.RLock()
+	defer wi.mutex.RUnlock()
+
+	result := make(map[string]*WikilinkTargetInfo)
+	for target, info := range wi.targets {
+		if info.IsAmbiguous && len(info.ReferencedBy) > 0 {
+			// Create a copy
+			infoCopy := &WikilinkTargetInfo{
+				Target:        info.Target,
+				Exists:        info.Exists,
+				ReferencedBy:  make(map[string]bool),
+				LastSeen:      info.LastSeen,
+				SuggestedURI:  info.SuggestedURI,
+				MatchingFiles: append([]string(nil), info.MatchingFiles...),
+				IsAmbiguous:   info.IsAmbiguous,
+			}
+			for uri := range info.ReferencedBy {
+				infoCopy.ReferencedBy[uri] = true
+			}
+			result[target] = infoCopy
+		}
+	}
+	return result
+}
+
 // GetTargetsByPrefix returns targets that start with the given prefix
 func (wi *WikilinkIndex) GetTargetsByPrefix(prefix string) map[string]*WikilinkTargetInfo {
 	wi.mutex.RLock()
@@ -220,58 +268,82 @@ type WorkspaceFile interface {
 	GetPath() string
 }
 
-// ExtractWikilinksFromDocument parses a document and extracts all wikilink targets
+// ExtractWikilinksFromDocument parses a document and extracts all wikilink targets using AST-based parsing
 func (wi *WikilinkIndex) ExtractWikilinksFromDocument(content, documentURI string, workspaceFiles map[string]WorkspaceFile) []string {
-	// Use regex to extract wikilinks for now (simpler approach while parser issues are resolved)
-	wikilinkRegex := regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
-	matches := wikilinkRegex.FindAllStringSubmatch(content, -1)
-
-	var targets []string
-
-	for _, match := range matches {
-		if len(match) > 1 {
-			target := strings.TrimSpace(match[1])
-			targets = append(targets, target)
-
-			// Check if this target corresponds to an existing file
-			exists := wi.targetExistsInWorkspace(target, workspaceFiles)
-
-			// Add to index
-			wi.AddTarget(target, documentURI, exists)
-
-			wi.logger.Debug("extracted wikilink",
-				"target", target,
-				"exists", exists,
-				"source", documentURI)
-		}
+	// Parse document using the parser library
+	doc, err := wi.parser.ParseString(content)
+	if err != nil {
+		wi.logger.Error("document parsing failed", 
+			"uri", documentURI, "error", err)
+		return []string{}
 	}
 
-	wi.logger.Debug("extracted wikilinks from document",
+	// Extract wikilinks from AST
+	targets := wi.extractWikilinksFromAST(doc, documentURI, workspaceFiles)
+
+	wi.logger.Debug("extracted wikilinks from document using AST",
 		"uri", documentURI,
 		"count", len(targets))
 
 	return targets
 }
 
+// extractWikilinksFromAST extracts wikilinks using AST traversal
+func (wi *WikilinkIndex) extractWikilinksFromAST(doc *parser.Document, documentURI string, workspaceFiles map[string]WorkspaceFile) []string {
+	var targets []string
+
+	// Walk the AST to find all wikilink nodes
+	walker := parser.NewWalker(parser.WalkFunc(func(node parser.Node) error {
+		if wikilink, ok := node.(*parser.Wikilink); ok {
+			target := strings.TrimSpace(wikilink.Target)
+			targets = append(targets, target)
+
+			exists, matchingFiles := wi.targetExistsInWorkspace(target, workspaceFiles)
+			wi.AddTargetWithMatches(target, documentURI, exists, matchingFiles)
+
+			wi.logger.Debug("extracted wikilink from AST",
+				"target", target,
+				"display", wikilink.DisplayText,
+				"exists", exists,
+				"source", documentURI)
+		}
+		return nil
+	}))
+
+	if err := walker.Walk(doc); err != nil {
+		wi.logger.Error("failed to walk AST for wikilink extraction",
+			"uri", documentURI,
+			"error", err)
+		return targets
+	}
+
+	return targets
+}
+
+
 // targetExistsInWorkspace checks if a wikilink target corresponds to an existing file
-func (wi *WikilinkIndex) targetExistsInWorkspace(target string, workspaceFiles map[string]WorkspaceFile) bool {
+// Returns whether target exists and all matching file paths
+func (wi *WikilinkIndex) targetExistsInWorkspace(target string, workspaceFiles map[string]WorkspaceFile) (bool, []string) {
+	var matchingFiles []string
+	
 	// Direct match: target matches a file's path without extension
 	for _, fileInfo := range workspaceFiles {
 		path := fileInfo.GetPath()
 		// Check if target matches file path without extension
 		pathWithoutExt := strings.TrimSuffix(path, filepath.Ext(path))
 		if target == pathWithoutExt {
-			return true
+			matchingFiles = append(matchingFiles, path)
+			continue
 		}
 
 		// Check if target matches just the filename without extension
 		baseWithoutExt := strings.TrimSuffix(filepath.Base(path), filepath.Ext(path))
 		if target == baseWithoutExt {
-			return true
+			matchingFiles = append(matchingFiles, path)
 		}
 	}
 
-	return false
+	return len(matchingFiles) > 0, matchingFiles
 }
 
 // RefreshDocumentWikilinks removes old wikilink references for a document and re-extracts them

@@ -33,7 +33,6 @@ format:
 test:
 	go test ./...
 
-
 install: clean
 	go build -ldflags "\
 		-w -s \
@@ -51,3 +50,8 @@ clean:
 
 licenser:
 	licenser apply -r "Notedown Authors"
+
+dev: install
+	rm -rf /tmp/notedown_test_workspace
+	cp -r test_workspace /tmp/notedown_test_workspace
+	cd /tmp/notedown_test_workspace && nvim .

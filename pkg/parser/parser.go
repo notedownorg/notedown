@@ -27,9 +27,12 @@ func NewParser() Parser {
 	return &NotedownParser{
 		goldmark: goldmark.New(
 			goldmark.WithExtensions(
-				extension.GFM,
+				extension.Table,
+				extension.Strikethrough,
+				extension.Linkify,
 				extension.Footnote,
 				extensions.NewWikilinkExtension(),
+				extensions.NewTaskListExtension(),
 			),
 			goldmark.WithParserOptions(
 				parser.WithAttribute(),
@@ -87,17 +90,64 @@ func (p *NotedownParser) convertNode(astNode ast.Node, parentNode Node, source [
 
 // astToTreeNode converts a single goldmark AST node to our tree node
 func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
-	// Try to get position information
+	// Extract position information from goldmark AST node
 	var rng Range
-	if hasText, ok := astNode.(interface{ Text([]byte) []byte }); ok {
-		// For nodes with text, calculate range from text length
-		txt := hasText.Text(source)
+	
+	// Extract position information from goldmark node
+	// Only try Lines() method on block nodes to avoid panic on inline nodes
+	if astNode.Type() == ast.TypeBlock {
+		if segmentable, ok := astNode.(interface{ Lines() *text.Segments }); ok {
+			lines := segmentable.Lines()
+			if lines.Len() > 0 {
+				firstLine := lines.At(0)
+				lastLine := lines.At(lines.Len() - 1)
+				
+				startOffset := firstLine.Start
+				endOffset := lastLine.Stop
+				
+				rng = Range{
+					Start: p.offsetToPosition(startOffset, source),
+					End:   p.offsetToPosition(endOffset, source),
+				}
+			} else {
+				// For ListItem nodes, try to get position from first child TextBlock
+				if astNode.Kind() == ast.KindListItem {
+					firstChild := astNode.FirstChild()
+					if firstChild != nil && firstChild.Kind() == ast.KindTextBlock {
+						if childSegmentable, ok := firstChild.(interface{ Lines() *text.Segments }); ok {
+							childLines := childSegmentable.Lines()
+							if childLines.Len() > 0 {
+								line := childLines.At(0)
+								rng = Range{
+									Start: p.offsetToPosition(line.Start, source),
+									End:   p.offsetToPosition(line.Stop, source),
+								}
+							}
+						}
+					}
+				}
+				if rng.Start.Line == 0 { // fallback if position not found
+					rng = Range{
+						Start: Position{Line: 1, Column: 1, Offset: 0},
+						End:   Position{Line: 1, Column: 1, Offset: 0},
+					}
+				}
+			}
+		} else {
+			rng = Range{
+				Start: Position{Line: 1, Column: 1, Offset: 0},
+				End:   Position{Line: 1, Column: 1, Offset: 0},
+			}
+		}
+	} else if hasSegment, ok := astNode.(interface{ Segment() text.Segment }); ok {
+		// For nodes with a single segment
+		segment := hasSegment.Segment()
 		rng = Range{
-			Start: Position{Line: 1, Column: 1, Offset: 0}, // Default position
-			End:   Position{Line: 1, Column: len(txt) + 1, Offset: len(txt)},
+			Start: p.offsetToPosition(segment.Start, source),
+			End:   p.offsetToPosition(segment.Stop, source),
 		}
 	} else {
-		// Default range for nodes without direct position info
+		// Default range for nodes without position info
 		rng = Range{
 			Start: Position{Line: 1, Column: 1, Offset: 0},
 			End:   Position{Line: 1, Column: 1, Offset: 0},
@@ -164,7 +214,28 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 		return NewList(n.IsOrdered(), n.IsTight, rng)
 
 	case *ast.ListItem:
-		return NewListItem(false, false, rng) // TODO: Handle task lists
+		// Check if this is a task list item by looking for TaskCheckBox children
+		taskList := false
+		checked := false
+		
+		// Walk through children to find TaskCheckBox
+		for child := n.FirstChild(); child != nil; child = child.NextSibling() {
+			if textBlock, ok := child.(*ast.TextBlock); ok {
+				// Check TextBlock children for TaskCheckBox
+				for grandchild := textBlock.FirstChild(); grandchild != nil; grandchild = grandchild.NextSibling() {
+					if taskCheckbox, ok := grandchild.(*extensions.TaskCheckBox); ok {
+						taskList = true
+						checked = taskCheckbox.IsChecked
+						break
+					}
+				}
+			}
+			if taskList {
+				break
+			}
+		}
+		
+		return NewListItem(taskList, checked, rng)
 
 	case *ast.Emphasis:
 		return NewEmphasis(rng)

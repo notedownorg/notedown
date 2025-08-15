@@ -35,6 +35,10 @@ func (s *Server) handleDidOpen(params json.RawMessage) error {
 	// Extract wikilinks from the document content
 	s.extractWikilinksFromDocument(uri, content)
 
+	// Generate and publish diagnostics for this document
+	diagnostics := s.generateWikilinkDiagnostics(uri, content)
+	s.publishDiagnostics(uri, diagnostics)
+
 	s.logger.Info("document opened", "uri", uri, "languageId", didOpenParams.TextDocument.LanguageID)
 	return nil
 }
@@ -51,6 +55,9 @@ func (s *Server) handleDidClose(params json.RawMessage) error {
 
 	// Remove wikilink references from this document
 	s.removeWikilinksFromDocument(uri)
+
+	// Clear diagnostics for this document
+	s.publishDiagnostics(uri, []lsp.Diagnostic{})
 
 	s.RemoveDocument(uri)
 	s.logger.Info("document closed", "uri", uri)
@@ -81,6 +88,10 @@ func (s *Server) handleDidChange(params json.RawMessage) error {
 
 			// Update wikilinks for this document
 			s.refreshWikilinksFromDocument(uri, newContent)
+			
+			// Generate and publish updated diagnostics
+			diagnostics := s.generateWikilinkDiagnostics(uri, newContent)
+			s.publishDiagnostics(uri, diagnostics)
 		}
 		s.documentsMutex.Unlock()
 	}
@@ -163,6 +174,15 @@ func (s *Server) handleDefinition(params json.RawMessage) (any, error) {
 
 // findFileForTarget attempts to find an existing file that matches the wikilink target
 func (s *Server) findFileForTarget(target string) *FileInfo {
+	// Normalize the target (replace backslashes with forward slashes)
+	normalizedTarget := strings.ReplaceAll(target, "\\", "/")
+
+	// Reject targets containing .. sequences to prevent directory traversal
+	if strings.Contains(normalizedTarget, "..") {
+		s.logger.Debug("target contains directory traversal sequences, rejecting", "target", target)
+		return nil
+	}
+
 	workspaceFiles := s.GetWorkspaceFiles()
 
 	for _, fileInfo := range workspaceFiles {
@@ -172,7 +192,6 @@ func (s *Server) findFileForTarget(target string) *FileInfo {
 
 		// Normalize paths for comparison (handle both forward and backward slashes)
 		normalizedPath := strings.ReplaceAll(pathWithoutExt, "\\", "/")
-		normalizedTarget := strings.ReplaceAll(target, "\\", "/")
 
 		// Match exact path or base name
 		if normalizedPath == normalizedTarget || baseWithoutExt == target {
@@ -251,6 +270,12 @@ func (s *Server) resolveTargetPath(target string) (string, string) {
 
 	// Normalize the target (replace backslashes with forward slashes)
 	normalizedTarget := strings.ReplaceAll(target, "\\", "/")
+
+	// Reject targets containing .. sequences to prevent directory traversal
+	if strings.Contains(normalizedTarget, "..") {
+		s.logger.Error("target contains directory traversal sequences", "target", target)
+		return "", ""
+	}
 
 	// If target contains slashes, it might be a path-based wikilink
 	var targetPath string

@@ -174,6 +174,12 @@ func NewDocument(rng Range) *Document {
 	}
 }
 
+// AddChild overrides BaseNode.AddChild to set the concrete Document as parent
+func (d *Document) AddChild(child Node) {
+	child.SetParent(d)
+	d.BaseNode.children = append(d.BaseNode.children, child)
+}
+
 // Heading represents a heading node
 type Heading struct {
 	*BaseNode
@@ -188,6 +194,11 @@ func NewHeading(level int, text string, rng Range) *Heading {
 		Level:    level,
 		Text:     text,
 	}
+}
+
+// Accept implements the visitor pattern for Heading
+func (h *Heading) Accept(visitor Visitor) error {
+	return visitor.Visit(h)
 }
 
 // Paragraph represents a paragraph node
@@ -234,6 +245,11 @@ func NewCodeBlock(language, content string, fenced bool, rng Range) *CodeBlock {
 	}
 }
 
+// Accept implements the visitor pattern for CodeBlock
+func (cb *CodeBlock) Accept(visitor Visitor) error {
+	return visitor.Visit(cb)
+}
+
 // Link represents a link node
 type Link struct {
 	*BaseNode
@@ -266,6 +282,11 @@ func NewWikilink(target, displayText string, rng Range) *Wikilink {
 	}
 }
 
+// Accept implements the visitor pattern for Wikilink
+func (w *Wikilink) Accept(visitor Visitor) error {
+	return visitor.Visit(w)
+}
+
 // List represents a list node
 type List struct {
 	*BaseNode
@@ -282,6 +303,17 @@ func NewList(ordered, tight bool, rng Range) *List {
 	}
 }
 
+// Accept implements the visitor pattern for List
+func (l *List) Accept(visitor Visitor) error {
+	return visitor.Visit(l)
+}
+
+// AddChild overrides BaseNode.AddChild to set the concrete List as parent
+func (l *List) AddChild(child Node) {
+	child.SetParent(l)
+	l.BaseNode.children = append(l.BaseNode.children, child)
+}
+
 // ListItem represents a list item node
 type ListItem struct {
 	*BaseNode
@@ -296,6 +328,11 @@ func NewListItem(taskList, checked bool, rng Range) *ListItem {
 		TaskList: taskList,
 		Checked:  checked,
 	}
+}
+
+// Accept implements the visitor pattern for ListItem
+func (li *ListItem) Accept(visitor Visitor) error {
+	return visitor.Visit(li)
 }
 
 // Emphasis represents emphasized text (*text* or _text_)
@@ -334,4 +371,70 @@ func NewCode(content string, rng Range) *Code {
 		BaseNode: NewBaseNode(NodeCode, rng),
 		Content:  content,
 	}
+}
+
+// FindListItemAtLine finds the list item that contains the given line number
+func (d *Document) FindListItemAtLine(line int) *ListItem {
+	var result *ListItem
+	
+	walker := NewWalker(WalkFunc(func(node Node) error {
+		if listItem, ok := node.(*ListItem); ok {
+			// Check if this list item's range contains the target line
+			if listItem.Range().Start.Line <= line && line <= listItem.Range().End.Line {
+				result = listItem
+			}
+		}
+		return nil
+	}))
+	
+	walker.Walk(d)
+	return result
+}
+
+// FindParentList finds the parent List node for a given ListItem
+func (li *ListItem) FindParentList() *List {
+	parent := li.Parent()
+	for parent != nil {
+		// Check if parent is a List by node type
+		if parent.Type() == NodeList {
+			// Since all our nodes embed BaseNode, we need to walk up to find the concrete List
+			// In our case, the parent should be the concrete List node
+			if list, ok := parent.(*List); ok {
+				return list
+			}
+		}
+		parent = parent.Parent()
+	}
+	return nil
+}
+
+// GetListItems returns all ListItem children of this List
+func (l *List) GetListItems() []*ListItem {
+	var items []*ListItem
+	for _, child := range l.Children() {
+		if listItem, ok := child.(*ListItem); ok {
+			items = append(items, listItem)
+		}
+	}
+	return items
+}
+
+// GetSiblingListItems returns all sibling ListItems in the same parent List
+func (li *ListItem) GetSiblingListItems() []*ListItem {
+	parentList := li.FindParentList()
+	if parentList == nil {
+		return nil
+	}
+	return parentList.GetListItems()
+}
+
+// GetListItemIndex returns the index of this ListItem within its parent List
+func (li *ListItem) GetListItemIndex() int {
+	siblings := li.GetSiblingListItems()
+	for i, sibling := range siblings {
+		if sibling == li {
+			return i
+		}
+	}
+	return -1
 }

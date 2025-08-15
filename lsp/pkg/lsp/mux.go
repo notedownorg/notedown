@@ -63,6 +63,12 @@ func (m *Mux) write(response jsonrpc.Message) error {
 	return jsonrpc.Write(m.writer, response)
 }
 
+// PublishNotification sends a notification to the client
+func (m *Mux) PublishNotification(method string, params any) error {
+	notification := jsonrpc.NewNotification(method, params)
+	return m.write(notification)
+}
+
 func (m *Mux) process() error {
 	request, err := jsonrpc.Read(m.reader)
 	if err != nil {
@@ -137,4 +143,40 @@ func (m *Mux) Run() error {
 			return err
 		}
 	}
+}
+
+// SendRequest sends a request to the client and waits for a response
+func (m *Mux) SendRequest(method string, params any) (any, error) {
+	m.writeMutex.Lock()
+	defer m.writeMutex.Unlock()
+
+	// Create a unique request ID
+	requestID := json.RawMessage(`1`) // Simple ID for now
+	
+	// Marshal params to JSON
+	paramsJSON, err := json.Marshal(params)
+	if err != nil {
+		m.logger.Error("failed to marshal request params", "method", method, "error", err)
+		return nil, err
+	}
+	
+	// Create the request
+	request := &jsonrpc.Request{
+		ProtocolVersion: "2.0",
+		Method:          method,
+		Params:          paramsJSON,
+		ID:              &requestID,
+	}
+
+	// Write the request
+	if err := jsonrpc.Write(m.writer, request); err != nil {
+		m.logger.Error("failed to send request", "method", method, "error", err)
+		return nil, err
+	}
+
+	// For now, we'll return immediately as implementing full request/response
+	// handling requires more complex state management. The client will receive
+	// the request and should handle it appropriately.
+	m.logger.Debug("sent request to client", "method", method)
+	return nil, nil
 }

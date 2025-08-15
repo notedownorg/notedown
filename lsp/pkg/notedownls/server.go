@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -26,6 +27,12 @@ type Server struct {
 
 	// Wikilink management
 	wikilinkIndex *indexes.WikilinkIndex
+	
+	// Diagnostic publishing
+	diagnosticPublisher func(params lsp.PublishDiagnosticsParams) error
+	
+	// Client request sender (for workspace/applyEdit)
+	clientRequestSender func(method string, params any) (any, error)
 }
 
 // NewServer creates a new Notedown LSP server
@@ -75,6 +82,13 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 				ResolveProvider:   &[]bool{false}[0],
 			},
 			DefinitionProvider: &[]bool{true}[0],
+			ExecuteCommandProvider: &lsp.ExecuteCommandOptions{
+				Commands: []string{
+					"notedown.moveListItemUp",
+					"notedown.moveListItemDown",
+				},
+			},
+			// DiagnosticProvider: &lsp.DiagnosticOptions{}, // Disabled to avoid pull diagnostic conflicts
 			Workspace: &lsp.WorkspaceServerCapabilities{
 				WorkspaceFolders: &lsp.WorkspaceFoldersServerCapabilities{
 					Supported:           &[]bool{true}[0],
@@ -102,7 +116,23 @@ func (s *Server) RegisterHandlers(mux *lsp.Mux) error {
 	// Register definition handler
 	mux.RegisterMethod(lsp.MethodTextDocumentDefinition, s.handleDefinition)
 
-	s.logger.Debug("registered document lifecycle, workspace, completion, and definition handlers")
+	// Register workspace execute command handler
+	mux.RegisterMethod(lsp.MethodWorkspaceExecuteCommand, s.handleExecuteCommand)
+
+	// Register diagnostic handler (pull diagnostics) - disabled to avoid conflicts
+	// mux.RegisterMethod(lsp.MethodTextDocumentDiagnostic, s.handleDiagnostic)
+
+	// Set up diagnostic publishing
+	s.SetDiagnosticPublisher(func(params lsp.PublishDiagnosticsParams) error {
+		return mux.PublishNotification(string(lsp.MethodTextDocumentPublishDiagnostics), params)
+	})
+
+	// Set up client request sending (for workspace/applyEdit)
+	s.SetClientRequestSender(func(method string, params any) (any, error) {
+		return mux.SendRequest(method, params)
+	})
+
+	s.logger.Debug("registered document lifecycle, workspace, completion, definition, execute command handlers, and diagnostic publishing")
 	return nil
 }
 
@@ -282,7 +312,11 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 
 	// Get all markdown files from workspace
 	files := s.GetWorkspaceFiles()
+	
+	// Track targets to detect conflicts
+	targetToFiles := make(map[string][]*FileInfo)
 
+	// First pass: collect all targets and their matching files
 	for _, fileInfo := range files {
 		// Skip the current document
 		if fileInfo.URI == currentDocURI {
@@ -295,19 +329,80 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 		for _, target := range targets {
 			// Filter based on prefix
 			if prefix == "" || strings.HasPrefix(strings.ToLower(target.Link), strings.ToLower(prefix)) {
-				insertText := target.Link
-				if needsClosing {
-					insertText += "]]"
-				}
+				targetToFiles[target.Link] = append(targetToFiles[target.Link], fileInfo)
+			}
+		}
+	}
 
-				kind := lsp.CompletionItemKindFile
+	// Second pass: generate completion items with conflict information
+	addedTargets := make(map[string]bool)
+	
+	for target, matchingFiles := range targetToFiles {
+		if addedTargets[target] {
+			continue
+		}
+		addedTargets[target] = true
+		
+		insertText := target
+		if needsClosing {
+			insertText += "]]"
+		}
+
+		kind := lsp.CompletionItemKindFile
+		
+		if len(matchingFiles) == 1 {
+			// Single match - use existing logic
+			fileInfo := matchingFiles[0]
+			detail := fmt.Sprintf("Link to %s", fileInfo.Path)
+			sortKey := fmt.Sprintf("0_%s", target)
+			
+			items = append(items, lsp.CompletionItem{
+				Label:      target,
+				Kind:       &kind,
+				Detail:     &detail,
+				InsertText: &insertText,
+				FilterText: &target,
+				SortText:   &sortKey,
+			})
+		} else {
+			// Multiple matches - show ambiguous target with warning
+			var filePaths []string
+			for _, fileInfo := range matchingFiles {
+				filePaths = append(filePaths, fileInfo.Path)
+			}
+			
+			detail := fmt.Sprintf("⚠️ Ambiguous: %s", strings.Join(filePaths, ", "))
+			sortKey := fmt.Sprintf("0_%s_ambiguous", target)
+			
+			items = append(items, lsp.CompletionItem{
+				Label:      target + " (ambiguous)",
+				Kind:       &kind,
+				Detail:     &detail,
+				InsertText: &insertText,
+				FilterText: &target,
+				SortText:   &sortKey,
+			})
+			
+			// Also add specific path-based completions for each match
+			for i, fileInfo := range matchingFiles {
+				pathWithoutExt := strings.TrimSuffix(fileInfo.Path, ".md")
+				pathWithoutExt = strings.ReplaceAll(pathWithoutExt, "\\", "/")
+				
+				pathInsertText := pathWithoutExt
+				if needsClosing {
+					pathInsertText += "]]"
+				}
+				
+				pathDetail := fmt.Sprintf("Link to %s (disambiguated)", fileInfo.Path)
+				pathSortKey := fmt.Sprintf("0_%s_path_%d", target, i)
+				
 				items = append(items, lsp.CompletionItem{
-					Label:      target.Link,
+					Label:      pathWithoutExt,
 					Kind:       &kind,
-					Detail:     &target.Detail,
-					InsertText: &insertText,
-					FilterText: &target.Link,
-					SortText:   &target.SortKey,
+					Detail:     &pathDetail,
+					InsertText: &pathInsertText,
+					FilterText: &pathWithoutExt,
+					SortText:   &pathSortKey,
 				})
 			}
 		}
@@ -521,6 +616,175 @@ func (s *Server) getWorkspaceFilesMap() map[string]indexes.WorkspaceFile {
 	}
 
 	return result
+}
+
+// SetDiagnosticPublisher sets the diagnostic publishing function
+func (s *Server) SetDiagnosticPublisher(publisher func(params lsp.PublishDiagnosticsParams) error) {
+	s.diagnosticPublisher = publisher
+}
+
+// SetClientRequestSender sets the client request sending function
+func (s *Server) SetClientRequestSender(sender func(method string, params any) (any, error)) {
+	s.clientRequestSender = sender
+}
+
+// publishDiagnostics publishes diagnostics for a document
+func (s *Server) publishDiagnostics(uri string, diagnostics []lsp.Diagnostic) {
+	if s.diagnosticPublisher == nil {
+		return
+	}
+
+	// Ensure diagnostics is never nil to avoid JSON serialization issues
+	if diagnostics == nil {
+		diagnostics = []lsp.Diagnostic{}
+	}
+
+	params := lsp.PublishDiagnosticsParams{
+		URI:         uri,
+		Diagnostics: diagnostics,
+	}
+
+	s.logger.Debug("preparing to publish diagnostics", "uri", uri, "count", len(diagnostics), "diagnostics_is_nil", diagnostics == nil)
+
+	if err := s.diagnosticPublisher(params); err != nil {
+		s.logger.Error("failed to publish diagnostics", "uri", uri, "error", err)
+	} else {
+		s.logger.Debug("published diagnostics", "uri", uri, "count", len(diagnostics))
+	}
+}
+
+// generateWikilinkDiagnostics generates diagnostics for wikilink conflicts in a document
+func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnostic {
+	var diagnostics []lsp.Diagnostic
+	
+	// Regular expression to find wikilinks and their positions
+	wikilinkRegex := regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
+	matches := wikilinkRegex.FindAllStringSubmatchIndex(content, -1)
+	
+	for _, match := range matches {
+		// Extract the target from the match
+		targetStart := match[2]
+		targetEnd := match[3]
+		if targetStart == -1 || targetEnd == -1 {
+			continue
+		}
+		
+		target := content[targetStart:targetEnd]
+		target = strings.TrimSpace(target)
+		
+		// Get target info from index
+		allTargets := s.wikilinkIndex.GetAllTargets()
+		targetInfo, exists := allTargets[target]
+		
+		if exists && targetInfo.IsAmbiguous {
+			// Calculate line and character positions
+			line, char := s.positionFromOffset(content, match[0])
+			endLine, endChar := s.positionFromOffset(content, match[1])
+			
+			// Create diagnostic for ambiguous wikilink
+			severity := lsp.DiagnosticSeverityWarning
+			source := "notedown"
+			message := fmt.Sprintf("Ambiguous wikilink '%s' matches multiple files: %s", 
+				target, strings.Join(targetInfo.MatchingFiles, ", "))
+			
+			diagnostic := lsp.Diagnostic{
+				Range: lsp.Range{
+					Start: lsp.Position{Line: line, Character: char},
+					End:   lsp.Position{Line: endLine, Character: endChar},
+				},
+				Severity: &severity,
+				Source:   &source,
+				Message:  message,
+				Code:     "ambiguous-wikilink",
+			}
+			
+			// Add related information for each matching file
+			for _, filePath := range targetInfo.MatchingFiles {
+				fileURI := "file://" + filePath
+				diagnostic.RelatedInformation = append(diagnostic.RelatedInformation, 
+					lsp.DiagnosticRelatedInformation{
+						Location: lsp.Location{
+							URI: fileURI,
+							Range: lsp.Range{
+								Start: lsp.Position{Line: 0, Character: 0},
+								End:   lsp.Position{Line: 0, Character: 0},
+							},
+						},
+						Message: fmt.Sprintf("Matches file: %s", filePath),
+					})
+			}
+			
+			diagnostics = append(diagnostics, diagnostic)
+		}
+	}
+	
+	return diagnostics
+}
+
+// handleDiagnostic handles textDocument/diagnostic pull diagnostic requests
+func (s *Server) handleDiagnostic(params json.RawMessage) (any, error) {
+	var diagParams struct {
+		TextDocument struct {
+			URI string `json:"uri"`
+		} `json:"textDocument"`
+	}
+	
+	if err := json.Unmarshal(params, &diagParams); err != nil {
+		s.logger.Error("failed to unmarshal diagnostic params", "error", err)
+		return nil, err
+	}
+	
+	uri := diagParams.TextDocument.URI
+	s.logger.Debug("diagnostic request received", "uri", uri)
+	
+	// Get document content
+	doc, exists := s.GetDocument(uri)
+	if !exists {
+		s.logger.Debug("document not found for diagnostic request", "uri", uri)
+		// Return empty diagnostics array, not nil
+		return []lsp.Diagnostic{}, nil
+	}
+	
+	// Generate diagnostics using existing logic
+	diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
+	
+	// Ensure we never return nil diagnostics
+	if diagnostics == nil {
+		diagnostics = []lsp.Diagnostic{}
+	}
+	
+	return diagnostics, nil
+}
+
+// positionFromOffset converts a byte offset to line and character position
+func (s *Server) positionFromOffset(content string, offset int) (int, int) {
+	lines := strings.Split(content[:offset], "\n")
+	line := len(lines) - 1
+	char := len(lines[line])
+	if line > 0 {
+		char = len(lines[line])
+	}
+	return line, char
+}
+
+// refreshAllDocumentDiagnostics regenerates and publishes diagnostics for all open documents
+func (s *Server) refreshAllDocumentDiagnostics() {
+	s.documentsMutex.RLock()
+	defer s.documentsMutex.RUnlock()
+	
+	// Get workspace files as a map for the indexing
+	workspaceFiles := s.getWorkspaceFilesMap()
+	
+	for uri, doc := range s.documents {
+		// Refresh wikilinks for this document to detect new conflicts
+		s.wikilinkIndex.RefreshDocumentWikilinks(doc.Content, uri, workspaceFiles)
+		
+		// Generate and publish updated diagnostics
+		diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
+		s.publishDiagnostics(uri, diagnostics)
+	}
+	
+	s.logger.Debug("refreshed diagnostics for all open documents", "count", len(s.documents))
 }
 
 // Shutdown handles cleanup when the server is shutting down

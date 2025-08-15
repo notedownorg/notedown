@@ -311,7 +311,10 @@ type RenameOptions struct{}
 type FoldingRangeOptions struct{}
 
 // ExecuteCommandOptions defines server capability options for execute command
-type ExecuteCommandOptions struct{}
+type ExecuteCommandOptions struct {
+	// The commands to be executed on the server
+	Commands []string `json:"commands"`
+}
 
 // SelectionRangeOptions defines server capability options for selection range
 type SelectionRangeOptions struct{}

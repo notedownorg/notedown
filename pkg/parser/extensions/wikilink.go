@@ -17,7 +17,7 @@ type WikilinkExtension struct{}
 // Extend implements goldmark.Extender
 func (e *WikilinkExtension) Extend(m goldmark.Markdown) {
 	m.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(&wikilinkParser{}, 200),
+		util.Prioritized(&wikilinkParser{}, 100), // Higher priority than link (200)
 	))
 }
 
@@ -29,7 +29,7 @@ func NewWikilinkExtension() goldmark.Extender {
 // wikilinkParser parses wikilink syntax
 type wikilinkParser struct{}
 
-var wikilinkRegex = regexp.MustCompile(`^\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
+var wikilinkRegex = regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
 
 // Trigger returns the trigger characters for wikilinks
 func (p *wikilinkParser) Trigger() []byte {
@@ -39,22 +39,52 @@ func (p *wikilinkParser) Trigger() []byte {
 // Parse parses a wikilink
 func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	line, _ := block.PeekLine()
-	if len(line) < 4 || line[0] != '[' || line[1] != '[' {
+	
+	if len(line) < 4 {
+		return nil
+	}
+	
+	if line[0] != '[' || line[1] != '[' {
 		return nil
 	}
 
-	match := wikilinkRegex.FindSubmatch(line)
-	if match == nil {
+	// Find the closing ]]
+	closePos := -1
+	for i := 2; i < len(line)-1; i++ {
+		if line[i] == ']' && line[i+1] == ']' {
+			closePos = i
+			break
+		}
+	}
+	
+	if closePos == -1 {
+		return nil
+	}
+	
+	// Extract the content between [[ and ]]
+	content := line[2:closePos]
+	wikilinkLength := closePos + 2
+
+	// Parse target and display text
+	target := string(content)
+	displayText := target
+	
+	// Check for pipe separator
+	if pipePos := strings.Index(target, "|"); pipePos != -1 {
+		displayText = strings.TrimSpace(target[pipePos+1:])
+		target = strings.TrimSpace(target[:pipePos])
+	}
+	target = strings.TrimSpace(target)
+	displayText = strings.TrimSpace(displayText)
+	
+	if target == "" {
 		return nil
 	}
 
-	// Extract target and display text
-	target := strings.TrimSpace(string(match[1]))
-	var displayText string
-	if len(match) > 2 && match[2] != nil {
-		displayText = strings.TrimSpace(string(match[2]))
-	} else {
-		displayText = target
+	// Reject targets containing .. sequences to prevent directory traversal
+	normalizedTarget := strings.ReplaceAll(target, "\\", "/")
+	if strings.Contains(normalizedTarget, "..") {
+		return nil
 	}
 
 	// Create wikilink AST node
@@ -63,11 +93,9 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		DisplayText: displayText,
 	}
 
-	// Note: For now, we'll rely on goldmark's internal segment handling
-
-	// Advance the reader
-	block.Advance(len(match[0]))
-
+	// Advance the reader by the length of the wikilink
+	block.Advance(wikilinkLength)
+	
 	return node
 }
 

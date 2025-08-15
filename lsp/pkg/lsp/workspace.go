@@ -66,3 +66,30 @@ type DidChangeWatchedFilesRegistrationOptions struct {
 	// The watchers to register
 	Watchers []FileSystemWatcher `json:"watchers"`
 }
+
+// ExecuteCommandParams represents the parameters for workspace/executeCommand
+type ExecuteCommandParams struct {
+	// The identifier of the actual command handler.
+	Command string `json:"command"`
+	// Arguments that the command handler should be invoked with.
+	Arguments []any `json:"arguments,omitempty"`
+}
+
+// WorkspaceEdit represents changes to many resources managed in the workspace
+type WorkspaceEdit struct {
+	// Holds changes to existing resources.
+	Changes map[string][]TextEdit `json:"changes,omitempty"`
+	// Depending on the client capability `workspace.workspaceEdit.resourceOperations` document changes
+	// are either an array of `TextEdit`s to apply to the document or an array of document edits.
+	DocumentChanges []any `json:"documentChanges,omitempty"` // (TextDocumentEdit | CreateFile | RenameFile | DeleteFile)[]
+}
+
+// ApplyWorkspaceEditParams represents the parameters for workspace/applyEdit
+type ApplyWorkspaceEditParams struct {
+	// An optional label of the workspace edit. This label is
+	// presented in the user interface for example on an undo
+	// stack to undo the workspace edit.
+	Label *string `json:"label,omitempty"`
+	// The edits to apply.
+	Edit WorkspaceEdit `json:"edit"`
+}

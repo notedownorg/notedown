@@ -25,3 +25,20 @@ func (r Request) IsJSONRPC() bool {
 func (r Request) IsNotification() bool {
 	return r.ID == nil
 }
+
+// NewNotification creates a new JSON-RPC notification (no ID)
+func NewNotification(method string, params any) *Request {
+	var paramsBytes json.RawMessage
+	if params != nil {
+		if b, err := json.Marshal(params); err == nil {
+			paramsBytes = b
+		}
+	}
+	
+	return &Request{
+		ProtocolVersion: JSONRPCVersion,
+		ID:              nil, // Notifications have no ID
+		Method:          method,
+		Params:          paramsBytes,
+	}
+}

@@ -6,3 +6,4 @@ Notedown flavored Markdown (NFM) is an optionated Markdown subset focused on rea
 ## Features:
 
 - [Internal Links/Wikilinks](./wikilinks.md)
+- [Task Lists](./tasks.md)
