@@ -9,7 +9,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 - 🔗 **Wikilink Support**: Intelligent completion and navigation for `[[wikilinks]]`
 - 🏠 **Workspace Detection**: Automatically uses notedown parser for configured workspaces
 - 🧠 **Smart LSP Integration**: Seamless language server integration with document synchronization
-- 🌳 **TreeSitter Ready**: Works with both markdown and notedown treesitter parsers
+- 🚀 **LSP Integration**: Full Notedown Language Server Protocol support
 - ⚡ **Fast**: Efficient workspace detection with path-based matching
 - 🔧 **Configurable**: Flexible parser selection modes and workspace configuration
 
@@ -17,7 +17,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 
 - Neovim >= 0.9.0
 - [notedown-language-server](https://github.com/notedownorg/notedown) (built and available in PATH)
-- Optional: [tree-sitter-notedown](https://github.com/notedownorg/tree-sitter-notedown) for enhanced syntax highlighting
+- TreeSitter with markdown parser installed (for folding support in notedown files)
 
 ## 📦 Installation
 
@@ -178,21 +178,6 @@ require("notedown").setup({
 })
 ```
 
-### Integration with TreeSitter
-
-If you have `tree-sitter-notedown` installed:
-
-```lua
--- In your TreeSitter configuration
-require("nvim-treesitter.configs").setup({
-  ensure_installed = { "markdown", "notedown" },
-  highlight = {
-    enable = true,
-  },
-})
-```
-
-The plugin will automatically use the notedown parser for files in configured workspaces.
 
 ### Custom Capabilities
 
@@ -232,7 +217,7 @@ require("notedown").setup({
 
 ### Parser Issues
 
-1. Check TreeSitter installation: `:TSInstallInfo`
+1. Check LSP server status: `:LspInfo`
 2. Verify parser mode: `:NotedownWorkspaceStatus`
 3. Try forcing parser mode: `parser = { mode = "notedown" }`
 
@@ -247,5 +232,4 @@ This project is licensed under the Apache License 2.0. See [LICENSE](../LICENSE)
 ## 🔗 Related Projects
 
 - [notedown](https://github.com/notedownorg/notedown) - The main Notedown language server
-- [tree-sitter-notedown](https://github.com/notedownorg/tree-sitter-notedown) - TreeSitter grammar for Notedown
 - [Obsidian](https://obsidian.md) - For wikilink inspiration

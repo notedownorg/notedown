@@ -1,7 +1,0 @@
-# Heading with [[link]]
-
-Some text with [[another|Display Text]].
-
-## Second Level
-
-Regular text.
