@@ -355,13 +355,16 @@ T["wikilink code actions"]["resolves ambiguous wikilink to root level file"] = f
 	utils.write_file(workspace .. "/config.md", "# Root Config\n\nThis is the root configuration file.")
 	utils.write_file(workspace .. "/docs/config.md", "# Docs Config\n\nThis is the documentation configuration.")
 	utils.write_file(workspace .. "/project/config.md", "# Project Config\n\nThis is the project configuration.")
-	
+
 	-- Create additional conflicting files for a second test
 	utils.write_file(workspace .. "/guide.md", "# Root Guide\n\nThis is the root guide file.")
 	utils.write_file(workspace .. "/docs/guide.md", "# Docs Guide\n\nThis is the documentation guide.")
 
 	-- Create test file with two ambiguous wikilinks
-	utils.write_file(workspace .. "/main.md", "# Main\n\nThis links to [[config]] which is ambiguous.\n\nAlso see [[guide]] for more info.")
+	utils.write_file(
+		workspace .. "/main.md",
+		"# Main\n\nThis links to [[config]] which is ambiguous.\n\nAlso see [[guide]] for more info."
+	)
 
 	-- Setup LSP
 	lsp.setup(child, workspace)
@@ -524,7 +527,7 @@ T["wikilink code actions"]["resolves ambiguous wikilink to root level file"] = f
 	-- Position cursor on the "guide" wikilink
 	child.lua('vim.fn.search("guide")')
 
-	-- Request code actions for the guide wikilink  
+	-- Request code actions for the guide wikilink
 	child.lua([[
 		_G.test_guide_actions_result = nil
 		_G.test_guide_actions_error = nil
@@ -593,7 +596,7 @@ T["wikilink code actions"]["resolves ambiguous wikilink to root level file"] = f
 	-- Find code action for docs subdirectory guide file (should contain "docs/guide.md")
 	local found_docs_action = false
 	local docs_action = nil
-	
+
 	for _, action in ipairs(guide_actions_result) do
 		local title = action.title or ""
 		if string.find(title, "docs/guide.md") then
@@ -623,10 +626,10 @@ T["wikilink code actions"]["resolves ambiguous wikilink to root level file"] = f
 	-- Apply the docs subdirectory code action
 	if docs_action and docs_action.edit then
 		child.lua(string.format('vim.lsp.util.apply_workspace_edit(%s, "utf-8")', vim.inspect(docs_action.edit)))
-		
+
 		-- Wait for the edit to be applied
 		vim.loop.sleep(500)
-		
+
 		-- Verify the content was updated to include both transformations
 		local final_content = child.lua_get('table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\\n")')
 		MiniTest.expect.equality(

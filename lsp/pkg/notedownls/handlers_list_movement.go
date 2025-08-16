@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 
 	"github.com/notedownorg/notedown/lsp/pkg/lsp"
@@ -190,12 +189,27 @@ func (s *Server) parseListHierarchy(content string) (*ListHierarchy, error) {
 		item := s.parseListItem(line, lineNum)
 		if item == nil {
 			// Not a list item, but might be continuation of previous item
+			// Only include lines that are indented more than the current list item
+			// or blank lines immediately following a list item
 			if len(currentStack) > 0 {
-				// Add to the last item in the stack
 				lastItem := currentStack[len(currentStack)-1]
-				lastItem.EndLine = lineNum
-				lastItem.OriginalLines = append(lastItem.OriginalLines, line)
+				trimmedLine := strings.TrimSpace(line)
+				
+				// Only include as continuation if:
+				// 1. It's indented more than the list item (content continuation), OR
+				// 2. It's not a heading or other structural element
+				// Note: We're being more restrictive about blank lines to avoid including too much
+				if len(line) > lastItem.IndentLevel && 
+				   len(line)-len(strings.TrimLeft(line, " \t")) > lastItem.IndentLevel &&
+				   !strings.HasPrefix(trimmedLine, "#") {
+					lastItem.EndLine = lineNum
+					lastItem.OriginalLines = append(lastItem.OriginalLines, line)
+					continue
+				}
 			}
+			// If we reach here, this line is not part of any list item
+			// Clear the stack as we've moved past the list
+			currentStack = currentStack[:0]
 			continue
 		}
 
@@ -333,11 +347,11 @@ func (s *Server) calculateListItemMove(hierarchy *ListHierarchy, item *ListItem,
 	// Get the item to swap with
 	swapItem := parentItems[swapIndex]
 
-	// Create text edits to swap the items
-	textEdits := s.createSwapTextEdits(item, swapItem)
-
-	// Handle renumbering for ordered lists
-	textEdits = s.handleOrderedListRenumbering(textEdits, parentItems, targetIndex, swapIndex)
+	// Check if we need renumbering for ordered lists
+	renumberInfo := s.calculateRenumberingInfo(parentItems, targetIndex, swapIndex)
+	
+	// Create text edits to swap the items (with renumbering if needed)
+	textEdits := s.createSwapTextEdits(item, swapItem, renumberInfo)
 
 	workspaceEdit := &lsp.WorkspaceEdit{
 		Changes: map[string][]lsp.TextEdit{
@@ -346,6 +360,44 @@ func (s *Server) calculateListItemMove(hierarchy *ListHierarchy, item *ListItem,
 	}
 
 	return workspaceEdit, nil
+}
+
+// RenumberInfo contains information about how to renumber items during a swap
+type RenumberInfo struct {
+	ShouldRenumber bool
+	Item1NewMarker string
+	Item2NewMarker string
+}
+
+// calculateRenumberingInfo determines if and how items should be renumbered
+func (s *Server) calculateRenumberingInfo(parentItems []*ListItem, index1, index2 int) *RenumberInfo {
+	info := &RenumberInfo{ShouldRenumber: false}
+	
+	if len(parentItems) <= index1 || len(parentItems) <= index2 {
+		return info
+	}
+	
+	item1 := parentItems[index1]
+	item2 := parentItems[index2]
+	
+	// Check if both items being swapped are numbered
+	item1Numbered, _ := regexp.MatchString(`^\d+\.`, item1.Marker)
+	item2Numbered, _ := regexp.MatchString(`^\d+\.`, item2.Marker)
+	
+	if !item1Numbered || !item2Numbered {
+		return info
+	}
+	
+	// Items should be renumbered - extract current numbers and swap them
+	item1Number := regexp.MustCompile(`^\d+`).FindString(item1.Marker)
+	item2Number := regexp.MustCompile(`^\d+`).FindString(item2.Marker)
+	
+	info.ShouldRenumber = true
+	info.Item1NewMarker = item2Number + "."
+	info.Item2NewMarker = item1Number + "."
+	
+	
+	return info
 }
 
 // findParentAndIndex finds the parent container and index of the given item
@@ -381,7 +433,7 @@ func (s *Server) findParentAndIndex(hierarchy *ListHierarchy, targetItem *ListIt
 }
 
 // createSwapTextEdits creates text edits to swap two list items
-func (s *Server) createSwapTextEdits(item1, item2 *ListItem) []lsp.TextEdit {
+func (s *Server) createSwapTextEdits(item1, item2 *ListItem, renumberInfo *RenumberInfo) []lsp.TextEdit {
 	var edits []lsp.TextEdit
 
 	// Get the full text ranges for both items (including all children)
@@ -392,10 +444,41 @@ func (s *Server) createSwapTextEdits(item1, item2 *ListItem) []lsp.TextEdit {
 	item1Text := strings.Join(item1.OriginalLines, "\n")
 	item2Text := strings.Join(item2.OriginalLines, "\n")
 
+	// Apply renumbering if needed
+	if renumberInfo != nil && renumberInfo.ShouldRenumber {
+		// Update item1 text to use item1's new marker
+		if len(item1.OriginalLines) > 0 {
+			oldLine := item1.OriginalLines[0]
+			newLine := regexp.MustCompile(`^\s*\d+\.`).ReplaceAllString(oldLine, strings.Repeat(" ", item1.IndentLevel)+renumberInfo.Item1NewMarker)
+			item1Lines := make([]string, len(item1.OriginalLines))
+			copy(item1Lines, item1.OriginalLines)
+			item1Lines[0] = newLine
+			item1Text = strings.Join(item1Lines, "\n")
+		}
+		
+		// Update item2 text to use item2's new marker
+		if len(item2.OriginalLines) > 0 {
+			oldLine := item2.OriginalLines[0]
+			newLine := regexp.MustCompile(`^\s*\d+\.`).ReplaceAllString(oldLine, strings.Repeat(" ", item2.IndentLevel)+renumberInfo.Item2NewMarker)
+			item2Lines := make([]string, len(item2.OriginalLines))
+			copy(item2Lines, item2.OriginalLines)
+			item2Lines[0] = newLine
+			item2Text = strings.Join(item2Lines, "\n")
+		}
+	}
+
 	// Add all children text for item1
 	item1Text += s.getChildrenText(item1)
 	// Add all children text for item2
 	item2Text += s.getChildrenText(item2)
+
+	// Ensure both texts end with newline since our range includes the next line
+	if !strings.HasSuffix(item1Text, "\n") {
+		item1Text += "\n"
+	}
+	if !strings.HasSuffix(item2Text, "\n") {
+		item2Text += "\n"
+	}
 
 	// Create edits to swap the content
 	if item1Range.Start.Line < item2Range.Start.Line {
@@ -468,64 +551,3 @@ func (s *Server) getChildrenText(item *ListItem) string {
 	return text.String()
 }
 
-// handleOrderedListRenumbering updates the numbering for ordered lists after a move
-func (s *Server) handleOrderedListRenumbering(edits []lsp.TextEdit, parentItems []*ListItem, index1, index2 int) []lsp.TextEdit {
-	// Check if we're dealing with numbered lists
-	if len(parentItems) == 0 {
-		return edits
-	}
-
-	// Check if ALL items in this specific level are numbered lists
-	// We only renumber if we're moving within a numbered list
-	allNumbered := true
-	for _, item := range parentItems {
-		if matched, _ := regexp.MatchString(`^\d+\.`, item.Marker); !matched {
-			allNumbered = false
-			break
-		}
-	}
-
-	if !allNumbered {
-		return edits
-	}
-
-	s.logger.Debug("renumbering ordered list after move", "parent_items_count", len(parentItems))
-
-	// Renumber all items in this level, accounting for the swap
-	for i, item := range parentItems {
-		// Calculate what the new number should be after the swap
-		var newNumber int
-		if i == index1 {
-			// This item is moving to index2's position
-			newNumber = index2 + 1
-		} else if i == index2 {
-			// This item is moving to index1's position
-			newNumber = index1 + 1
-		} else {
-			// This item stays in place
-			newNumber = i + 1
-		}
-
-		newMarker := strconv.Itoa(newNumber) + "."
-
-		// Update the marker in the first line of the item
-		if len(item.OriginalLines) > 0 {
-			oldLine := item.OriginalLines[0]
-			newLine := regexp.MustCompile(`^\s*\d+\.`).ReplaceAllString(oldLine, strings.Repeat(" ", item.IndentLevel)+newMarker)
-
-			// Only add edit if the line actually changes
-			if newLine != oldLine {
-				s.logger.Debug("updating numbered list marker", "line", item.StartLine, "old_marker", item.Marker, "new_marker", newMarker)
-				edits = append(edits, lsp.TextEdit{
-					Range: lsp.Range{
-						Start: lsp.Position{Line: item.StartLine, Character: 0},
-						End:   lsp.Position{Line: item.StartLine, Character: len(oldLine)},
-					},
-					NewText: newLine,
-				})
-			}
-		}
-	}
-
-	return edits
-}
