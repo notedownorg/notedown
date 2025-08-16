@@ -197,8 +197,8 @@ func (s *Server) findFileForTarget(target string) *FileInfo {
 		normalizedPath := strings.ReplaceAll(pathWithoutExt, "\\", "/")
 
 		// Match exact path or base name (with or without .md extension)
-		if normalizedPath == normalizedTarget || normalizedPath == targetWithoutExt || 
-		   baseWithoutExt == target || baseWithoutExt == targetWithoutExt {
+		if normalizedPath == normalizedTarget || normalizedPath == targetWithoutExt ||
+			baseWithoutExt == target || baseWithoutExt == targetWithoutExt {
 			return fileInfo
 		}
 	}
@@ -314,4 +314,168 @@ func (s *Server) createMarkdownFile(filePath, title string) error {
 	}
 
 	return nil
+}
+
+// handleCodeAction handles textDocument/codeAction requests
+func (s *Server) handleCodeAction(params json.RawMessage) (any, error) {
+	var codeActionParams lsp.CodeActionParams
+	if err := json.Unmarshal(params, &codeActionParams); err != nil {
+		s.logger.Error("failed to unmarshal code action params", "error", err)
+		return nil, err
+	}
+
+	s.logger.Debug("code action request received",
+		"uri", codeActionParams.TextDocument.URI,
+		"range", codeActionParams.Range)
+
+	// Get the document
+	doc, exists := s.GetDocument(codeActionParams.TextDocument.URI)
+	if !exists {
+		s.logger.Debug("document not found for code action", "uri", codeActionParams.TextDocument.URI)
+		return []lsp.CodeAction{}, nil
+	}
+
+	// Get code actions for ambiguous wikilinks in the specified range
+	actions := s.getAmbiguousWikilinkCodeActions(doc, codeActionParams.Range, codeActionParams.Context.Diagnostics)
+
+	s.logger.Debug("generated code actions", "count", len(actions))
+	return actions, nil
+}
+
+// getAmbiguousWikilinkCodeActions generates code actions for ambiguous wikilinks in the given range
+func (s *Server) getAmbiguousWikilinkCodeActions(doc *Document, targetRange lsp.Range, diagnostics []lsp.Diagnostic) []lsp.CodeAction {
+	var actions []lsp.CodeAction
+
+	// Check if any of the diagnostics in the range are for ambiguous wikilinks
+	for _, diagnostic := range diagnostics {
+		if diagnostic.Code == "ambiguous-wikilink" && s.rangesOverlap(diagnostic.Range, targetRange) {
+			// Extract the ambiguous target from the diagnostic message
+			target := s.extractTargetFromDiagnostic(diagnostic.Message)
+			if target == "" {
+				continue
+			}
+
+			// Generate code actions for this ambiguous wikilink
+			targetActions := s.generateCodeActionsForTarget(doc, target, diagnostic)
+			actions = append(actions, targetActions...)
+		}
+	}
+
+	return actions
+}
+
+// rangesOverlap checks if two ranges overlap
+func (s *Server) rangesOverlap(range1, range2 lsp.Range) bool {
+	// Check if ranges overlap on the same line or span multiple lines
+	if range1.End.Line < range2.Start.Line || range2.End.Line < range1.Start.Line {
+		return false
+	}
+
+	// If they're on the same line, check character positions
+	if range1.Start.Line == range1.End.Line && range2.Start.Line == range2.End.Line && range1.Start.Line == range2.Start.Line {
+		return !(range1.End.Character < range2.Start.Character || range2.End.Character < range1.Start.Character)
+	}
+
+	return true
+}
+
+// extractTargetFromDiagnostic extracts the wikilink target from a diagnostic message
+func (s *Server) extractTargetFromDiagnostic(message string) string {
+	// Message format: "Ambiguous wikilink 'target' matches multiple files: ..."
+	parts := strings.Split(message, "'")
+	if len(parts) >= 2 {
+		return parts[1]
+	}
+	return ""
+}
+
+// generateCodeActionsForTarget generates code actions for resolving an ambiguous wikilink target
+func (s *Server) generateCodeActionsForTarget(doc *Document, target string, diagnostic lsp.Diagnostic) []lsp.CodeAction {
+	var actions []lsp.CodeAction
+
+	// Get target info from the wikilink index
+	allTargets := s.wikilinkIndex.GetAllTargets()
+	targetInfo, exists := allTargets[target]
+	if !exists || !targetInfo.IsAmbiguous {
+		return actions
+	}
+
+	// Generate a code action for each matching file
+	for _, filePath := range targetInfo.MatchingFiles {
+		// Find the corresponding FileInfo to get proper path information
+		fileInfo := s.findFileInfoByPath(filePath)
+		if fileInfo == nil {
+			continue
+		}
+
+		// Generate the qualified path for this file
+		qualifiedPath := s.generateQualifiedPath(fileInfo)
+		if qualifiedPath == "" {
+			continue
+		}
+
+		// Build the new wikilink with display text
+		newWikilink := s.buildWikilinkWithDisplayText(qualifiedPath, target)
+
+		// Create the text edit
+		edit := lsp.TextEdit{
+			Range:   diagnostic.Range,
+			NewText: newWikilink,
+		}
+
+		// Create the workspace edit
+		workspaceEdit := &lsp.WorkspaceEdit{
+			Changes: map[string][]lsp.TextEdit{
+				doc.URI: {edit},
+			},
+		}
+
+		// Create the code action
+		kind := lsp.CodeActionKindQuickFix
+		title := fmt.Sprintf("Link to %s", filePath)
+
+		action := lsp.CodeAction{
+			Title:       title,
+			Kind:        &kind,
+			Diagnostics: []lsp.Diagnostic{diagnostic},
+			Edit:        workspaceEdit,
+		}
+
+		actions = append(actions, action)
+	}
+
+	return actions
+}
+
+// findFileInfoByPath finds a FileInfo by its file path
+func (s *Server) findFileInfoByPath(filePath string) *FileInfo {
+	allFiles := s.GetWorkspaceFiles()
+	for _, fileInfo := range allFiles {
+		if fileInfo.Path == filePath {
+			return fileInfo
+		}
+	}
+	return nil
+}
+
+// generateQualifiedPath generates a qualified path for a file (./file for root, dir/file for subdirs)
+func (s *Server) generateQualifiedPath(fileInfo *FileInfo) string {
+	// Remove the .md extension for the wikilink
+	pathWithoutExt := strings.TrimSuffix(fileInfo.Path, ".md")
+
+	// Convert backslashes to forward slashes for consistency
+	pathWithoutExt = strings.ReplaceAll(pathWithoutExt, "\\", "/")
+
+	// If it's in the root (no directory separators), prefix with ./
+	if !strings.Contains(pathWithoutExt, "/") {
+		return "./" + pathWithoutExt
+	}
+
+	// Otherwise, use the relative path as-is
+	return pathWithoutExt
+}
+
+// buildWikilinkWithDisplayText builds a wikilink with qualified path and display text
+func (s *Server) buildWikilinkWithDisplayText(qualifiedPath, originalTarget string) string {
+	return fmt.Sprintf("[[%s|%s]]", qualifiedPath, originalTarget)
 }

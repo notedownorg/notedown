@@ -82,6 +82,7 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 				ResolveProvider:   &[]bool{false}[0],
 			},
 			DefinitionProvider: &[]bool{true}[0],
+			CodeActionProvider: &lsp.CodeActionOptions{},
 			ExecuteCommandProvider: &lsp.ExecuteCommandOptions{
 				Commands: []string{
 					"notedown.moveListItemUp",
@@ -116,6 +117,9 @@ func (s *Server) RegisterHandlers(mux *lsp.Mux) error {
 	// Register definition handler
 	mux.RegisterMethod(lsp.MethodTextDocumentDefinition, s.handleDefinition)
 
+	// Register code action handler
+	mux.RegisterMethod(lsp.MethodTextDocumentCodeAction, s.handleCodeAction)
+
 	// Register workspace execute command handler
 	mux.RegisterMethod(lsp.MethodWorkspaceExecuteCommand, s.handleExecuteCommand)
 
@@ -132,7 +136,7 @@ func (s *Server) RegisterHandlers(mux *lsp.Mux) error {
 		return mux.SendRequest(method, params)
 	})
 
-	s.logger.Debug("registered document lifecycle, workspace, completion, definition, execute command handlers, and diagnostic publishing")
+	s.logger.Debug("registered document lifecycle, workspace, completion, definition, code action, execute command handlers, and diagnostic publishing")
 	return nil
 }
 

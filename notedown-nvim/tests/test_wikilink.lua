@@ -144,16 +144,15 @@ T["wikilink completion"]["provides comprehensive suggestions"] = function()
 	-- Setup with real LSP
 	lsp.setup(child, workspace)
 
-	-- Open index.md to ensure LSP indexes the wikilinks  
+	-- Open index.md to ensure LSP indexes the wikilinks
 	child.lua('vim.cmd("edit ' .. workspace .. '/index.md")')
 	lsp.wait_for_ready(child)
-	
+
 	-- Wait for workspace file discovery to complete
 	vim.loop.sleep(3000)
 
 	-- Create test file with wikilink content and manually update buffer
 	child.lua('vim.cmd("edit ' .. workspace .. '/test-completion.md")')
-	
 
 	-- Test completion by properly opening document and updating content
 	child.lua([[
@@ -224,7 +223,7 @@ T["wikilink completion"]["provides comprehensive suggestions"] = function()
 
 	-- Verify we got actual completions and they make sense
 	MiniTest.expect.equality(#completion_labels > 0, true, "Should have at least one completion")
-	
+
 	-- Test different types of completions
 	local found = {
 		existing_root = false, -- README, readme
@@ -278,7 +277,7 @@ T["wikilink diagnostics"]["shows conflicts for ambiguous links"] = function()
 
 	-- Create conflicting files that will make [[api]] ambiguous
 	utils.write_file(workspace .. "/api.md", "# API v1")
-	utils.write_file(workspace .. "/docs/api.md", "# API v2") 
+	utils.write_file(workspace .. "/docs/api.md", "# API v2")
 	utils.write_file(workspace .. "/conflict-test.md", "# Conflict Test\n\nLink to [[api]] here.")
 
 	-- Setup LSP
@@ -313,7 +312,7 @@ T["wikilink diagnostics"]["shows conflicts for ambiguous links"] = function()
 
 	-- Get diagnostics for the current buffer
 	local diagnostics = child.lua_get("vim.diagnostic.get(0)")
-	
+
 	-- Verify we got diagnostics
 	MiniTest.expect.equality(type(diagnostics), "table")
 	MiniTest.expect.equality(#diagnostics > 0, true, "Should have at least one diagnostic for ambiguous wikilink")
@@ -321,13 +320,13 @@ T["wikilink diagnostics"]["shows conflicts for ambiguous links"] = function()
 	-- Find the ambiguous wikilink diagnostic
 	local found_ambiguous_diagnostic = false
 	local ambiguous_message = ""
-	
+
 	for _, diag in ipairs(diagnostics) do
 		local message = diag.message or ""
 		if string.find(message, "Ambiguous wikilink") and string.find(message, "api") then
 			found_ambiguous_diagnostic = true
 			ambiguous_message = message
-			
+
 			-- Verify diagnostic properties
 			MiniTest.expect.equality(diag.severity, 2, "Should be Warning severity (2)")
 			MiniTest.expect.equality(diag.source, "notedown", "Should be from notedown source")
@@ -346,5 +345,310 @@ T["wikilink diagnostics"]["shows conflicts for ambiguous links"] = function()
 	lsp.cleanup_binary()
 end
 
+T["wikilink code actions"] = MiniTest.new_set()
+
+T["wikilink code actions"]["resolves ambiguous wikilink to root level file"] = function()
+	local workspace = utils.create_test_workspace("/tmp/test-wikilink-codeactions")
+	local child = utils.new_child_neovim()
+
+	-- Create conflicting files with same base name to create ambiguity
+	utils.write_file(workspace .. "/config.md", "# Root Config\n\nThis is the root configuration file.")
+	utils.write_file(workspace .. "/docs/config.md", "# Docs Config\n\nThis is the documentation configuration.")
+	utils.write_file(workspace .. "/project/config.md", "# Project Config\n\nThis is the project configuration.")
+	
+	-- Create additional conflicting files for a second test
+	utils.write_file(workspace .. "/guide.md", "# Root Guide\n\nThis is the root guide file.")
+	utils.write_file(workspace .. "/docs/guide.md", "# Docs Guide\n\nThis is the documentation guide.")
+
+	-- Create test file with two ambiguous wikilinks
+	utils.write_file(workspace .. "/main.md", "# Main\n\nThis links to [[config]] which is ambiguous.\n\nAlso see [[guide]] for more info.")
+
+	-- Setup LSP
+	lsp.setup(child, workspace)
+
+	-- Wait for workspace file discovery
+	vim.loop.sleep(3000)
+
+	-- Open the file with ambiguous wikilink
+	child.lua('vim.cmd("edit ' .. workspace .. '/main.md")')
+	lsp.wait_for_ready(child)
+
+	-- Position cursor on the ambiguous wikilink
+	child.lua('vim.fn.search("config")')
+
+	-- Ensure document is properly opened in LSP and indexed
+	child.lua([[
+		local client = vim.lsp.get_active_clients()[1]
+		if client then
+			local uri = vim.uri_from_bufnr(0)
+			-- Send didOpen to ensure LSP tracks this document
+			client.notify('textDocument/didOpen', {
+				textDocument = {
+					uri = uri,
+					languageId = 'markdown',
+					version = 1,
+					text = table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\n")
+				}
+			})
+		end
+	]])
+
+	-- Wait for diagnostics and indexing to complete
+	vim.loop.sleep(2000)
+
+	-- Request code actions for the ambiguous wikilink
+	child.lua([[
+		_G.test_code_actions_result = nil
+		_G.test_code_actions_error = nil
+		
+		local client = vim.lsp.get_active_clients()[1]
+		if client then
+			local uri = vim.uri_from_bufnr(0)
+			
+			-- Get current cursor position (should be on "config")
+			local cursor = vim.api.nvim_win_get_cursor(0)
+			local line = cursor[1] - 1  -- Convert to 0-based
+			local character = cursor[2]
+			
+			-- Get diagnostics for this buffer to include in context
+			local diagnostics = vim.diagnostic.get(0)
+			local lsp_diagnostics = {}
+			for _, diag in ipairs(diagnostics) do
+				table.insert(lsp_diagnostics, {
+					range = diag.range or {
+						start = { line = diag.lnum or line, character = diag.col or character },
+						['end'] = { line = diag.end_lnum or line, character = diag.end_col or (character + 6) }
+					},
+					message = diag.message or "",
+					code = diag.code or "ambiguous-wikilink",
+					severity = diag.severity or 2,
+					source = diag.source or "notedown"
+				})
+			end
+			
+			-- Request code actions for the range containing the ambiguous wikilink
+			local params = {
+				textDocument = { uri = uri },
+				range = {
+					start = { line = line, character = character },
+					['end'] = { line = line, character = character + 6 }  -- length of "config"
+				},
+				context = {
+					diagnostics = lsp_diagnostics
+				}
+			}
+			
+			local result, err = client.request_sync('textDocument/codeAction', params, 5000)
+			if err then
+				_G.test_code_actions_error = tostring(err)
+			elseif result then
+				_G.test_code_actions_result = result.result
+			end
+		end
+	]])
+
+	-- Check for code action errors
+	local code_actions_error = child.lua_get("_G.test_code_actions_error")
+	if code_actions_error and code_actions_error ~= vim.NIL then
+		MiniTest.expect.equality(
+			code_actions_error,
+			nil,
+			"Code action request should not have errors: " .. tostring(code_actions_error)
+		)
+	end
+
+	-- Get code action results
+	local code_actions_result = child.lua_get("_G.test_code_actions_result")
+	MiniTest.expect.equality(type(code_actions_result), "table", "Should get code actions result")
+	MiniTest.expect.equality(#code_actions_result > 0, true, "Should have at least one code action")
+
+	-- Find code action for root level config file (should have "./config" in title or edit)
+	local found_root_action = false
+	local root_action = nil
+
+	for _, action in ipairs(code_actions_result) do
+		local title = action.title or ""
+		if
+			string.find(title, "config.md")
+			and not string.find(title, "docs/")
+			and not string.find(title, "project/")
+		then
+			found_root_action = true
+			root_action = action
+			break
+		end
+	end
+
+	MiniTest.expect.equality(found_root_action, true, "Should find code action for root config file")
+	MiniTest.expect.equality(root_action.kind, "quickfix", "Should be a quickfix code action")
+
+	-- Verify the edit would transform [[config]] to [[./config|config]]
+	if root_action and root_action.edit and root_action.edit.changes then
+		local uri = vim.uri_from_fname(workspace .. "/main.md")
+		local changes = root_action.edit.changes[uri]
+		if changes and #changes > 0 then
+			local new_text = changes[1].newText
+			MiniTest.expect.equality(
+				new_text,
+				"[[./config|config]]",
+				"Should transform to qualified path with display text"
+			)
+		end
+	end
+
+	-- Verify we have multiple code actions (one for each matching file)
+	MiniTest.expect.equality(#code_actions_result >= 3, true, "Should have code actions for all three config files")
+
+	-- Apply the root level code action
+	if root_action and root_action.edit then
+		child.lua(string.format('vim.lsp.util.apply_workspace_edit(%s, "utf-8")', vim.inspect(root_action.edit)))
+
+		-- Wait for the edit to be applied
+		vim.loop.sleep(500)
+
+		-- Verify the content was updated
+		local updated_content = child.lua_get('table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\\n")')
+		MiniTest.expect.equality(
+			string.find(updated_content, "%[%[%.%/config%|config%]%]") ~= nil,
+			true,
+			"Content should contain [[./config|config]]"
+		)
+		MiniTest.expect.equality(
+			string.find(updated_content, "%[%[config%]%]") == nil,
+			true,
+			"Original [[config]] should be replaced"
+		)
+	end
+
+	-- Now test resolving the second ambiguous wikilink (guide) to subdirectory file
+	-- Position cursor on the "guide" wikilink
+	child.lua('vim.fn.search("guide")')
+
+	-- Request code actions for the guide wikilink  
+	child.lua([[
+		_G.test_guide_actions_result = nil
+		_G.test_guide_actions_error = nil
+		
+		local client = vim.lsp.get_active_clients()[1]
+		if client then
+			local uri = vim.uri_from_bufnr(0)
+			
+			-- Get current cursor position (should be on "guide")
+			local cursor = vim.api.nvim_win_get_cursor(0)
+			local line = cursor[1] - 1  -- Convert to 0-based
+			local character = cursor[2]
+			
+			-- Get diagnostics for this buffer to include in context
+			local diagnostics = vim.diagnostic.get(0)
+			local lsp_diagnostics = {}
+			for _, diag in ipairs(diagnostics) do
+				table.insert(lsp_diagnostics, {
+					range = diag.range or {
+						start = { line = diag.lnum or line, character = diag.col or character },
+						['end'] = { line = diag.end_lnum or line, character = diag.end_col or (character + 5) }
+					},
+					message = diag.message or "",
+					code = diag.code or "ambiguous-wikilink",
+					severity = diag.severity or 2,
+					source = diag.source or "notedown"
+				})
+			end
+			
+			-- Request code actions for the range containing the ambiguous guide wikilink
+			local params = {
+				textDocument = { uri = uri },
+				range = {
+					start = { line = line, character = character },
+					['end'] = { line = line, character = character + 5 }  -- length of "guide"
+				},
+				context = {
+					diagnostics = lsp_diagnostics
+				}
+			}
+			
+			local result, err = client.request_sync('textDocument/codeAction', params, 5000)
+			if err then
+				_G.test_guide_actions_error = tostring(err)
+			elseif result then
+				_G.test_guide_actions_result = result.result
+			end
+		end
+	]])
+
+	-- Check for code action errors
+	local guide_actions_error = child.lua_get("_G.test_guide_actions_error")
+	if guide_actions_error and guide_actions_error ~= vim.NIL then
+		MiniTest.expect.equality(
+			guide_actions_error,
+			nil,
+			"Guide code action request should not have errors: " .. tostring(guide_actions_error)
+		)
+	end
+
+	-- Get code action results for guide
+	local guide_actions_result = child.lua_get("_G.test_guide_actions_result")
+	MiniTest.expect.equality(type(guide_actions_result), "table", "Should get guide code actions result")
+	MiniTest.expect.equality(#guide_actions_result > 0, true, "Should have at least one guide code action")
+
+	-- Find code action for docs subdirectory guide file (should contain "docs/guide.md")
+	local found_docs_action = false
+	local docs_action = nil
+	
+	for _, action in ipairs(guide_actions_result) do
+		local title = action.title or ""
+		if string.find(title, "docs/guide.md") then
+			found_docs_action = true
+			docs_action = action
+			break
+		end
+	end
+
+	MiniTest.expect.equality(found_docs_action, true, "Should find code action for docs guide file")
+	MiniTest.expect.equality(docs_action.kind, "quickfix", "Should be a quickfix code action")
+
+	-- Verify the edit would transform [[guide]] to [[docs/guide|guide]]
+	if docs_action and docs_action.edit and docs_action.edit.changes then
+		local uri = vim.uri_from_fname(workspace .. "/main.md")
+		local changes = docs_action.edit.changes[uri]
+		if changes and #changes > 0 then
+			local new_text = changes[1].newText
+			MiniTest.expect.equality(
+				new_text,
+				"[[docs/guide|guide]]",
+				"Should transform to subdirectory qualified path with display text"
+			)
+		end
+	end
+
+	-- Apply the docs subdirectory code action
+	if docs_action and docs_action.edit then
+		child.lua(string.format('vim.lsp.util.apply_workspace_edit(%s, "utf-8")', vim.inspect(docs_action.edit)))
+		
+		-- Wait for the edit to be applied
+		vim.loop.sleep(500)
+		
+		-- Verify the content was updated to include both transformations
+		local final_content = child.lua_get('table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\\n")')
+		MiniTest.expect.equality(
+			string.find(final_content, "%[%[docs%/guide%|guide%]%]") ~= nil,
+			true,
+			"Content should contain [[docs/guide|guide]]"
+		)
+		MiniTest.expect.equality(
+			string.find(final_content, "%[%[%.%/config%|config%]%]") ~= nil,
+			true,
+			"Content should still contain [[./config|config]] from first transformation"
+		)
+		MiniTest.expect.equality(
+			string.find(final_content, "%[%[guide%]%]") == nil,
+			true,
+			"Original [[guide]] should be replaced"
+		)
+	end
+
+	child.stop()
+	utils.cleanup_test_workspace(workspace)
+	lsp.cleanup_binary()
+end
 
 return T

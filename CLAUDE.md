@@ -8,7 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make test` - Run all tests (LSP, Neovim, and integration)
 - `make test-lsp` - Run Go tests only (`go test ./...`)
 - `make test-nvim` - Run Neovim plugin tests only
-- `make test-integration` - Run integration tests (if available)
 - `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy

@@ -27,7 +27,7 @@ func TestHandleDefinition(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"file:///test/existing-file.md": {
-					Path: "/test/existing-file.md",
+					Path: "existing-file.md",
 					URI:  "file:///test/existing-file.md",
 				},
 			},
@@ -43,7 +43,7 @@ func TestHandleDefinition(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"file:///test/existing-file.md": {
-					Path: "/test/existing-file.md",
+					Path: "existing-file.md",
 					URI:  "file:///test/existing-file.md",
 				},
 			},
@@ -59,7 +59,7 @@ func TestHandleDefinition(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 20}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"file:///test/docs/api-reference.md": {
-					Path: "/test/docs/api-reference.md",
+					Path: "docs/api-reference.md",
 					URI:  "file:///test/docs/api-reference.md",
 				},
 			},
@@ -75,7 +75,7 @@ func TestHandleDefinition(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside target part
 			workspaceFiles: map[string]*FileInfo{
 				"file:///test/target-file.md": {
-					Path: "/test/target-file.md",
+					Path: "target-file.md",
 					URI:  "file:///test/target-file.md",
 				},
 			},
@@ -191,17 +191,22 @@ func TestFindFileForTarget(t *testing.T) {
 	// Set up test workspace files
 	server.workspace.fileIndex = map[string]*FileInfo{
 		"file:///test/simple-file.md": {
-			Path: "/test/simple-file.md",
+			Path: "simple-file.md",
 			URI:  "file:///test/simple-file.md",
 		},
 		"file:///test/docs/api-guide.md": {
-			Path: "/test/docs/api-guide.md",
+			Path: "docs/api-guide.md",
 			URI:  "file:///test/docs/api-guide.md",
 		},
 		"file:///test/projects/project-alpha.md": {
-			Path: "/test/projects/project-alpha.md",
+			Path: "projects/project-alpha.md",
 			URI:  "file:///test/projects/project-alpha.md",
 		},
+	}
+
+	// Set up workspace root
+	server.workspace.roots = []WorkspaceRoot{
+		{URI: "file:///test", Path: "/test", Name: "test"},
 	}
 
 	tests := []struct {
@@ -213,7 +218,7 @@ func TestFindFileForTarget(t *testing.T) {
 			name:   "exact match",
 			target: "simple-file",
 			expected: &FileInfo{
-				Path: "/test/simple-file.md",
+				Path: "simple-file.md",
 				URI:  "file:///test/simple-file.md",
 			},
 		},
@@ -221,7 +226,7 @@ func TestFindFileForTarget(t *testing.T) {
 			name:   "exact match with path",
 			target: "docs/api-guide",
 			expected: &FileInfo{
-				Path: "/test/docs/api-guide.md",
+				Path: "docs/api-guide.md",
 				URI:  "file:///test/docs/api-guide.md",
 			},
 		},
@@ -229,7 +234,7 @@ func TestFindFileForTarget(t *testing.T) {
 			name:   "target with .md extension",
 			target: "simple-file.md",
 			expected: &FileInfo{
-				Path: "/test/simple-file.md",
+				Path: "simple-file.md",
 				URI:  "file:///test/simple-file.md",
 			},
 		},
