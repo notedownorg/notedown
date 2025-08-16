@@ -27,10 +27,10 @@ type Server struct {
 
 	// Wikilink management
 	wikilinkIndex *indexes.WikilinkIndex
-	
+
 	// Diagnostic publishing
 	diagnosticPublisher func(params lsp.PublishDiagnosticsParams) error
-	
+
 	// Client request sender (for workspace/applyEdit)
 	clientRequestSender func(method string, params any) (any, error)
 }
@@ -312,7 +312,7 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 
 	// Get all markdown files from workspace
 	files := s.GetWorkspaceFiles()
-	
+
 	// Track targets to detect conflicts
 	targetToFiles := make(map[string][]*FileInfo)
 
@@ -336,26 +336,26 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 
 	// Second pass: generate completion items with conflict information
 	addedTargets := make(map[string]bool)
-	
+
 	for target, matchingFiles := range targetToFiles {
 		if addedTargets[target] {
 			continue
 		}
 		addedTargets[target] = true
-		
+
 		insertText := target
 		if needsClosing {
 			insertText += "]]"
 		}
 
 		kind := lsp.CompletionItemKindFile
-		
+
 		if len(matchingFiles) == 1 {
 			// Single match - use existing logic
 			fileInfo := matchingFiles[0]
 			detail := fmt.Sprintf("Link to %s", fileInfo.Path)
 			sortKey := fmt.Sprintf("0_%s", target)
-			
+
 			items = append(items, lsp.CompletionItem{
 				Label:      target,
 				Kind:       &kind,
@@ -370,10 +370,10 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 			for _, fileInfo := range matchingFiles {
 				filePaths = append(filePaths, fileInfo.Path)
 			}
-			
+
 			detail := fmt.Sprintf("⚠️ Ambiguous: %s", strings.Join(filePaths, ", "))
 			sortKey := fmt.Sprintf("0_%s_ambiguous", target)
-			
+
 			items = append(items, lsp.CompletionItem{
 				Label:      target + " (ambiguous)",
 				Kind:       &kind,
@@ -382,20 +382,20 @@ func (s *Server) getExistingFileCompletions(prefix, currentDocURI string, needsC
 				FilterText: &target,
 				SortText:   &sortKey,
 			})
-			
+
 			// Also add specific path-based completions for each match
 			for i, fileInfo := range matchingFiles {
 				pathWithoutExt := strings.TrimSuffix(fileInfo.Path, ".md")
 				pathWithoutExt = strings.ReplaceAll(pathWithoutExt, "\\", "/")
-				
+
 				pathInsertText := pathWithoutExt
 				if needsClosing {
 					pathInsertText += "]]"
 				}
-				
+
 				pathDetail := fmt.Sprintf("Link to %s (disambiguated)", fileInfo.Path)
 				pathSortKey := fmt.Sprintf("0_%s_path_%d", target, i)
-				
+
 				items = append(items, lsp.CompletionItem{
 					Label:      pathWithoutExt,
 					Kind:       &kind,
@@ -656,11 +656,11 @@ func (s *Server) publishDiagnostics(uri string, diagnostics []lsp.Diagnostic) {
 // generateWikilinkDiagnostics generates diagnostics for wikilink conflicts in a document
 func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnostic {
 	var diagnostics []lsp.Diagnostic
-	
+
 	// Regular expression to find wikilinks and their positions
 	wikilinkRegex := regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
 	matches := wikilinkRegex.FindAllStringSubmatchIndex(content, -1)
-	
+
 	for _, match := range matches {
 		// Extract the target from the match
 		targetStart := match[2]
@@ -668,25 +668,25 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 		if targetStart == -1 || targetEnd == -1 {
 			continue
 		}
-		
+
 		target := content[targetStart:targetEnd]
 		target = strings.TrimSpace(target)
-		
+
 		// Get target info from index
 		allTargets := s.wikilinkIndex.GetAllTargets()
 		targetInfo, exists := allTargets[target]
-		
+
 		if exists && targetInfo.IsAmbiguous {
 			// Calculate line and character positions
 			line, char := s.positionFromOffset(content, match[0])
 			endLine, endChar := s.positionFromOffset(content, match[1])
-			
+
 			// Create diagnostic for ambiguous wikilink
 			severity := lsp.DiagnosticSeverityWarning
 			source := "notedown"
-			message := fmt.Sprintf("Ambiguous wikilink '%s' matches multiple files: %s", 
+			message := fmt.Sprintf("Ambiguous wikilink '%s' matches multiple files: %s",
 				target, strings.Join(targetInfo.MatchingFiles, ", "))
-			
+
 			diagnostic := lsp.Diagnostic{
 				Range: lsp.Range{
 					Start: lsp.Position{Line: line, Character: char},
@@ -697,11 +697,11 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 				Message:  message,
 				Code:     "ambiguous-wikilink",
 			}
-			
+
 			// Add related information for each matching file
 			for _, filePath := range targetInfo.MatchingFiles {
 				fileURI := "file://" + filePath
-				diagnostic.RelatedInformation = append(diagnostic.RelatedInformation, 
+				diagnostic.RelatedInformation = append(diagnostic.RelatedInformation,
 					lsp.DiagnosticRelatedInformation{
 						Location: lsp.Location{
 							URI: fileURI,
@@ -713,11 +713,11 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 						Message: fmt.Sprintf("Matches file: %s", filePath),
 					})
 			}
-			
+
 			diagnostics = append(diagnostics, diagnostic)
 		}
 	}
-	
+
 	return diagnostics
 }
 
@@ -728,15 +728,15 @@ func (s *Server) handleDiagnostic(params json.RawMessage) (any, error) {
 			URI string `json:"uri"`
 		} `json:"textDocument"`
 	}
-	
+
 	if err := json.Unmarshal(params, &diagParams); err != nil {
 		s.logger.Error("failed to unmarshal diagnostic params", "error", err)
 		return nil, err
 	}
-	
+
 	uri := diagParams.TextDocument.URI
 	s.logger.Debug("diagnostic request received", "uri", uri)
-	
+
 	// Get document content
 	doc, exists := s.GetDocument(uri)
 	if !exists {
@@ -744,15 +744,15 @@ func (s *Server) handleDiagnostic(params json.RawMessage) (any, error) {
 		// Return empty diagnostics array, not nil
 		return []lsp.Diagnostic{}, nil
 	}
-	
+
 	// Generate diagnostics using existing logic
 	diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
-	
+
 	// Ensure we never return nil diagnostics
 	if diagnostics == nil {
 		diagnostics = []lsp.Diagnostic{}
 	}
-	
+
 	return diagnostics, nil
 }
 
@@ -771,19 +771,19 @@ func (s *Server) positionFromOffset(content string, offset int) (int, int) {
 func (s *Server) refreshAllDocumentDiagnostics() {
 	s.documentsMutex.RLock()
 	defer s.documentsMutex.RUnlock()
-	
+
 	// Get workspace files as a map for the indexing
 	workspaceFiles := s.getWorkspaceFilesMap()
-	
+
 	for uri, doc := range s.documents {
 		// Refresh wikilinks for this document to detect new conflicts
 		s.wikilinkIndex.RefreshDocumentWikilinks(doc.Content, uri, workspaceFiles)
-		
+
 		// Generate and publish updated diagnostics
 		diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
 		s.publishDiagnostics(uri, diagnostics)
 	}
-	
+
 	s.logger.Debug("refreshed diagnostics for all open documents", "count", len(s.documents))
 }
 

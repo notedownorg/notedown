@@ -91,10 +91,10 @@ func TestWikilinkIndex_GetAmbiguousTargets(t *testing.T) {
 
 	// Add an ambiguous target
 	index.AddTargetWithMatches("config", "file:///test.md", true, []string{"api/config.md", "docs/config.md"})
-	
+
 	// Add a non-ambiguous target
 	index.AddTargetWithMatches("readme", "file:///test.md", true, []string{"readme.md"})
-	
+
 	// Add an unreferenced ambiguous target (should not be returned)
 	index.targets["unreferenced"] = &WikilinkTargetInfo{
 		Target:        "unreferenced",

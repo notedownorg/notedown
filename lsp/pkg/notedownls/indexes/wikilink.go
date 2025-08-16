@@ -12,13 +12,13 @@ import (
 
 // WikilinkTargetInfo contains information about a wikilink target
 type WikilinkTargetInfo struct {
-	Target       string          // The wikilink target (e.g., "project-alpha", "docs/api")
-	Exists       bool            // Whether the target file actually exists
-	ReferencedBy map[string]bool // Set of document URIs that reference this target
-	LastSeen     time.Time       // When this target was last seen during scanning
-	SuggestedURI string          // Suggested file URI if this target were to be created
-	MatchingFiles []string       // All files that match this target (for conflict detection)
-	IsAmbiguous  bool            // Whether this target has multiple matching files
+	Target        string          // The wikilink target (e.g., "project-alpha", "docs/api")
+	Exists        bool            // Whether the target file actually exists
+	ReferencedBy  map[string]bool // Set of document URIs that reference this target
+	LastSeen      time.Time       // When this target was last seen during scanning
+	SuggestedURI  string          // Suggested file URI if this target were to be created
+	MatchingFiles []string        // All files that match this target (for conflict detection)
+	IsAmbiguous   bool            // Whether this target has multiple matching files
 }
 
 // WikilinkIndex manages all wikilink targets across the workspace
@@ -273,7 +273,7 @@ func (wi *WikilinkIndex) ExtractWikilinksFromDocument(content, documentURI strin
 	// Parse document using the parser library
 	doc, err := wi.parser.ParseString(content)
 	if err != nil {
-		wi.logger.Error("document parsing failed", 
+		wi.logger.Error("document parsing failed",
 			"uri", documentURI, "error", err)
 		return []string{}
 	}
@@ -320,12 +320,11 @@ func (wi *WikilinkIndex) extractWikilinksFromAST(doc *parser.Document, documentU
 	return targets
 }
 
-
 // targetExistsInWorkspace checks if a wikilink target corresponds to an existing file
 // Returns whether target exists and all matching file paths
 func (wi *WikilinkIndex) targetExistsInWorkspace(target string, workspaceFiles map[string]WorkspaceFile) (bool, []string) {
 	var matchingFiles []string
-	
+
 	// Direct match: target matches a file's path without extension
 	for _, fileInfo := range workspaceFiles {
 		path := fileInfo.GetPath()

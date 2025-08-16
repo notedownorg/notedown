@@ -152,14 +152,14 @@ func (m *Mux) SendRequest(method string, params any) (any, error) {
 
 	// Create a unique request ID
 	requestID := json.RawMessage(`1`) // Simple ID for now
-	
+
 	// Marshal params to JSON
 	paramsJSON, err := json.Marshal(params)
 	if err != nil {
 		m.logger.Error("failed to marshal request params", "method", method, "error", err)
 		return nil, err
 	}
-	
+
 	// Create the request
 	request := &jsonrpc.Request{
 		ProtocolVersion: "2.0",

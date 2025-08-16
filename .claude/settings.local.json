@@ -23,7 +23,13 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:pkg.go.dev)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(./run_tests.sh)",
+      "Bash(timeout 5s ./integration/notedown-lsp serve:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/liam/github.com/notedownorg/notedown/usecase-focused-appoach/integration/test_lsp_manually.sh)",
+      "Bash(timeout 30s nvim:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

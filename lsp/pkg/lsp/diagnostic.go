@@ -31,15 +31,15 @@ type CodeDescription struct {
 
 // Diagnostic represents a diagnostic message from the language server
 type Diagnostic struct {
-	Range               Range                           `json:"range"`
-	Severity            *DiagnosticSeverity             `json:"severity,omitempty"`
-	Code                any                             `json:"code,omitempty"` // string | number
-	CodeDescription     *CodeDescription                `json:"codeDescription,omitempty"`
-	Source              *string                         `json:"source,omitempty"`
-	Message             string                          `json:"message"`
-	Tags                []DiagnosticTag                 `json:"tags,omitempty"`
-	RelatedInformation  []DiagnosticRelatedInformation  `json:"relatedInformation,omitempty"`
-	Data                any                             `json:"data,omitempty"`
+	Range              Range                          `json:"range"`
+	Severity           *DiagnosticSeverity            `json:"severity,omitempty"`
+	Code               any                            `json:"code,omitempty"` // string | number
+	CodeDescription    *CodeDescription               `json:"codeDescription,omitempty"`
+	Source             *string                        `json:"source,omitempty"`
+	Message            string                         `json:"message"`
+	Tags               []DiagnosticTag                `json:"tags,omitempty"`
+	RelatedInformation []DiagnosticRelatedInformation `json:"relatedInformation,omitempty"`
+	Data               any                            `json:"data,omitempty"`
 }
 
 // PublishDiagnosticsParams represents the parameters of a publishDiagnostics notification

@@ -256,15 +256,15 @@ func TestGetCompleteWikilinkTarget(t *testing.T) {
 
 func TestHandleDefinitionDeprecated(t *testing.T) {
 	tests := []struct {
-		name           string
-		documentURI    string
+		name            string
+		documentURI     string
 		documentContent string
-		position       lsp.Position
-		workspaceFiles map[string]*FileInfo
-		expectLocation bool
-		expectError    bool
-		expectedURI    string
-		description    string
+		position        lsp.Position
+		workspaceFiles  map[string]*FileInfo
+		expectLocation  bool
+		expectError     bool
+		expectedURI     string
+		description     string
 	}{
 		{
 			name:            "existing file - simple target",
@@ -273,7 +273,7 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"existing-file": {
-					Path: "/test/existing-file.md",
+					Path: "existing-file.md",
 					URI:  "file:///test/existing-file.md",
 				},
 			},
@@ -289,7 +289,7 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"existing-file": {
-					Path: "/test/existing-file.md",
+					Path: "existing-file.md",
 					URI:  "file:///test/existing-file.md",
 				},
 			},
@@ -305,7 +305,7 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 20}, // Inside wikilink
 			workspaceFiles: map[string]*FileInfo{
 				"docs/api-reference": {
-					Path: "/test/docs/api-reference.md",
+					Path: "docs/api-reference.md",
 					URI:  "file:///test/docs/api-reference.md",
 				},
 			},
@@ -321,7 +321,7 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 			position:        lsp.Position{Line: 0, Character: 15}, // Inside target part
 			workspaceFiles: map[string]*FileInfo{
 				"target-file": {
-					Path: "/test/target-file.md",
+					Path: "target-file.md",
 					URI:  "file:///test/target-file.md",
 				},
 			},
@@ -369,10 +369,15 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 
 			// Set up workspace files
 			// Set up workspace files using proper type
-		server.workspace.fileIndex = make(map[string]*FileInfo)
-		for key, fileInfo := range tt.workspaceFiles {
-			server.workspace.fileIndex[key] = fileInfo
-		}
+			server.workspace.fileIndex = make(map[string]*FileInfo)
+			for key, fileInfo := range tt.workspaceFiles {
+				server.workspace.fileIndex[key] = fileInfo
+			}
+
+			// Set up workspace root
+			server.workspace.roots = []WorkspaceRoot{
+				{URI: "file:///test", Path: "/test", Name: "test"},
+			}
 
 			// Add the test document if it exists
 			if tt.documentURI == "file:///test/document.md" {
@@ -438,19 +443,24 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 	// Set up test workspace files
 	workspaceFiles := map[string]*FileInfo{
 		"simple-file": {
-			Path: "/test/simple-file.md",
+			Path: "simple-file.md",
 			URI:  "file:///test/simple-file.md",
 		},
 		"docs/api-guide": {
-			Path: "/test/docs/api-guide.md",
+			Path: "docs/api-guide.md",
 			URI:  "file:///test/docs/api-guide.md",
 		},
 		"project-alpha": {
-			Path: "/test/projects/project-alpha.md",
+			Path: "projects/project-alpha.md",
 			URI:  "file:///test/projects/project-alpha.md",
 		},
 	}
 	server.workspace.fileIndex = workspaceFiles
+
+	// Set up workspace root
+	server.workspace.roots = []WorkspaceRoot{
+		{URI: "file:///test", Path: "/test", Name: "test"},
+	}
 
 	tests := []struct {
 		name     string
@@ -461,7 +471,7 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 			name:   "exact match",
 			target: "simple-file",
 			expected: &FileInfo{
-				Path: "/test/simple-file.md",
+				Path: "simple-file.md",
 				URI:  "file:///test/simple-file.md",
 			},
 		},
@@ -469,7 +479,7 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 			name:   "exact match with path",
 			target: "docs/api-guide",
 			expected: &FileInfo{
-				Path: "/test/docs/api-guide.md",
+				Path: "docs/api-guide.md",
 				URI:  "file:///test/docs/api-guide.md",
 			},
 		},
@@ -477,7 +487,7 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 			name:   "target with .md extension",
 			target: "simple-file.md",
 			expected: &FileInfo{
-				Path: "/test/simple-file.md",
+				Path: "simple-file.md",
 				URI:  "file:///test/simple-file.md",
 			},
 		},
@@ -534,50 +544,50 @@ func TestResolveTargetPathDeprecated(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		target      string
+		name         string
+		target       string
 		expectedPath string
 		expectedURI  string
 	}{
 		{
-			name:        "simple target",
-			target:      "simple-file",
+			name:         "simple target",
+			target:       "simple-file",
 			expectedPath: "/test/workspace/simple-file.md",
 			expectedURI:  "file:///test/workspace/simple-file.md",
 		},
 		{
-			name:        "target with extension",
-			target:      "file.md",
+			name:         "target with extension",
+			target:       "file.md",
 			expectedPath: "/test/workspace/file.md.md",
 			expectedURI:  "file:///test/workspace/file.md.md",
 		},
 		{
-			name:        "path-based target",
-			target:      "docs/api-reference",
+			name:         "path-based target",
+			target:       "docs/api-reference",
 			expectedPath: "/test/workspace/docs/api-reference.md",
 			expectedURI:  "file:///test/workspace/docs/api-reference.md",
 		},
 		{
-			name:        "nested path target",
-			target:      "projects/alpha/readme",
+			name:         "nested path target",
+			target:       "projects/alpha/readme",
 			expectedPath: "/test/workspace/projects/alpha/readme.md",
 			expectedURI:  "file:///test/workspace/projects/alpha/readme.md",
 		},
 		{
-			name:        "directory traversal attempt - should be rejected",
-			target:      "../parent-doc",
+			name:         "directory traversal attempt - should be rejected",
+			target:       "../parent-doc",
 			expectedPath: "",
 			expectedURI:  "",
 		},
 		{
-			name:        "directory traversal in subdirectory - should be rejected",
-			target:      "docs/../secret",
+			name:         "directory traversal in subdirectory - should be rejected",
+			target:       "docs/../secret",
 			expectedPath: "",
 			expectedURI:  "",
 		},
 		{
-			name:        "multiple directory traversal - should be rejected",
-			target:      "../../outside-workspace",
+			name:         "multiple directory traversal - should be rejected",
+			target:       "../../outside-workspace",
 			expectedPath: "",
 			expectedURI:  "",
 		},

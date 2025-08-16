@@ -5,44 +5,46 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Test Commands
 
 ### Core Development
-- `make test` - Run all tests
-- `make format` - Format code with gofmt and apply license headers
+- `make test` - Run all tests (LSP, Neovim, and integration)
+- `make test-lsp` - Run Go tests only (`go test ./...`)
+- `make test-nvim` - Run Neovim plugin tests only
+- `make test-integration` - Run integration tests (if available)
+- `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy
 - `make all` - Full build pipeline: format, mod, test, and check for dirty working tree
 - `make dirty` - Check if working tree is clean (exit code 1 if dirty)
-- `make install` - Build and install binary to GOPATH/bin with version info, also installs Neovim plugin
+- `make install` - Build and install `notedown-language-server` binary to GOPATH/bin with version info, also installs Neovim plugin to `~/.config/notedown/nvim/`
 - `make clean` - Remove installed binary and Neovim plugin files
 - `make licenser` - Apply license headers to all files
+- `make dev` - Install and open test workspace in Neovim for development
 
 ### Testing Individual Components
 - `go test ./pkg/parser/...` - Test parser package
 - `go test ./lsp/pkg/...` - Test LSP server packages
 - `go test ./lsp/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd notedown-tree-sitter && npm test` - Test tree-sitter grammar
+- `cd notedown-nvim && nvim --headless --noplugin -u tests/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
 
 ### Building
-- `go build -o notedown-lsp ./lsp/` - Build LSP server binary
+- `go build -o bin/notedown-language-server ./lsp/` - Build LSP server binary
 - `go run ./lsp/ serve` - Run LSP server directly
 - `make install` - Build with version info and install to GOPATH/bin
-- `cd notedown-tree-sitter && npm run build` - Build tree-sitter grammar and shared library
 
 ### Code Quality
 - Uses `licenser` tool for license header management (run `make licenser`)
 - All code must be gofmt formatted
 - Working tree must be clean after running hygiene tasks
 - Requires Go 1.24.4 or later
-- Tree-sitter grammar must pass all corpus tests before commits
 
 ## Architecture Overview
 
-This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of three main components:
+This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of four main components:
 
 ### 1. Parser Package (`pkg/parser/`)
 - **Core Parser**: Built on `goldmark` with custom extensions for NFM
 - **AST Conversion**: Converts goldmark AST to custom tree structure with position tracking
-- **Extensions**: Supports wikilinks (`[[target]]` or `[[target|display]]`) via custom goldmark extension
+- **Extensions**: Supports wikilinks (`[[target]]` or `[[target|display]]`) and tasklists via custom goldmark extensions
 - **Tree Structure**: Implements visitor pattern for AST traversal with precise position information
 
 Key files:
@@ -50,6 +52,7 @@ Key files:
 - `tree.go` - Custom AST node types and tree structure
 - `visitor.go` - Visitor pattern for tree traversal
 - `extensions/wikilink.go` - Wikilink syntax support
+- `extensions/tasklist.go` - Task list syntax support
 
 ### 2. LSP Server (`lsp/`)
 - **Server Implementation**: Custom LSP server implementation with JSON-RPC protocol handling
@@ -90,18 +93,17 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Tree-sitter Grammar (`notedown-tree-sitter/`)
-- **Grammar Definition**: Tree-sitter grammar for syntax highlighting and parsing (`grammar.js`)
-- **Query Files**: Syntax highlighting queries (`queries/highlights.scm`) and injection queries (`queries/injections.scm`)
-- **Test Suite**: Comprehensive test corpus for grammar validation (`test/corpus/`)
-- **Build System**: npm-based build system that generates parser and shared library
-- **Editor Integration**: Provides syntax highlighting for Neovim and other tree-sitter compatible editors
+### 3. Neovim Plugin (`notedown-nvim/`)
+- **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
+- **LSP Integration**: Automatic LSP server startup and configuration
+- **Parser Modes**: Configurable parser selection (auto/notedown/markdown)
+- **Workspace Detection**: Path-based workspace matching with tilde expansion
 
 Key files:
-- `grammar.js` - Tree-sitter grammar definition for Notedown Flavored Markdown
-- `queries/highlights.scm` - Syntax highlighting rules
-- `test/corpus/` - Test cases for grammar validation (wikilinks, headings, mixed content, edge cases)
-- `package.json` - Build scripts and dependencies
+- `lua/notedown/init.lua` - Main plugin initialization and configuration
+- `lua/notedown/config.lua` - Configuration management and workspace detection
+- `plugin/notedown.lua` - Plugin bootstrapping
+- `tests/` - Mini.nvim-based test suite
 
 ### 4. Shared Packages (`pkg/`)
 - **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
@@ -109,18 +111,17 @@ Key files:
 
 ### Dependencies
 - `goldmark` - Markdown parser foundation
-- `tliron/glsp` - LSP protocol utilities (used minimally)
 - `spf13/cobra` - CLI framework
-- `tliron/commonlog` - Structured logging
-- Custom wikilink extension for NFM-specific syntax
+- `stretchr/testify` - Testing framework
+- Custom wikilink and tasklist extensions for NFM-specific syntax
 
 ### Testing Strategy
 - Unit tests for parser components (`parser_test.go`)
 - JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
 - Logger tests with different output formats and levels
 - Notedownls tests cover completion, workspace management, and wikilink indexing
-- Tree-sitter grammar tests with corpus validation and highlight testing
-- Test workspace available in `test_workspace/` with sample Markdown files and directory structure
+- Neovim plugin tests with Mini.nvim framework for realistic scenarios
+- Demo workspace available in `demo_workspace/` with sample Markdown files and directory structure, including examples of ambiguous wikilinks
 - Test files use standard Go testing conventions
 - Focus on AST conversion accuracy and position tracking
 
@@ -139,6 +140,7 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 ### Language Features
 - **Notedown Flavored Markdown**: Opinionated Markdown subset focused on readability and semantic meaning
 - **Wikilinks**: Internal linking with `[[target]]` or `[[target|display]]` syntax
+- **Task Lists**: Checkbox-based task management
 - **Standard Markdown**: GitHub Flavored Markdown support plus footnotes  
 - **Semantic Focus**: Emphasizes semantic meaning over HTML rendering
 - **Language Specification**: Full language documentation available in `language/` directory
@@ -147,10 +149,8 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 - **Neovim Plugin**: Complete Neovim integration provided in `notedown-nvim/`
   - Lua-based configuration and initialization (`lua/notedown/`)
   - Plugin bootstrapping (`plugin/notedown.lua`)
-  - Tree-sitter grammar integration for syntax highlighting
   - Automatically installed to `~/.config/notedown/nvim/` with `make install`
 - **LSP Integration**: Compatible with any LSP-capable editor through standard LSP protocol
-- **Syntax Highlighting**: Tree-sitter based highlighting for Notedown Flavored Markdown
 
 ### Development Notes
 - All log messages should start with lowercase characters

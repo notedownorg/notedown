@@ -92,7 +92,7 @@ func (p *NotedownParser) convertNode(astNode ast.Node, parentNode Node, source [
 func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 	// Extract position information from goldmark AST node
 	var rng Range
-	
+
 	// Extract position information from goldmark node
 	// Only try Lines() method on block nodes to avoid panic on inline nodes
 	if astNode.Type() == ast.TypeBlock {
@@ -101,10 +101,10 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 			if lines.Len() > 0 {
 				firstLine := lines.At(0)
 				lastLine := lines.At(lines.Len() - 1)
-				
+
 				startOffset := firstLine.Start
 				endOffset := lastLine.Stop
-				
+
 				rng = Range{
 					Start: p.offsetToPosition(startOffset, source),
 					End:   p.offsetToPosition(endOffset, source),
@@ -217,7 +217,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 		// Check if this is a task list item by looking for TaskCheckBox children
 		taskList := false
 		checked := false
-		
+
 		// Walk through children to find TaskCheckBox
 		for child := n.FirstChild(); child != nil; child = child.NextSibling() {
 			if textBlock, ok := child.(*ast.TextBlock); ok {
@@ -234,7 +234,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 				break
 			}
 		}
-		
+
 		return NewListItem(taskList, checked, rng)
 
 	case *ast.Emphasis:

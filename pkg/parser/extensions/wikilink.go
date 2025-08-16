@@ -39,11 +39,11 @@ func (p *wikilinkParser) Trigger() []byte {
 // Parse parses a wikilink
 func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Context) ast.Node {
 	line, _ := block.PeekLine()
-	
+
 	if len(line) < 4 {
 		return nil
 	}
-	
+
 	if line[0] != '[' || line[1] != '[' {
 		return nil
 	}
@@ -56,11 +56,11 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 			break
 		}
 	}
-	
+
 	if closePos == -1 {
 		return nil
 	}
-	
+
 	// Extract the content between [[ and ]]
 	content := line[2:closePos]
 	wikilinkLength := closePos + 2
@@ -68,7 +68,7 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	// Parse target and display text
 	target := string(content)
 	displayText := target
-	
+
 	// Check for pipe separator
 	if pipePos := strings.Index(target, "|"); pipePos != -1 {
 		displayText = strings.TrimSpace(target[pipePos+1:])
@@ -76,7 +76,7 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 	target = strings.TrimSpace(target)
 	displayText = strings.TrimSpace(displayText)
-	
+
 	if target == "" {
 		return nil
 	}
@@ -95,7 +95,7 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 
 	// Advance the reader by the length of the wikilink
 	block.Advance(wikilinkLength)
-	
+
 	return node
 }
 

@@ -48,7 +48,7 @@ func (s *Server) handleExternalFileCreated(uri string) {
 		s.logger.Warn("failed to add created file to workspace index", "uri", uri, "error", err)
 	} else {
 		s.logger.Info("external Markdown file created and indexed", "uri", uri)
-		
+
 		// File creation might resolve conflicts or create new ones
 		s.refreshAllDocumentDiagnostics()
 	}
@@ -95,7 +95,7 @@ func (s *Server) handleExternalFileDeleted(uri string) {
 		// File was not being tracked
 		s.logger.Debug("untracked file deleted externally and removed from workspace index", "uri", uri)
 	}
-	
+
 	// File deletion might resolve conflicts or create new ones
 	s.refreshAllDocumentDiagnostics()
 }

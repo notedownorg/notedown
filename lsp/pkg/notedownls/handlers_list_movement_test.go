@@ -177,7 +177,7 @@ func TestParseListHierarchy(t *testing.T) {
 		}
 	}
 	require.GreaterOrEqual(t, taskItemIndex, 0, "Expected to find task item")
-	
+
 	taskItem := hierarchy.Items[taskItemIndex]
 	assert.Len(t, taskItem.Children, 2, "Expected task item to have 2 children")
 }
@@ -329,7 +329,7 @@ func TestCalculateListItemMove(t *testing.T) {
 				assert.NoError(t, err, "Expected successful move calculation")
 				assert.NotNil(t, workspaceEdit, "Expected workspace edit")
 				assert.NotEmpty(t, workspaceEdit.Changes, "Expected workspace edit to have changes")
-				
+
 				edits, exists := workspaceEdit.Changes[documentURI]
 				assert.True(t, exists, "Expected edits for document URI")
 				assert.NotEmpty(t, edits, "Expected text edits")
@@ -459,7 +459,7 @@ func TestListMovementIntegration(t *testing.T) {
 `
 
 	testURI := "file:///test.md"
-	
+
 	// Add document to server and set content
 	doc, err := server.AddDocument(testURI)
 	require.NoError(t, err, "Failed to add document")
@@ -481,7 +481,7 @@ func TestListMovementIntegration(t *testing.T) {
 		},
 		{
 			name:          "move first bullet item up (boundary)",
-			line:          2, // "First item" 
+			line:          2, // "First item"
 			character:     0,
 			moveUp:        true,
 			expectSuccess: false, // Should fail - already at top
@@ -524,20 +524,20 @@ func TestListMovementIntegration(t *testing.T) {
 
 			if tt.expectSuccess {
 				assert.NoError(t, err, "Expected successful list movement")
-				
+
 				// Check that result is a workspace edit
 				workspaceEdit, ok := result.(*lsp.WorkspaceEdit)
 				require.True(t, ok, "Expected WorkspaceEdit result")
-				
+
 				// Verify workspace edit has changes
 				assert.NotEmpty(t, workspaceEdit.Changes, "Expected workspace edit to have changes")
-				
+
 				edits, exists := workspaceEdit.Changes[testURI]
 				assert.True(t, exists, "Expected workspace edit to have changes for test URI")
 				assert.NotEmpty(t, edits, "Expected workspace edit to have text edits")
-				
+
 				t.Logf("Successfully generated %d text edits", len(edits))
-				
+
 			} else {
 				assert.Error(t, err, "Expected error for boundary case")
 			}
@@ -683,7 +683,7 @@ function test() {
 End of file.`
 
 	testURI := "file:///test.md"
-	
+
 	// Add document to server and set content
 	doc, err := server.AddDocument(testURI)
 	require.NoError(t, err, "Failed to add document")
@@ -714,7 +714,7 @@ End of file.`
 	edits := workspaceEdit.Changes[testURI]
 	for i, edit := range edits {
 		t.Logf("Edit %d:", i)
-		t.Logf("  Range: %d:%d to %d:%d", 
+		t.Logf("  Range: %d:%d to %d:%d",
 			edit.Range.Start.Line, edit.Range.Start.Character,
 			edit.Range.End.Line, edit.Range.End.Character)
 		t.Logf("  NewText: %q", edit.NewText)
@@ -722,13 +722,13 @@ End of file.`
 
 	// Apply the edits manually to see the result
 	finalContent := applyTextEditsManually(testContent, edits)
-	
+
 	t.Logf("=== AFTER ===")
 	finalLines := strings.Split(finalContent, "\n")
 	for i, line := range finalLines {
 		t.Logf("%2d: %s", i, line)
 	}
-	
+
 	// Verify the expected outcome
 	expectedAfter := `# Task Lists Test
 
@@ -771,23 +771,23 @@ End of file.`
 // applyTextEditsManually manually applies text edits to see the result
 func applyTextEditsManually(content string, edits []lsp.TextEdit) string {
 	lines := strings.Split(content, "\n")
-	
+
 	// Apply edits in reverse order to avoid index shifting issues
 	for i := len(edits) - 1; i >= 0; i-- {
 		edit := edits[i]
 		startLine := edit.Range.Start.Line
 		endLine := edit.Range.End.Line
-		
+
 		// Split new text into lines
 		newLines := strings.Split(edit.NewText, "\n")
-		
+
 		// Replace the range
 		before := lines[:startLine]
 		after := lines[endLine:]
-		
+
 		// Combine before + newLines + after
 		lines = append(before, append(newLines, after...)...)
 	}
-	
+
 	return strings.Join(lines, "\n")
 }

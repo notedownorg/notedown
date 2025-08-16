@@ -376,7 +376,7 @@ func NewCode(content string, rng Range) *Code {
 // FindListItemAtLine finds the list item that contains the given line number
 func (d *Document) FindListItemAtLine(line int) *ListItem {
 	var result *ListItem
-	
+
 	walker := NewWalker(WalkFunc(func(node Node) error {
 		if listItem, ok := node.(*ListItem); ok {
 			// Check if this list item's range contains the target line
@@ -386,7 +386,7 @@ func (d *Document) FindListItemAtLine(line int) *ListItem {
 		}
 		return nil
 	}))
-	
+
 	walker.Walk(d)
 	return result
 }

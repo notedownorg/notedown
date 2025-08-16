@@ -88,7 +88,7 @@ func (s *Server) handleDidChange(params json.RawMessage) error {
 
 			// Update wikilinks for this document
 			s.refreshWikilinksFromDocument(uri, newContent)
-			
+
 			// Generate and publish updated diagnostics
 			diagnostics := s.generateWikilinkDiagnostics(uri, newContent)
 			s.publishDiagnostics(uri, diagnostics)
@@ -185,6 +185,9 @@ func (s *Server) findFileForTarget(target string) *FileInfo {
 
 	workspaceFiles := s.GetWorkspaceFiles()
 
+	// Strip .md extension from target for comparison
+	targetWithoutExt := strings.TrimSuffix(normalizedTarget, ".md")
+
 	for _, fileInfo := range workspaceFiles {
 		// Check if the file path (without extension) matches the target
 		pathWithoutExt := strings.TrimSuffix(fileInfo.Path, filepath.Ext(fileInfo.Path))
@@ -193,8 +196,9 @@ func (s *Server) findFileForTarget(target string) *FileInfo {
 		// Normalize paths for comparison (handle both forward and backward slashes)
 		normalizedPath := strings.ReplaceAll(pathWithoutExt, "\\", "/")
 
-		// Match exact path or base name
-		if normalizedPath == normalizedTarget || baseWithoutExt == target {
+		// Match exact path or base name (with or without .md extension)
+		if normalizedPath == normalizedTarget || normalizedPath == targetWithoutExt || 
+		   baseWithoutExt == target || baseWithoutExt == targetWithoutExt {
 			return fileInfo
 		}
 	}

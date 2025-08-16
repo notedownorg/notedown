@@ -10,15 +10,15 @@ import (
 
 func TestHandleDefinition(t *testing.T) {
 	tests := []struct {
-		name           string
-		documentURI    string
+		name            string
+		documentURI     string
 		documentContent string
-		position       lsp.Position
-		workspaceFiles map[string]*FileInfo
-		expectLocation bool
-		expectError    bool
-		expectedURI    string
-		description    string
+		position        lsp.Position
+		workspaceFiles  map[string]*FileInfo
+		expectLocation  bool
+		expectError     bool
+		expectedURI     string
+		description     string
 	}{
 		{
 			name:            "existing file - simple target",
@@ -188,14 +188,14 @@ func TestFindFileForTarget(t *testing.T) {
 	logger := log.NewDefault()
 	server := NewServer("test", logger)
 
-	// Set up test workspace files  
+	// Set up test workspace files
 	server.workspace.fileIndex = map[string]*FileInfo{
 		"file:///test/simple-file.md": {
 			Path: "/test/simple-file.md",
 			URI:  "file:///test/simple-file.md",
 		},
 		"file:///test/docs/api-guide.md": {
-			Path: "/test/docs/api-guide.md", 
+			Path: "/test/docs/api-guide.md",
 			URI:  "file:///test/docs/api-guide.md",
 		},
 		"file:///test/projects/project-alpha.md": {
@@ -276,32 +276,32 @@ func TestResolveTargetPath(t *testing.T) {
 	}
 
 	tests := []struct {
-		name        string
-		target      string
+		name         string
+		target       string
 		expectedPath string
 		expectedURI  string
 	}{
 		{
-			name:        "simple target",
-			target:      "simple-file",
+			name:         "simple target",
+			target:       "simple-file",
 			expectedPath: "/test/workspace/simple-file.md",
 			expectedURI:  "file:///test/workspace/simple-file.md",
 		},
 		{
-			name:        "target with extension - should double add extension (current behavior)",
-			target:      "file.md",
+			name:         "target with extension - should double add extension (current behavior)",
+			target:       "file.md",
 			expectedPath: "/test/workspace/file.md.md",
 			expectedURI:  "file:///test/workspace/file.md.md",
 		},
 		{
-			name:        "path-based target",
-			target:      "docs/api-reference",
+			name:         "path-based target",
+			target:       "docs/api-reference",
 			expectedPath: "/test/workspace/docs/api-reference.md",
 			expectedURI:  "file:///test/workspace/docs/api-reference.md",
 		},
 		{
-			name:        "nested path target",
-			target:      "projects/alpha/readme",
+			name:         "nested path target",
+			target:       "projects/alpha/readme",
 			expectedPath: "/test/workspace/projects/alpha/readme.md",
 			expectedURI:  "file:///test/workspace/projects/alpha/readme.md",
 		},

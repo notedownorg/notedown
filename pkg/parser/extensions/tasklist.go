@@ -91,7 +91,7 @@ func (s *taskListParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 
 	// Consume the checkbox
 	block.Advance(3)
-	
+
 	// Skip optional space after checkbox
 	if len(line) > 3 && line[3] == ' ' {
 		block.Advance(1)
@@ -117,14 +117,14 @@ func (r *taskListHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source []byt
 	if !entering {
 		return ast.WalkContinue, nil
 	}
-	
+
 	checkbox := n.(*TaskCheckBox)
 	if checkbox.IsChecked {
 		_, _ = w.WriteString(`<input checked="" disabled="" type="checkbox">`)
 	} else {
 		_, _ = w.WriteString(`<input disabled="" type="checkbox">`)
 	}
-	
+
 	return ast.WalkContinue, nil
 }
 

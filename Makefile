@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Use nix develop shell if nix is available
+export NIX_CONFIG := warn-dirty = false
+ifneq ($(shell command -v nix 2> /dev/null),)
+SHELL := nix develop --command bash
+endif
+
 # Version information
 VERSION := $(shell git describe --tags --always --dirty)
 COMMIT := $(shell git rev-parse HEAD)
@@ -29,9 +35,15 @@ mod:
 
 format:
 	gofmt -w .
+	stylua notedown-nvim/
 
-test:
+test: test-lsp test-nvim test-integration
+
+test-lsp:
 	go test ./...
+
+test-nvim:
+	cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
 install: clean
 	go build -ldflags "\
@@ -52,6 +64,6 @@ licenser:
 	licenser apply -r "Notedown Authors"
 
 dev: install
-	rm -rf /tmp/notedown_test_workspace
-	cp -r test_workspace /tmp/notedown_test_workspace
-	cd /tmp/notedown_test_workspace && nvim .
+	rm -rf /tmp/notedown_demo_workspace
+	cp -r demo_workspace /tmp/notedown_demo_workspace
+	cd /tmp/notedown_demo_workspace && nvim .

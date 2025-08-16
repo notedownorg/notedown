@@ -34,7 +34,7 @@ func NewNotification(method string, params any) *Request {
 			paramsBytes = b
 		}
 	}
-	
+
 	return &Request{
 		ProtocolVersion: JSONRPCVersion,
 		ID:              nil, // Notifications have no ID

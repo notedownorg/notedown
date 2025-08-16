@@ -176,7 +176,6 @@ func (s *Server) handleMoveListItem(arguments []any, moveUp bool) (any, error) {
 	return workspaceEdit, nil
 }
 
-
 // parseListHierarchy parses the document content and builds a list hierarchy
 func (s *Server) parseListHierarchy(content string) (*ListHierarchy, error) {
 	lines := strings.Split(content, "\n")
@@ -292,7 +291,7 @@ func (h *ListHierarchy) findItemAtPosition(position lsp.Position) *ListItem {
 // getAllItems returns all list items in the hierarchy (flattened)
 func (h *ListHierarchy) getAllItems() []*ListItem {
 	var allItems []*ListItem
-	
+
 	var traverse func([]*ListItem)
 	traverse = func(items []*ListItem) {
 		for _, item := range items {
@@ -300,7 +299,7 @@ func (h *ListHierarchy) getAllItems() []*ListItem {
 			traverse(item.Children)
 		}
 	}
-	
+
 	traverse(h.Items)
 	return allItems
 }
