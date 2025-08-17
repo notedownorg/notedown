@@ -118,6 +118,16 @@ T["tasks - move Sub-subtask A.1.b up"] = function()
 	})
 end
 
+T["tasks - cursor bug reproduction"] = function()
+	golden.test_list_movement("tasks", "cursor_bug", {
+		search_pattern = "Completed subtask",
+		command = "NotedownMoveDown",
+		expected_cursor = { 5, 6 }, -- Should be on line 5 at "[x]" of moved "Completed subtask"
+		input_file = "cursor_bug_input.md",
+		expected_file = "cursor_bug_expected.md"
+	})
+end
+
 -- ========================================
 -- BOUNDARY CONDITION TESTS
 -- ========================================

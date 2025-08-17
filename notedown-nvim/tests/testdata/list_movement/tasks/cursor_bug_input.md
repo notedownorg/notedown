@@ -1,0 +1,6 @@
+- [ ] Main task
+  - [ ] Subtask 1
+  - [x] Completed subtask
+  - [ ] Subtask 3
+    - [ ] Sub-subtask
+- [x] Another main task

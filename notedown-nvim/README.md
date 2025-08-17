@@ -7,6 +7,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 ## ✨ Features
 
 - 🔗 **Wikilink Support**: Intelligent completion and navigation for `[[wikilinks]]`
+- 📝 **List Movement**: Reorganize list items with mk/mj keybindings and smart cursor following
 - 🏠 **Workspace Detection**: Automatically uses notedown parser when opened directly in configured workspaces
 - 🧠 **Smart LSP Integration**: Seamless language server integration with document synchronization
 - 🚀 **LSP Integration**: Full Notedown Language Server Protocol support
@@ -78,6 +79,11 @@ require("notedown").setup({
       "~/github.com/notedownorg/notedown",
     },
   },
+  keybindings = {
+    -- Keybindings for list item movement
+    move_list_item_up = "mk",   -- Move up
+    move_list_item_down = "mj", -- Move down
+  },
 })
 ```
 
@@ -135,6 +141,34 @@ Type `[[` to trigger intelligent completion:
 - Use `gd` or your configured go-to-definition keybinding
 - Jump to the target file or create it if it doesn't exist
 
+### List Movement
+
+Reorganize list items quickly with intuitive keybindings:
+
+- **`mk`**: Move list item up  
+- **`mj`**: Move list item down
+
+Features:
+- **Smart cursor following**: Cursor stays with the moved content
+- **Multi-level support**: Works with nested lists of any depth
+- **List type aware**: Handles bullet lists, numbered lists, and task lists
+- **Auto-renumbering**: Updates list numbers when moving numbered items
+- **Character position preservation**: Maintains cursor position within moved text
+
+Example:
+```markdown
+1. First item
+2. Second item   <- cursor here, press mk
+3. Third item
+```
+
+Becomes:
+```markdown
+1. First item
+2. Third item
+3. Second item   <- cursor follows the moved item
+```
+
 ### Commands
 
 #### `:NotedownWorkspaceStatus`
@@ -163,6 +197,25 @@ Reload the plugin and restart the LSP server:
 - Restarts language server
 
 ## 🔧 Advanced Configuration
+
+### Custom Keybindings
+
+Customize list movement keybindings to your preference:
+
+```lua
+require("notedown").setup({
+  keybindings = {
+    move_list_item_up = "[e",     -- Use bracket notation
+    move_list_item_down = "]e",   -- Use bracket notation
+    -- or
+    move_list_item_up = "<leader>k",   -- Use leader-based
+    move_list_item_down = "<leader>j", -- Use leader-based
+    -- or
+    move_list_item_up = "<M-k>",   -- Use Alt (may need terminal config)
+    move_list_item_down = "<M-j>", -- Use Alt (may need terminal config)
+  },
+})
+```
 
 ### Custom LSP Server Command
 

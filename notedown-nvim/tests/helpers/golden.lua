@@ -84,8 +84,8 @@ end
 -- Main test function for list movement operations
 function M.test_list_movement(test_dir, golden_file, options)
 	local base_path = "tests/testdata/list_movement/" .. test_dir
-	local input_path = base_path .. "/input.md"
-	local golden_path = base_path .. "/" .. golden_file .. ".md"
+	local input_path = base_path .. "/" .. (options.input_file or "input.md")
+	local golden_path = base_path .. "/" .. (options.expected_file or (golden_file .. ".md"))
 
 	-- Read input and expected content
 	local input_content = read_file(input_path)

@@ -19,8 +19,8 @@ M.defaults = {
 	},
 	keybindings = {
 		-- Keybindings for list item movement
-		move_list_item_up = "<leader>lk",
-		move_list_item_down = "<leader>lj",
+		move_list_item_up = "mk",
+		move_list_item_down = "mj",
 	},
 }
 

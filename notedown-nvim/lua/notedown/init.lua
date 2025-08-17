@@ -199,6 +199,7 @@ end
 local function calculate_new_cursor_position(text_edits, original_line, original_char, move_up, original_content)
 	-- Strategy: Find which edit places our original content at a new location
 	-- We need to match content, not just line numbers
+	
 
 	for i, edit in ipairs(text_edits) do
 		local start_line = edit.range.start.line + 1 -- Convert to 1-based
@@ -212,7 +213,33 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 		-- Check if this edit's new text contains our original content (ignoring list markers)
 		if edit_text:find(original_text, 1, true) then
 			-- Found the edit that places our content
-			local new_line = start_line
+			-- Calculate the actual final line number by accounting for all edits
+			-- The issue is that edits can change line numbers, so we need to calculate
+			-- the final position after considering the cumulative effect
+			local cumulative_line_offset = 0
+			
+			-- Calculate how many lines were added/removed by previous edits
+			for prev_i = 1, i - 1 do
+				local prev_edit = text_edits[prev_i]
+				local prev_lines_removed = prev_edit.range["end"].line - prev_edit.range.start.line
+				local prev_lines_added = #vim.split(prev_edit.newText, "\n") - 1
+				cumulative_line_offset = cumulative_line_offset + (prev_lines_added - prev_lines_removed)
+			end
+			
+			-- Find which line within this edit contains our text
+			local lines_in_edit = vim.split(edit.newText, "\n")
+			local target_line_offset = 0
+			
+			for j, line in ipairs(lines_in_edit) do
+				local line_without_markers = line:gsub("^%s*[-*+] ", ""):gsub("^%s*%d+%. ", "")
+				if line_without_markers:find(original_text, 1, true) then
+					target_line_offset = j - 1 -- 0-based offset
+					break
+				end
+			end
+			
+			local new_line = start_line + cumulative_line_offset + target_line_offset
+			
 
 			-- Validate direction
 			local valid_direction = true
@@ -243,6 +270,17 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 						local new_text_start = #new_marker + 1
 						local offset_in_text = original_char - original_text_start
 						new_char = new_text_start + offset_in_text
+					end
+				end
+				
+				-- Special handling for task lists - position cursor at the checkbox for completed tasks
+				local checkbox_pattern = "^%s*%- %[.%] "
+				local completed_task_pattern = "^%s*%- %[x%] "
+				if original_content:match(completed_task_pattern) and new_line_content and new_line_content:match(completed_task_pattern) then
+					-- Position cursor at the closing bracket of the checkbox for completed tasks only
+					local checkbox_pos = new_line_content:find("%]")
+					if checkbox_pos then
+						new_char = checkbox_pos - 1 -- Convert to 0-based
 					end
 				end
 
@@ -339,7 +377,7 @@ function M.move_list_item_up()
 						result.changes[uri],
 						original_line,
 						original_char,
-						true,
+						true, -- move_up = true
 						original_content
 					)
 
