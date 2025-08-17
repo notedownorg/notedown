@@ -122,7 +122,7 @@ T["tasks - cursor bug reproduction"] = function()
 	golden.test_list_movement("tasks", "cursor_bug", {
 		search_pattern = "Completed subtask",
 		command = "NotedownMoveDown",
-		expected_cursor = { 5, 6 }, -- Should be on line 5 at "[x]" of moved "Completed subtask"
+		expected_cursor = { 9, 6 }, -- Should be on line 9 at "]" of moved "Completed subtask" (cursor jumps 6 lines)
 		input_file = "cursor_bug_input.md",
 		expected_file = "cursor_bug_expected.md"
 	})

@@ -2,5 +2,9 @@
   - [ ] Subtask 1
   - [x] Completed subtask
   - [ ] Subtask 3
-    - [ ] Sub-subtask
+    - [ ] Sub-subtask 1
+    - [ ] Sub-subtask 2
+    - [ ] Sub-subtask 3
+    - [ ] Sub-subtask 4
+    - [ ] Sub-subtask 5
 - [x] Another main task
