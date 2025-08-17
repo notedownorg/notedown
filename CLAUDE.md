@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `go test ./lsp/pkg/...` - Test LSP server packages
 - `go test ./lsp/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd notedown-nvim && nvim --headless --noplugin -u tests/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
+- `cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
 
 ### Building
 - `go build -o bin/notedown-language-server ./lsp/` - Build LSP server binary
@@ -32,9 +32,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Code Quality
 - Uses `licenser` tool for license header management (run `make licenser`)
-- All code must be gofmt formatted
+- All code must be gofmt formatted (Go) and stylua formatted (Lua)
 - Working tree must be clean after running hygiene tasks
 - Requires Go 1.24.4 or later
+- Optional Nix development environment available (flake.nix)
 
 ## Architecture Overview
 

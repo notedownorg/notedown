@@ -16,7 +16,7 @@
 
 local MiniTest = require("mini.test")
 local utils = require("helpers.utils")
-local lsp = require("helpers.lsp")
+local lsp = require("helpers.lsp_dedicated")
 
 local T = MiniTest.new_set()
 

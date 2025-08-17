@@ -29,7 +29,8 @@
       "Bash(chmod:*)",
       "Bash(/Users/liam/github.com/notedownorg/notedown/usecase-focused-appoach/integration/test_lsp_manually.sh)",
       "Bash(timeout 30s nvim:*)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(time nvim:*)"
     ],
     "deny": []
   }

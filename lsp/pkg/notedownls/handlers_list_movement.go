@@ -194,14 +194,14 @@ func (s *Server) parseListHierarchy(content string) (*ListHierarchy, error) {
 			if len(currentStack) > 0 {
 				lastItem := currentStack[len(currentStack)-1]
 				trimmedLine := strings.TrimSpace(line)
-				
+
 				// Only include as continuation if:
 				// 1. It's indented more than the list item (content continuation), OR
 				// 2. It's not a heading or other structural element
 				// Note: We're being more restrictive about blank lines to avoid including too much
-				if len(line) > lastItem.IndentLevel && 
-				   len(line)-len(strings.TrimLeft(line, " \t")) > lastItem.IndentLevel &&
-				   !strings.HasPrefix(trimmedLine, "#") {
+				if len(line) > lastItem.IndentLevel &&
+					len(line)-len(strings.TrimLeft(line, " \t")) > lastItem.IndentLevel &&
+					!strings.HasPrefix(trimmedLine, "#") {
 					lastItem.EndLine = lineNum
 					lastItem.OriginalLines = append(lastItem.OriginalLines, line)
 					continue
@@ -349,7 +349,7 @@ func (s *Server) calculateListItemMove(hierarchy *ListHierarchy, item *ListItem,
 
 	// Check if we need renumbering for ordered lists
 	renumberInfo := s.calculateRenumberingInfo(parentItems, targetIndex, swapIndex)
-	
+
 	// Create text edits to swap the items (with renumbering if needed)
 	textEdits := s.createSwapTextEdits(item, swapItem, renumberInfo)
 
@@ -372,31 +372,30 @@ type RenumberInfo struct {
 // calculateRenumberingInfo determines if and how items should be renumbered
 func (s *Server) calculateRenumberingInfo(parentItems []*ListItem, index1, index2 int) *RenumberInfo {
 	info := &RenumberInfo{ShouldRenumber: false}
-	
+
 	if len(parentItems) <= index1 || len(parentItems) <= index2 {
 		return info
 	}
-	
+
 	item1 := parentItems[index1]
 	item2 := parentItems[index2]
-	
+
 	// Check if both items being swapped are numbered
 	item1Numbered, _ := regexp.MatchString(`^\d+\.`, item1.Marker)
 	item2Numbered, _ := regexp.MatchString(`^\d+\.`, item2.Marker)
-	
+
 	if !item1Numbered || !item2Numbered {
 		return info
 	}
-	
+
 	// Items should be renumbered - extract current numbers and swap them
 	item1Number := regexp.MustCompile(`^\d+`).FindString(item1.Marker)
 	item2Number := regexp.MustCompile(`^\d+`).FindString(item2.Marker)
-	
+
 	info.ShouldRenumber = true
 	info.Item1NewMarker = item2Number + "."
 	info.Item2NewMarker = item1Number + "."
-	
-	
+
 	return info
 }
 
@@ -455,7 +454,7 @@ func (s *Server) createSwapTextEdits(item1, item2 *ListItem, renumberInfo *Renum
 			item1Lines[0] = newLine
 			item1Text = strings.Join(item1Lines, "\n")
 		}
-		
+
 		// Update item2 text to use item2's new marker
 		if len(item2.OriginalLines) > 0 {
 			oldLine := item2.OriginalLines[0]
@@ -550,4 +549,3 @@ func (s *Server) getChildrenText(item *ListItem) string {
 	traverse(item)
 	return text.String()
 }
-

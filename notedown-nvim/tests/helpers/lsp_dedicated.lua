@@ -12,7 +12,17 @@
 -- See the License for the specific language governing permissions and
 -- limitations under the License.
 
--- LSP-specific test utilities for notedown.nvim
+-- Dedicated LSP session management for notedown.nvim tests
+--
+-- This helper provides ISOLATED LSP sessions - each test gets its own fresh
+-- LSP server instance and Neovim child process. Use this when:
+-- - Tests need complete isolation from each other
+-- - Testing LSP initialization/shutdown behavior
+-- - Tests modify LSP server state that could affect other tests
+-- - Debugging individual test failures in isolation
+--
+-- For better performance when running many tests that don't need isolation,
+-- consider using helpers.lsp_shared instead.
 
 local M = {}
 
