@@ -66,7 +66,7 @@ function M.get_workspace_status(bufnr)
 		workspace_path = workspace_path,
 		should_use_notedown = should_use_notedown,
 		auto_detected = is_workspace, -- Indicates automatic .notedown detection
-		parser_mode = is_workspace and "notedown" or "markdown"
+		parser_mode = is_workspace and "notedown" or "markdown",
 	}
 end
 

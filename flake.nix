@@ -29,6 +29,7 @@
               licenser
               stylua
               neovim
+              golangci-lint
             ];
           };
         }
