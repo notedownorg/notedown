@@ -50,8 +50,12 @@ func (s *Server) handleDidOpen(params json.RawMessage) error {
 	s.extractWikilinksFromDocument(uri, content)
 
 	// Generate and publish diagnostics for this document
-	diagnostics := s.generateWikilinkDiagnostics(uri, content)
-	s.publishDiagnostics(uri, diagnostics)
+	wikilinkDiagnostics := s.generateWikilinkDiagnostics(uri, content)
+	taskDiagnostics := s.generateTaskDiagnostics(uri, content)
+
+	// Combine all diagnostics
+	allDiagnostics := append(wikilinkDiagnostics, taskDiagnostics...)
+	s.publishDiagnostics(uri, allDiagnostics)
 
 	s.logger.Info("document opened", "uri", uri, "languageId", didOpenParams.TextDocument.LanguageID)
 	return nil
@@ -104,8 +108,12 @@ func (s *Server) handleDidChange(params json.RawMessage) error {
 			s.refreshWikilinksFromDocument(uri, newContent)
 
 			// Generate and publish updated diagnostics
-			diagnostics := s.generateWikilinkDiagnostics(uri, newContent)
-			s.publishDiagnostics(uri, diagnostics)
+			wikilinkDiagnostics := s.generateWikilinkDiagnostics(uri, newContent)
+			taskDiagnostics := s.generateTaskDiagnostics(uri, newContent)
+
+			// Combine all diagnostics
+			allDiagnostics := append(wikilinkDiagnostics, taskDiagnostics...)
+			s.publishDiagnostics(uri, allDiagnostics)
 		}
 		s.documentsMutex.Unlock()
 	}
