@@ -1,7 +1,0 @@
-# Map of names -> location on disk
-workspaces:
-  personal:
-    location: ~/notes
-
-# Which workspace tools should default to if no override is set
-default_workspace: personal

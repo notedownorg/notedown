@@ -19,3 +19,12 @@ vendor/
 
 # Go workspace file
 go.work
+
+# Build output
+bin/
+
+notedown-lsp
+notedown-lsp-test
+
+# Node things..
+node_modules/

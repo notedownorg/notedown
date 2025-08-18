@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git grep:*)",
+      "Bash(find:*)",
+      "Bash(mkdir:*)",
+      "Bash(go test:*)",
+      "Bash(mv:*)",
+      "Bash(go build:*)",
+      "Bash(go get:*)",
+      "Bash(go env:*)",
+      "Bash(go doc:*)",
+      "Bash(go run:*)",
+      "WebFetch(domain:microsoft.github.io)",
+      "Bash(go mod:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(cat:*)",
+      "Bash(grep:*)",
+      "Bash(./node_modules/.bin/tree-sitter:*)",
+      "Bash(make:*)",
+      "Bash(nvim:*)",
+      "Bash(npm run build:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:pkg.go.dev)",
+      "Bash(rm:*)",
+      "Bash(./run_tests.sh)",
+      "Bash(timeout 5s ./integration/notedown-lsp serve:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/liam/github.com/notedownorg/notedown/usecase-focused-appoach/integration/test_lsp_manually.sh)",
+      "Bash(timeout 30s nvim:*)",
+      "Bash(timeout:*)",
+      "Bash(time nvim:*)"
+    ],
+    "deny": []
+  }
+}
