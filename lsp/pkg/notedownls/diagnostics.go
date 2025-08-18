@@ -93,7 +93,7 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 }
 
 // generateTaskDiagnostics generates diagnostics for invalid task states in a document
-// 
+//
 // Uses a hybrid approach combining regex pattern matching with AST validation:
 // 1. Regex finds all potential task checkbox patterns in list items
 // 2. Parser identifies which list items are actually recognized as valid tasks
@@ -126,16 +126,16 @@ func (s *Server) generateTaskDiagnostics(uri, content string) []lsp.Diagnostic {
 }
 
 // findInvalidTaskCheckboxes finds potential task checkboxes that failed validation
-// 
+//
 // This implements the hybrid approach:
 // 1. Regex finds all checkbox patterns that LOOK like tasks in list items
-// 2. Parser AST tells us which list items are ACTUALLY recognized as valid tasks  
+// 2. Parser AST tells us which list items are ACTUALLY recognized as valid tasks
 // 3. Invalid = checkbox pattern found + not recognized as valid task + invalid state
 //
 // Examples:
 //   - [x] task        ← Regex finds, Parser recognizes as task → No diagnostic
-//   - [invalid] task  ← Regex finds, Parser ignores (not task) → Diagnostic  
-//   Text [invalid]    ← Regex ignores (not in list) → No diagnostic
+//   - [invalid] task  ← Regex finds, Parser ignores (not task) → Diagnostic
+//     Text [invalid]    ← Regex ignores (not in list) → No diagnostic
 func (s *Server) findInvalidTaskCheckboxes(doc *parser.Document, content string, cfg *config.Config) []lsp.Diagnostic {
 	var diagnostics []lsp.Diagnostic
 
@@ -212,12 +212,12 @@ func (s *Server) findInvalidTaskCheckboxes(doc *parser.Document, content string,
 }
 
 // collectListItems walks the AST and collects all list items with their ranges
-// 
+//
 // This gives us the parser's view of which list items are actual tasks.
 // The parser sets TaskList=true only for list items with valid task checkbox states.
 // We use this to distinguish between:
 //   - Valid tasks: [x] item    → Parser creates ListItem with TaskList=true
-//   - Invalid tasks: [bad] item → Parser creates ListItem with TaskList=false  
+//   - Invalid tasks: [bad] item → Parser creates ListItem with TaskList=false
 //   - Regular items: No checkbox → Parser creates ListItem with TaskList=false
 func (s *Server) collectListItems(doc *parser.Document) []*parser.ListItem {
 	var items []*parser.ListItem
@@ -232,7 +232,10 @@ func (s *Server) collectListItems(doc *parser.Document) []*parser.ListItem {
 
 	// Walk the entire document tree
 	walker := parser.NewWalker(walkFunc)
-	walker.Walk(doc)
+	if err := walker.Walk(doc); err != nil {
+		s.logger.Error("failed to walk document tree for list items", "error", err)
+		return items
+	}
 
 	return items
 }

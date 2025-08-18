@@ -105,11 +105,11 @@ T["task diagnostics"]["detects invalid task states"] = function()
 	local expected_invalid_states = {
 		"invalid",
 		"?",
-		"wip", 
+		"wip",
 		"todo",
 		"bad",
 		"error",
-		"wrong"
+		"wrong",
 	}
 
 	-- Count task diagnostics (from notedown-task source)
@@ -124,32 +124,39 @@ T["task diagnostics"]["detects invalid task states"] = function()
 	end
 
 	-- Should find exactly the expected number of invalid task states
-	MiniTest.expect.equality(task_diag_count, #expected_invalid_states, 
-		"Should find " .. #expected_invalid_states .. " invalid task states")
+	MiniTest.expect.equality(
+		task_diag_count,
+		#expected_invalid_states,
+		"Should find " .. #expected_invalid_states .. " invalid task states"
+	)
 
 	-- Verify each diagnostic has correct properties
 	for _, diag in ipairs(task_diagnostics) do
 		-- Should be warning severity
 		MiniTest.expect.equality(diag.severity, 2, "Should be Warning severity (2)")
-		
+
 		-- Should be from notedown-task source
 		MiniTest.expect.equality(diag.source, "notedown-task", "Should be from notedown-task source")
-		
+
 		-- Should have the invalid-task-state code
 		MiniTest.expect.equality(diag.code, "invalid-task-state", "Should have invalid-task-state code")
-		
+
 		-- Message should contain error description
 		local message = diag.message or ""
-		MiniTest.expect.equality(string.find(message, "Invalid task state") ~= nil, true, 
-			"Should contain 'Invalid task state' in message")
-		MiniTest.expect.equality(string.find(message, "Valid states:") ~= nil, true, 
-			"Should list valid states in message")
-		
+		MiniTest.expect.equality(
+			string.find(message, "Invalid task state") ~= nil,
+			true,
+			"Should contain 'Invalid task state' in message"
+		)
+		MiniTest.expect.equality(
+			string.find(message, "Valid states:") ~= nil,
+			true,
+			"Should list valid states in message"
+		)
+
 		-- Should mention default valid states
-		MiniTest.expect.equality(string.find(message, " ") ~= nil, true, 
-			"Should mention space (empty) as valid state")
-		MiniTest.expect.equality(string.find(message, "x") ~= nil, true, 
-			"Should mention 'x' as valid state")
+		MiniTest.expect.equality(string.find(message, " ") ~= nil, true, "Should mention space (empty) as valid state")
+		MiniTest.expect.equality(string.find(message, "x") ~= nil, true, "Should mention 'x' as valid state")
 	end
 
 	-- Verify that specific invalid states are detected
@@ -176,8 +183,7 @@ T["task diagnostics"]["detects invalid task states"] = function()
 				break
 			end
 		end
-		MiniTest.expect.equality(found, true, 
-			"Should detect invalid state: '" .. expected_state .. "'")
+		MiniTest.expect.equality(found, true, "Should detect invalid state: '" .. expected_state .. "'")
 	end
 
 	child.stop()
@@ -299,7 +305,7 @@ This is regular text with no tasks.
 
 	-- Wait a bit for file system to settle
 	vim.loop.sleep(500)
-	
+
 	-- Setup LSP
 	lsp.setup(child, workspace)
 
@@ -345,13 +351,13 @@ This is regular text with no tasks.
 	for _, diag in ipairs(task_diagnostics) do
 		-- Should be warning severity
 		MiniTest.expect.equality(diag.severity, 2, "Should be Warning severity (2)")
-		
+
 		-- Should be from notedown-task source
 		MiniTest.expect.equality(diag.source, "notedown-task", "Should be from notedown-task source")
-		
+
 		-- Should have the invalid-task-state code
 		MiniTest.expect.equality(diag.code, "invalid-task-state", "Should have invalid-task-state code")
-		
+
 		-- Extract state from message for verification
 		local message = diag.message or ""
 		local state_start = string.find(message, "'")
@@ -365,7 +371,7 @@ This is regular text with no tasks.
 	end
 
 	-- Should detect both 'invalid' and '?' as invalid states
-	local expected_invalid = {"invalid", "?"}
+	local expected_invalid = { "invalid", "?" }
 	for _, expected in ipairs(expected_invalid) do
 		local found = false
 		for _, detected in ipairs(detected_invalid_states) do

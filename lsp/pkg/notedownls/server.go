@@ -864,7 +864,6 @@ func (s *Server) publishDiagnostics(uri string, diagnostics []lsp.Diagnostic) {
 	}
 }
 
-
 // refreshAllDocumentDiagnostics regenerates and publishes diagnostics for all open documents
 func (s *Server) refreshAllDocumentDiagnostics() {
 	s.documentsMutex.RLock()

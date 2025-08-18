@@ -320,12 +320,12 @@ line 2`
 		expectedLine int
 		expectedChar int
 	}{
-		{0, 0, 0},     // Start of first line
-		{3, 0, 3},     // Middle of first line
-		{7, 1, 0},     // Start of second line (after \n)
-		{10, 1, 3},    // Middle of second line
-		{14, 2, 0},    // Start of third line
-		{20, 2, 6},    // End of content
+		{0, 0, 0},  // Start of first line
+		{3, 0, 3},  // Middle of first line
+		{7, 1, 0},  // Start of second line (after \n)
+		{10, 1, 3}, // Middle of second line
+		{14, 2, 0}, // Start of third line
+		{20, 2, 6}, // End of content
 	}
 
 	for _, tt := range tests {
