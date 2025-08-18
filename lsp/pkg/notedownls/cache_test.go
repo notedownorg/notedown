@@ -31,7 +31,7 @@ func TestCacheDebugLogging(t *testing.T) {
 	// Create a temporary workspace
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "test.md")
-	if err := os.WriteFile(testFile, []byte("# Test Document"), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte("# Test Document"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 

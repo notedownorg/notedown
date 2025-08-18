@@ -27,10 +27,6 @@ func TestNewWorkspaceManager(t *testing.T) {
 	logger := log.NewDefault()
 	wm := NewWorkspaceManager(logger)
 
-	if wm == nil {
-		t.Error("NewWorkspaceManager should return a non-nil WorkspaceManager")
-	}
-
 	if len(wm.roots) != 0 {
 		t.Errorf("Expected 0 roots, got %d", len(wm.roots))
 	}
@@ -236,11 +232,11 @@ func TestDiscoverMarkdownFilesIntegration(t *testing.T) {
 		fullPath := filepath.Join(tempDir, filePath)
 		dir := filepath.Dir(fullPath)
 
-		if err := os.MkdirAll(dir, 0755); err != nil {
+		if err := os.MkdirAll(dir, 0750); err != nil {
 			t.Fatalf("Failed to create directory %s: %v", dir, err)
 		}
 
-		if err := os.WriteFile(fullPath, []byte(content), 0644); err != nil {
+		if err := os.WriteFile(fullPath, []byte(content), 0600); err != nil {
 			t.Fatalf("Failed to create file %s: %v", fullPath, err)
 		}
 	}
@@ -309,7 +305,7 @@ func TestWorkspaceManagerConcurrency(t *testing.T) {
 	params := lsp.InitializeParams{
 		RootUri: &[]string{"file:///test"}[0],
 	}
-	wm.InitializeFromParams(params)
+	_ = wm.InitializeFromParams(params)
 
 	// Test concurrent access
 	done := make(chan bool)
@@ -328,7 +324,7 @@ func TestWorkspaceManagerConcurrency(t *testing.T) {
 	go func() {
 		for i := 0; i < 100; i++ {
 			testURI := "file:///test/doc.md"
-			wm.AddFileToIndex(testURI)
+			_ = wm.AddFileToIndex(testURI)
 			wm.RemoveFileFromIndex(testURI)
 		}
 		done <- true
@@ -349,12 +345,12 @@ func TestAddRemoveFileFromIndex(t *testing.T) {
 	params := lsp.InitializeParams{
 		RootUri: &[]string{"file:///test"}[0],
 	}
-	wm.InitializeFromParams(params)
+	_ = wm.InitializeFromParams(params)
 
 	// Create a temporary file for testing
 	tempDir := t.TempDir()
 	tempFile := filepath.Join(tempDir, "test.md")
-	if err := os.WriteFile(tempFile, []byte("# Test"), 0644); err != nil {
+	if err := os.WriteFile(tempFile, []byte("# Test"), 0600); err != nil {
 		t.Fatalf("Failed to create temp file: %v", err)
 	}
 
@@ -405,7 +401,7 @@ func TestMaxFileCountLimit(t *testing.T) {
 
 	for _, fileName := range testFiles {
 		filePath := filepath.Join(tempDir, fileName)
-		if err := os.WriteFile(filePath, []byte("# "+fileName), 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte("# "+fileName), 0600); err != nil {
 			t.Fatalf("Failed to create file %s: %v", fileName, err)
 		}
 	}
@@ -414,7 +410,7 @@ func TestMaxFileCountLimit(t *testing.T) {
 	params := lsp.InitializeParams{
 		RootUri: &[]string{pathToFileURI(tempDir)}[0],
 	}
-	wm.InitializeFromParams(params)
+	_ = wm.InitializeFromParams(params)
 
 	// Discover files - should be limited by maxFileCount
 	err := wm.DiscoverMarkdownFiles()

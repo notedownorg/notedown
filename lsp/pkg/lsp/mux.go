@@ -105,17 +105,23 @@ func (m *Mux) process() error {
 			handler, ok := m.methodHandlers[method(request.Method)]
 			if !ok {
 				m.logger.Warn("method not found", "method", request.Method, "id", formatRequestID(request.ID))
-				m.write(jsonrpc.NewMethodNotFoundError(request.ID, request.Method))
+				if err := m.write(jsonrpc.NewMethodNotFoundError(request.ID, request.Method)); err != nil {
+					m.logger.Error("failed to write method not found error", "error", err)
+				}
 				return
 			}
 			result, err := handler(request.Params)
 			if err != nil {
 				m.logger.Error("method handler failed", "method", request.Method, "id", formatRequestID(request.ID), "error", err)
-				m.write(jsonrpc.NewInternalError(request.ID, err))
+				if writeErr := m.write(jsonrpc.NewInternalError(request.ID, err)); writeErr != nil {
+					m.logger.Error("failed to write internal error", "error", writeErr)
+				}
 				return
 			}
 			m.logger.Debug("method completed successfully", "method", request.Method, "id", formatRequestID(request.ID))
-			m.write(jsonrpc.NewResponse(request.ID, result))
+			if err := m.write(jsonrpc.NewResponse(request.ID, result)); err != nil {
+				m.logger.Error("failed to write response", "error", err)
+			}
 		}
 	}(request)
 	return nil

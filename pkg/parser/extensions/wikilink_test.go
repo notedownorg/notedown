@@ -218,7 +218,7 @@ func TestWikilinkParser_Parse(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var wikilinks []*WikilinkAST
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if wl, ok := node.(*WikilinkAST); ok {
 						wikilinks = append(wikilinks, wl)
@@ -309,7 +309,7 @@ func TestWikilinkIntegration(t *testing.T) {
 
 			// Walk the AST to find wikilink nodes
 			var wikilinks []*WikilinkAST
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if wl, ok := node.(*WikilinkAST); ok {
 						wikilinks = append(wikilinks, wl)
@@ -443,7 +443,7 @@ func TestWikilinkContextualParsing(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if _, ok := node.(*WikilinkAST); ok {
 						count++
@@ -554,7 +554,7 @@ func TestWikilinkEdgeCases(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.input)))
 
 			var found bool
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if _, ok := node.(*WikilinkAST); ok {
 						found = true

@@ -107,7 +107,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			configPath := filepath.Join(tempDir, tt.filename)
-			err := os.WriteFile(configPath, []byte(tt.content), 0644)
+			err := os.WriteFile(configPath, []byte(tt.content), 0600)
 			require.NoError(t, err)
 
 			result, err := LoadConfigFromFile(configPath)
@@ -130,7 +130,7 @@ func TestLoadConfig(t *testing.T) {
 	// Setup project with config
 	projectDir := filepath.Join(tempDir, "project")
 	notedownDir := filepath.Join(projectDir, ".notedown")
-	err := os.MkdirAll(notedownDir, 0755)
+	err := os.MkdirAll(notedownDir, 0750)
 	require.NoError(t, err)
 
 	configContent := `tasks:
@@ -141,11 +141,11 @@ func TestLoadConfig(t *testing.T) {
       name: "done"`
 
 	configPath := filepath.Join(notedownDir, "settings.yaml")
-	err = os.WriteFile(configPath, []byte(configContent), 0644)
+	err = os.WriteFile(configPath, []byte(configContent), 0600)
 	require.NoError(t, err)
 
 	srcDir := filepath.Join(projectDir, "src")
-	err = os.MkdirAll(srcDir, 0755)
+	err = os.MkdirAll(srcDir, 0750)
 	require.NoError(t, err)
 
 	tests := []struct {

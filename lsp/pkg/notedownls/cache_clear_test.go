@@ -34,7 +34,7 @@ func TestCacheClearDebugLogging(t *testing.T) {
 
 	for _, fileName := range testFiles {
 		filePath := filepath.Join(tempDir, fileName)
-		if err := os.WriteFile(filePath, []byte("# "+fileName), 0644); err != nil {
+		if err := os.WriteFile(filePath, []byte("# "+fileName), 0600); err != nil {
 			t.Fatalf("Failed to create file %s: %v", fileName, err)
 		}
 	}

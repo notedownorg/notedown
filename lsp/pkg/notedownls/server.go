@@ -613,7 +613,7 @@ func (s *Server) getDirectoryPathCompletions(prefix, currentDocURI string, needs
 
 		if prefix == "" || strings.HasPrefix(strings.ToLower(dirCompletion), strings.ToLower(prefix)) {
 			kind := lsp.CompletionItemKindFolder
-			detail := fmt.Sprintf("Directory path completion")
+			detail := "Directory path completion"
 			sortKey := fmt.Sprintf("3_%s", dirCompletion) // Lower priority than files and referenced targets
 
 			// Don't include closing ]] for directories - user might want to continue typing
@@ -933,40 +933,6 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 	return diagnostics
 }
 
-// handleDiagnostic handles textDocument/diagnostic pull diagnostic requests
-func (s *Server) handleDiagnostic(params json.RawMessage) (any, error) {
-	var diagParams struct {
-		TextDocument struct {
-			URI string `json:"uri"`
-		} `json:"textDocument"`
-	}
-
-	if err := json.Unmarshal(params, &diagParams); err != nil {
-		s.logger.Error("failed to unmarshal diagnostic params", "error", err)
-		return nil, err
-	}
-
-	uri := diagParams.TextDocument.URI
-	s.logger.Debug("diagnostic request received", "uri", uri)
-
-	// Get document content
-	doc, exists := s.GetDocument(uri)
-	if !exists {
-		s.logger.Debug("document not found for diagnostic request", "uri", uri)
-		// Return empty diagnostics array, not nil
-		return []lsp.Diagnostic{}, nil
-	}
-
-	// Generate diagnostics using existing logic
-	diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
-
-	// Ensure we never return nil diagnostics
-	if diagnostics == nil {
-		diagnostics = []lsp.Diagnostic{}
-	}
-
-	return diagnostics, nil
-}
 
 // positionFromOffset converts a byte offset to line and character position
 func (s *Server) positionFromOffset(content string, offset int) (int, int) {

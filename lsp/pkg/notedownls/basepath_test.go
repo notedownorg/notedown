@@ -30,7 +30,7 @@ func TestBasepathCorrectness(t *testing.T) {
 	// Create a temporary file
 	tempDir := t.TempDir()
 	testFile := filepath.Join(tempDir, "my-awesome-document.md")
-	if err := os.WriteFile(testFile, []byte("# My Awesome Document"), 0644); err != nil {
+	if err := os.WriteFile(testFile, []byte("# My Awesome Document"), 0600); err != nil {
 		t.Fatalf("Failed to create test file: %v", err)
 	}
 

@@ -144,7 +144,7 @@ func TestConfigurableTaskStates(t *testing.T) {
 					}
 					return nil
 				}))
-				walker.Walk(doc)
+				_ = walker.Walk(doc)
 
 				require.Len(t, lists, 2, "Should have parent and nested list")
 
@@ -247,7 +247,7 @@ func findFirstList(t *testing.T, doc *Document) *List {
 		}
 		return nil
 	}))
-	walker.Walk(doc)
+	_ = walker.Walk(doc)
 	require.NotNil(t, list, "Should find at least one list")
 	return list
 }

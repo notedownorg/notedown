@@ -191,7 +191,7 @@ func NewDocument(rng Range) *Document {
 // AddChild overrides BaseNode.AddChild to set the concrete Document as parent
 func (d *Document) AddChild(child Node) {
 	child.SetParent(d)
-	d.BaseNode.children = append(d.BaseNode.children, child)
+	d.children = append(d.children, child)
 }
 
 // Heading represents a heading node
@@ -325,7 +325,7 @@ func (l *List) Accept(visitor Visitor) error {
 // AddChild overrides BaseNode.AddChild to set the concrete List as parent
 func (l *List) AddChild(child Node) {
 	child.SetParent(l)
-	l.BaseNode.children = append(l.BaseNode.children, child)
+	l.children = append(l.children, child)
 }
 
 // ListItem represents a list item node
@@ -401,7 +401,7 @@ func (d *Document) FindListItemAtLine(line int) *ListItem {
 		return nil
 	}))
 
-	walker.Walk(d)
+	_ = walker.Walk(d)
 	return result
 }
 

@@ -449,9 +449,8 @@ func (s *Server) findParentAndIndex(hierarchy *ListHierarchy, targetItem *ListIt
 func (s *Server) createSwapTextEdits(item1, item2 *ListItem, renumberInfo *RenumberInfo) []lsp.TextEdit {
 	var edits []lsp.TextEdit
 
-	// Get the full text ranges for both items (including all children)
-	item1Range := s.getItemFullRange(item1)
-	item2Range := s.getItemFullRange(item2)
+	// Get the text ranges for both items, avoiding overlaps for adjacent items
+	item1Range, item2Range := s.getItemRangeForSwap(item1, item2)
 
 	// Get the full text content for both items
 	item1Text := strings.Join(item1.OriginalLines, "\n")
@@ -522,14 +521,38 @@ func (s *Server) createSwapTextEdits(item1, item2 *ListItem, renumberInfo *Renum
 // getItemFullRange returns the full range of a list item including all its children
 func (s *Server) getItemFullRange(item *ListItem) lsp.Range {
 	startLine := item.StartLine
-	endLine := item.EndLine
 
 	// Find the last line of the deepest child
-	endLine = s.findLastChildLine(item)
+	endLine := s.findLastChildLine(item)
 
 	return lsp.Range{
 		Start: lsp.Position{Line: startLine, Character: 0},
 		End:   lsp.Position{Line: endLine + 1, Character: 0}, // Include the line after for proper replacement
+	}
+}
+
+// getItemRangeForSwap returns the range for swapping, avoiding overlaps with adjacent items
+func (s *Server) getItemRangeForSwap(item1, item2 *ListItem) (lsp.Range, lsp.Range) {
+	item1Start := item1.StartLine
+	item1End := s.findLastChildLine(item1)
+	item2Start := item2.StartLine
+	item2End := s.findLastChildLine(item2)
+
+	// For adjacent items, we need to ensure ranges don't overlap
+	// The first item should end exactly where the second item starts
+	if item1End + 1 == item2Start {
+		// Items are adjacent - first item takes up to but not including item2Start
+		// second item takes from item2Start to item2End + 1
+		return lsp.Range{
+			Start: lsp.Position{Line: item1Start, Character: 0},
+			End:   lsp.Position{Line: item2Start, Character: 0}, // Don't include item2Start
+		}, lsp.Range{
+			Start: lsp.Position{Line: item2Start, Character: 0},
+			End:   lsp.Position{Line: item2End + 1, Character: 0},
+		}
+	} else {
+		// Items are not adjacent - use normal range calculation
+		return s.getItemFullRange(item1), s.getItemFullRange(item2)
 	}
 }
 

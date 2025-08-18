@@ -87,21 +87,19 @@ func (p *NotedownParser) convertAST(node ast.Node, source []byte) *Document {
 func (p *NotedownParser) convertNode(astNode ast.Node, parentNode Node, source []byte) {
 	for child := astNode.FirstChild(); child != nil; child = child.NextSibling() {
 		treeNode := p.astToTreeNode(child, source)
-		if treeNode != nil {
-			parentNode.AddChild(treeNode)
+		parentNode.AddChild(treeNode)
 
-			// Only recurse for container nodes, not leaf nodes like headings
-			switch child.(type) {
-			case *ast.Heading:
-				// Don't process heading children - text is already extracted
-			case *ast.Text:
-				// Text nodes are leaf nodes
-			case *ast.CodeSpan:
-				// Code spans are leaf nodes
-			default:
-				// For other nodes, process children
-				p.convertNode(child, treeNode, source)
-			}
+		// Only recurse for container nodes, not leaf nodes like headings
+		switch child.(type) {
+		case *ast.Heading:
+			// Don't process heading children - text is already extracted
+		case *ast.Text:
+			// Text nodes are leaf nodes
+		case *ast.CodeSpan:
+			// Code spans are leaf nodes
+		default:
+			// For other nodes, process children
+			p.convertNode(child, treeNode, source)
 		}
 	}
 }
@@ -179,8 +177,13 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 
 	// Debug: Check for heading first
 	if heading, ok := astNode.(*ast.Heading); ok {
-		text := string(heading.Text(source))
-		result := NewHeading(heading.Level, text, rng)
+		var text bytes.Buffer
+		lines := heading.Lines()
+		for i := 0; i < lines.Len(); i++ {
+			line := lines.At(i)
+			text.Write(line.Value(source))
+		}
+		result := NewHeading(heading.Level, text.String(), rng)
 		return result
 	}
 
@@ -205,7 +208,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 	case *ast.FencedCodeBlock:
 		var language string
 		if n.Info != nil {
-			info := n.Info.Text(source)
+			info := n.Info.Value(source)
 			if len(info) > 0 {
 				language = string(info)
 			}
@@ -259,8 +262,13 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 		return NewEmphasis(rng)
 
 	case *ast.CodeSpan:
-		content := string(n.Text(source))
-		return NewCode(content, rng)
+		var content bytes.Buffer
+		for child := n.FirstChild(); child != nil; child = child.NextSibling() {
+			if textNode, ok := child.(*ast.Text); ok {
+				content.Write(textNode.Segment.Value(source))
+			}
+		}
+		return NewCode(content.String(), rng)
 
 	default:
 		// Debug: Log unhandled node types
@@ -268,8 +276,13 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 		node := NewBaseNode(NodeContainer, rng)
 		// If this was supposed to be a heading, fix it
 		if heading, ok := astNode.(*ast.Heading); ok {
-			text := string(heading.Text(source))
-			result := NewHeading(heading.Level, text, rng)
+			var text bytes.Buffer
+			lines := heading.Lines()
+			for i := 0; i < lines.Len(); i++ {
+				line := lines.At(i)
+				text.Write(line.Value(source))
+			}
+			result := NewHeading(heading.Level, text.String(), rng)
 			return result
 		}
 		return node

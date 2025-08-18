@@ -123,7 +123,7 @@ func TestTaskListParser_Parse(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var checkboxes []*TaskCheckBox
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if cb, ok := node.(*TaskCheckBox); ok {
 						checkboxes = append(checkboxes, cb)
@@ -177,7 +177,7 @@ func TestTaskListParser_ParseWithExistingChildren(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if _, ok := node.(*TaskCheckBox); ok {
 						count++
@@ -232,7 +232,7 @@ func TestTaskListASTParsing(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var checkboxes []*TaskCheckBox
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if cb, ok := node.(*TaskCheckBox); ok {
 						checkboxes = append(checkboxes, cb)
@@ -303,7 +303,7 @@ func TestTaskListContextualParsing(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if _, ok := node.(*TaskCheckBox); ok {
 						count++
@@ -363,7 +363,7 @@ func TestTaskListEdgeCases(t *testing.T) {
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
-			ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
 				if entering {
 					if _, ok := node.(*TaskCheckBox); ok {
 						count++
@@ -379,21 +379,3 @@ func TestTaskListEdgeCases(t *testing.T) {
 	}
 }
 
-// Helper functions for testing
-
-func createNodeOfKind(kind ast.NodeKind) ast.Node {
-	switch kind {
-	case ast.KindDocument:
-		return ast.NewDocument()
-	case ast.KindParagraph:
-		return ast.NewParagraph()
-	case ast.KindTextBlock:
-		return ast.NewTextBlock()
-	case ast.KindListItem:
-		return ast.NewListItem(1)
-	case ast.KindList:
-		return ast.NewList('-')
-	default:
-		return ast.NewParagraph() // fallback
-	}
-}

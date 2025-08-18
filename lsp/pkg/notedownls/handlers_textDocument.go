@@ -315,7 +315,7 @@ func (s *Server) resolveTargetPath(target string) (string, string) {
 func (s *Server) createMarkdownFile(filePath, title string) error {
 	// Ensure the directory exists
 	dir := filepath.Dir(filePath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
@@ -323,7 +323,7 @@ func (s *Server) createMarkdownFile(filePath, title string) error {
 	content := fmt.Sprintf("# %s\n\n", title)
 
 	// Write the file
-	if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(filePath, []byte(content), 0600); err != nil {
 		return fmt.Errorf("failed to write file: %w", err)
 	}
 
@@ -387,7 +387,7 @@ func (s *Server) rangesOverlap(range1, range2 lsp.Range) bool {
 
 	// If they're on the same line, check character positions
 	if range1.Start.Line == range1.End.Line && range2.Start.Line == range2.End.Line && range1.Start.Line == range2.Start.Line {
-		return !(range1.End.Character < range2.Start.Character || range2.End.Character < range1.Start.Character)
+		return range1.End.Character >= range2.Start.Character && range2.End.Character >= range1.Start.Character
 	}
 
 	return true

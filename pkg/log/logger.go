@@ -25,7 +25,7 @@ type Logger struct {
 }
 
 func NewFile(filename string, level Level, format Format) (*Logger, error) {
-	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	file, err := os.OpenFile(filename, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600) // #nosec G304 - filename is provided by caller for log file creation
 	if err != nil {
 		return nil, err
 	}

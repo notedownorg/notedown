@@ -32,12 +32,12 @@ func TestFindWorkspaceRoot(t *testing.T) {
 	srcDir := filepath.Join(projectDir, "src")
 	deepDir := filepath.Join(srcDir, "deep")
 
-	err := os.MkdirAll(deepDir, 0755)
+	err := os.MkdirAll(deepDir, 0750)
 	require.NoError(t, err)
 
 	// Create .notedown directory in project root
 	notedownDir := filepath.Join(projectDir, ".notedown")
-	err = os.MkdirAll(notedownDir, 0755)
+	err = os.MkdirAll(notedownDir, 0750)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -88,12 +88,12 @@ func TestFindConfigFile(t *testing.T) {
 	// Create project with .notedown directory
 	projectDir := filepath.Join(tempDir, "project")
 	notedownDir := filepath.Join(projectDir, ".notedown")
-	err := os.MkdirAll(notedownDir, 0755)
+	err := os.MkdirAll(notedownDir, 0750)
 	require.NoError(t, err)
 
 	// Create a subdirectory
 	srcDir := filepath.Join(projectDir, "src")
-	err = os.MkdirAll(srcDir, 0755)
+	err = os.MkdirAll(srcDir, 0750)
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -106,7 +106,7 @@ func TestFindConfigFile(t *testing.T) {
 			name: "yaml file found",
 			setupFunc: func() {
 				yamlPath := filepath.Join(notedownDir, "settings.yaml")
-				err := os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0644)
+				err := os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0600)
 				require.NoError(t, err)
 			},
 			startPath:    srcDir,
@@ -117,10 +117,10 @@ func TestFindConfigFile(t *testing.T) {
 			setupFunc: func() {
 				// Remove yaml file if exists
 				yamlPath := filepath.Join(notedownDir, "settings.yaml")
-				os.Remove(yamlPath)
+				_ = os.Remove(yamlPath)
 
 				jsonPath := filepath.Join(notedownDir, "settings.json")
-				err := os.WriteFile(jsonPath, []byte(`{"tasks":{"states":[]}}`), 0644)
+				err := os.WriteFile(jsonPath, []byte(`{"tasks":{"states":[]}}`), 0600)
 				require.NoError(t, err)
 			},
 			startPath:    srcDir,
@@ -130,11 +130,11 @@ func TestFindConfigFile(t *testing.T) {
 			name: "yaml preferred over json",
 			setupFunc: func() {
 				yamlPath := filepath.Join(notedownDir, "settings.yaml")
-				err := os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0644)
+				err := os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0600)
 				require.NoError(t, err)
 
 				jsonPath := filepath.Join(notedownDir, "settings.json")
-				err = os.WriteFile(jsonPath, []byte(`{"tasks":{"states":[]}}`), 0644)
+				err = os.WriteFile(jsonPath, []byte(`{"tasks":{"states":[]}}`), 0600)
 				require.NoError(t, err)
 			},
 			startPath:    srcDir,
@@ -146,8 +146,8 @@ func TestFindConfigFile(t *testing.T) {
 				// Remove all config files
 				yamlPath := filepath.Join(notedownDir, "settings.yaml")
 				jsonPath := filepath.Join(notedownDir, "settings.json")
-				os.Remove(yamlPath)
-				os.Remove(jsonPath)
+				_ = os.Remove(yamlPath)
+				_ = os.Remove(jsonPath)
 			},
 			startPath:    srcDir,
 			expectedFile: "",
@@ -172,16 +172,16 @@ func TestHasWorkspaceConfig(t *testing.T) {
 	// Project with config
 	projectWithConfig := filepath.Join(tempDir, "with-config")
 	notedownDir := filepath.Join(projectWithConfig, ".notedown")
-	err := os.MkdirAll(notedownDir, 0755)
+	err := os.MkdirAll(notedownDir, 0750)
 	require.NoError(t, err)
 
 	yamlPath := filepath.Join(notedownDir, "settings.yaml")
-	err = os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0644)
+	err = os.WriteFile(yamlPath, []byte("tasks:\n  states: []"), 0600)
 	require.NoError(t, err)
 
 	// Project without config
 	projectWithoutConfig := filepath.Join(tempDir, "without-config")
-	err = os.MkdirAll(projectWithoutConfig, 0755)
+	err = os.MkdirAll(projectWithoutConfig, 0750)
 	require.NoError(t, err)
 
 	tests := []struct {

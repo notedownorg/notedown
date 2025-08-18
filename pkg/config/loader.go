@@ -42,7 +42,7 @@ func LoadConfig(startPath string) (*Config, error) {
 
 // LoadConfigFromFile loads configuration from a specific file path
 func LoadConfigFromFile(configPath string) (*Config, error) {
-	data, err := os.ReadFile(configPath)
+	data, err := os.ReadFile(configPath) // #nosec G304 - configPath is from trusted config discovery
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
 	}
@@ -106,7 +106,7 @@ func SaveConfig(config *Config, configPath string) error {
 
 	// Ensure the directory exists
 	dir := filepath.Dir(configPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return fmt.Errorf("failed to create config directory %s: %w", dir, err)
 	}
 
@@ -130,7 +130,7 @@ func SaveConfig(config *Config, configPath string) error {
 		return fmt.Errorf("unsupported config file format: %s (expected .yaml, .yml, or .json)", ext)
 	}
 
-	if err := os.WriteFile(configPath, data, 0644); err != nil {
+	if err := os.WriteFile(configPath, data, 0600); err != nil {
 		return fmt.Errorf("failed to write config file %s: %w", configPath, err)
 	}
 
