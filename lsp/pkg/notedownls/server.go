@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"strings"
 	"sync"
 
@@ -865,84 +864,6 @@ func (s *Server) publishDiagnostics(uri string, diagnostics []lsp.Diagnostic) {
 	}
 }
 
-// generateWikilinkDiagnostics generates diagnostics for wikilink conflicts in a document
-func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnostic {
-	var diagnostics []lsp.Diagnostic
-
-	// Regular expression to find wikilinks and their positions
-	wikilinkRegex := regexp.MustCompile(`\[\[([^\]|]+)(?:\|([^\]]+))?\]\]`)
-	matches := wikilinkRegex.FindAllStringSubmatchIndex(content, -1)
-
-	for _, match := range matches {
-		// Extract the target from the match
-		targetStart := match[2]
-		targetEnd := match[3]
-		if targetStart == -1 || targetEnd == -1 {
-			continue
-		}
-
-		target := content[targetStart:targetEnd]
-		target = strings.TrimSpace(target)
-
-		// Get target info from index
-		allTargets := s.wikilinkIndex.GetAllTargets()
-		targetInfo, exists := allTargets[target]
-
-		if exists && targetInfo.IsAmbiguous {
-			// Calculate line and character positions
-			line, char := s.positionFromOffset(content, match[0])
-			endLine, endChar := s.positionFromOffset(content, match[1])
-
-			// Create diagnostic for ambiguous wikilink
-			severity := lsp.DiagnosticSeverityWarning
-			source := "notedown"
-			message := fmt.Sprintf("Ambiguous wikilink '%s' matches multiple files: %s",
-				target, strings.Join(targetInfo.MatchingFiles, ", "))
-
-			diagnostic := lsp.Diagnostic{
-				Range: lsp.Range{
-					Start: lsp.Position{Line: line, Character: char},
-					End:   lsp.Position{Line: endLine, Character: endChar},
-				},
-				Severity: &severity,
-				Source:   &source,
-				Message:  message,
-				Code:     "ambiguous-wikilink",
-			}
-
-			// Add related information for each matching file
-			for _, filePath := range targetInfo.MatchingFiles {
-				fileURI := "file://" + filePath
-				diagnostic.RelatedInformation = append(diagnostic.RelatedInformation,
-					lsp.DiagnosticRelatedInformation{
-						Location: lsp.Location{
-							URI: fileURI,
-							Range: lsp.Range{
-								Start: lsp.Position{Line: 0, Character: 0},
-								End:   lsp.Position{Line: 0, Character: 0},
-							},
-						},
-						Message: fmt.Sprintf("Matches file: %s", filePath),
-					})
-			}
-
-			diagnostics = append(diagnostics, diagnostic)
-		}
-	}
-
-	return diagnostics
-}
-
-// positionFromOffset converts a byte offset to line and character position
-func (s *Server) positionFromOffset(content string, offset int) (int, int) {
-	lines := strings.Split(content[:offset], "\n")
-	line := len(lines) - 1
-	char := len(lines[line])
-	if line > 0 {
-		char = len(lines[line])
-	}
-	return line, char
-}
 
 // refreshAllDocumentDiagnostics regenerates and publishes diagnostics for all open documents
 func (s *Server) refreshAllDocumentDiagnostics() {
@@ -957,8 +878,12 @@ func (s *Server) refreshAllDocumentDiagnostics() {
 		s.wikilinkIndex.RefreshDocumentWikilinks(doc.Content, uri, workspaceFiles)
 
 		// Generate and publish updated diagnostics
-		diagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
-		s.publishDiagnostics(uri, diagnostics)
+		wikilinkDiagnostics := s.generateWikilinkDiagnostics(uri, doc.Content)
+		taskDiagnostics := s.generateTaskDiagnostics(uri, doc.Content)
+
+		// Combine all diagnostics
+		allDiagnostics := append(wikilinkDiagnostics, taskDiagnostics...)
+		s.publishDiagnostics(uri, allDiagnostics)
 	}
 
 	s.logger.Debug("refreshed diagnostics for all open documents", "count", len(s.documents))
