@@ -23,7 +23,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 COMMIT := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-all: format mod test dirty
+check: clean format mod lint test
 
 hygiene: format mod
 
@@ -33,11 +33,14 @@ dirty:
 mod:
 	go mod tidy
 
-format:
+format: licenser
 	gofmt -w .
 	stylua notedown-nvim/
 
-test: test-lsp test-nvim test-integration
+lint:
+	golangci-lint run
+
+test: test-lsp test-nvim
 
 test-lsp:
 	go test ./...

@@ -1,24 +1,24 @@
 package extensions
 
 import (
+	"github.com/notedownorg/notedown/pkg/config"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/parser"
-	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/text"
 	"github.com/yuin/goldmark/util"
 )
 
-// TaskCheckBox represents a task list checkbox node ala GFM
+// TaskCheckBox represents a task list checkbox node with configurable states
 type TaskCheckBox struct {
 	ast.BaseInline
-	IsChecked bool
+	State string // The actual state value (e.g., " ", "x", "wip", "in-progress")
 }
 
-// NewTaskCheckBox creates a new TaskCheckBox node
-func NewTaskCheckBox(checked bool) *TaskCheckBox {
+// NewTaskCheckBox creates a new TaskCheckBox node with a state string
+func NewTaskCheckBox(state string) *TaskCheckBox {
 	return &TaskCheckBox{
-		IsChecked: checked,
+		State: state,
 	}
 }
 
@@ -35,12 +35,16 @@ func (n *TaskCheckBox) Kind() ast.NodeKind {
 	return KindTaskCheckBox
 }
 
-// taskListParser is a parser for task list items
-type taskListParser struct{}
+// taskListParser is a parser for task list items with configurable states
+type taskListParser struct {
+	config *config.Config
+}
 
-// NewTaskListParser creates a new task list parser
-func NewTaskListParser() parser.InlineParser {
-	return &taskListParser{}
+// NewTaskListParser creates a new task list parser with configuration
+func NewTaskListParser(cfg *config.Config) parser.InlineParser {
+	return &taskListParser{
+		config: cfg,
+	}
 }
 
 // Trigger implements parser.InlineParser.Trigger
@@ -70,78 +74,76 @@ func (s *taskListParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 		return nil
 	}
 
-	// Look for [x], [ ], or [X] pattern
+	// Must start with [
 	if line[0] != '[' {
 		return nil
 	}
 
-	var checked bool
-	if len(line) >= 3 && line[2] == ']' {
-		switch line[1] {
-		case ' ':
-			checked = false
-		case 'x', 'X':
-			checked = true
-		default:
-			return nil
+	// Find the closing ]
+	closingBracket := -1
+	for i := 1; i < len(line); i++ {
+		if line[i] == ']' {
+			closingBracket = i
+			break
 		}
-	} else {
+	}
+
+	if closingBracket == -1 {
 		return nil
 	}
 
-	// Consume the checkbox
-	block.Advance(3)
+	// Extract the content between brackets
+	stateValue := string(line[1:closingBracket])
+
+	// Check if this state value is valid according to configuration
+	if !s.isValidTaskState(stateValue) {
+		return nil
+	}
+
+	// Consume the entire checkbox [state]
+	block.Advance(closingBracket + 1)
 
 	// Skip optional space after checkbox
-	if len(line) > 3 && line[3] == ' ' {
+	if closingBracket+1 < len(line) && line[closingBracket+1] == ' ' {
 		block.Advance(1)
 	}
 
-	return NewTaskCheckBox(checked)
+	return NewTaskCheckBox(stateValue)
 }
 
-// taskListHTMLRenderer is a renderer for task list checkboxes
-type taskListHTMLRenderer struct{}
-
-// NewTaskListHTMLRenderer creates a new task list HTML renderer
-func NewTaskListHTMLRenderer() renderer.NodeRenderer {
-	return &taskListHTMLRenderer{}
-}
-
-// RegisterFuncs implements renderer.NodeRenderer.RegisterFuncs
-func (r *taskListHTMLRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(KindTaskCheckBox, r.renderTaskCheckBox)
-}
-
-func (r *taskListHTMLRenderer) renderTaskCheckBox(w util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
-	if !entering {
-		return ast.WalkContinue, nil
+// isValidTaskState checks if the given state value is valid according to configuration
+func (s *taskListParser) isValidTaskState(stateValue string) bool {
+	// Use default configuration if none provided
+	cfg := s.config
+	if cfg == nil {
+		cfg = config.GetDefaultConfig()
 	}
 
-	checkbox := n.(*TaskCheckBox)
-	if checkbox.IsChecked {
-		_, _ = w.WriteString(`<input checked="" disabled="" type="checkbox">`)
-	} else {
-		_, _ = w.WriteString(`<input disabled="" type="checkbox">`)
+	// Check each configured task state (including aliases)
+	for _, state := range cfg.Tasks.States {
+		if state.HasValue(stateValue) {
+			return true
+		}
 	}
 
-	return ast.WalkContinue, nil
+	return false
 }
 
-// TaskListExtension is an extension that adds support for task lists
-type TaskListExtension struct{}
+// TaskListExtension is an extension that adds support for configurable task lists
+type TaskListExtension struct {
+	config *config.Config
+}
 
-// NewTaskListExtension creates a new task list extension
-func NewTaskListExtension() goldmark.Extender {
-	return &TaskListExtension{}
+// NewTaskListExtension creates a new task list extension with configuration
+func NewTaskListExtension(cfg *config.Config) goldmark.Extender {
+	return &TaskListExtension{
+		config: cfg,
+	}
 }
 
 // Extend implements goldmark.Extender.Extend
 func (e *TaskListExtension) Extend(m goldmark.Markdown) {
 	m.Parser().AddOptions(parser.WithInlineParsers(
-		util.Prioritized(NewTaskListParser(), 0),
-	))
-	m.Renderer().AddOptions(renderer.WithNodeRenderers(
-		util.Prioritized(NewTaskListHTMLRenderer(), 500),
+		util.Prioritized(NewTaskListParser(e.config), 0),
 	))
 }

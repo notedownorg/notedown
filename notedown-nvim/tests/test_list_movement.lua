@@ -124,7 +124,7 @@ T["tasks - cursor bug reproduction"] = function()
 		command = "NotedownMoveDown",
 		expected_cursor = { 9, 6 }, -- Should be on line 9 at "]" of moved "Completed subtask" (cursor jumps 6 lines)
 		input_file = "cursor_bug_input.md",
-		expected_file = "cursor_bug_expected.md"
+		expected_file = "cursor_bug_expected.md",
 	})
 end
 

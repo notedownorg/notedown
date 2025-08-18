@@ -30,27 +30,27 @@ T["config defaults"] = function()
 	local server_name = child.lua_get('require("notedown.config").defaults.server.name')
 	MiniTest.expect.equality(server_name, "notedown")
 
-	local parser_mode = child.lua_get('require("notedown.config").defaults.parser.mode')
-	MiniTest.expect.equality(parser_mode, "auto")
+	-- Test keybindings defaults
+	local move_up_key = child.lua_get('require("notedown.config").defaults.keybindings.move_list_item_up')
+	MiniTest.expect.equality(move_up_key, "mk")
 
 	child.stop()
 end
 
 T["workspace detection"] = MiniTest.new_set()
 
-T["workspace detection"]["detects configured workspace"] = function()
+T["workspace detection"]["detects .notedown directory"] = function()
 	local workspace_path = utils.create_test_workspace("/tmp/test-notedown-workspace")
 	local child = utils.new_child_neovim()
+
+	-- Create .notedown directory to mark this as a notedown workspace
+	child.lua('vim.fn.mkdir("' .. workspace_path .. '/.notedown", "p")')
 
 	-- Change to the test workspace
 	child.lua('vim.fn.chdir("' .. workspace_path .. '")')
 
-	-- Set up notedown with our test workspace
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "auto", notedown_workspaces = { "'
-			.. workspace_path
-			.. '" } } })'
-	)
+	-- Set up notedown (automatic detection, no configuration needed)
+	child.lua('require("notedown").setup({ server = { cmd = { "echo", "mock-server" } } })')
 
 	-- Create a markdown buffer
 	child.lua('vim.cmd("edit README.md")')
@@ -60,6 +60,7 @@ T["workspace detection"]["detects configured workspace"] = function()
 
 	MiniTest.expect.equality(status.is_notedown_workspace, true)
 	MiniTest.expect.equality(status.should_use_notedown, true)
+	MiniTest.expect.equality(status.auto_detected, true)
 	-- Check that workspace_path contains our test path (handle macOS /private/tmp vs /tmp)
 	local expected_path = workspace_path:gsub("^/tmp", "/private/tmp")
 	local actual_path = status.workspace_path or ""
@@ -70,17 +71,15 @@ T["workspace detection"]["detects configured workspace"] = function()
 	utils.cleanup_test_workspace(workspace_path)
 end
 
-T["workspace detection"]["ignores non-configured workspace"] = function()
+T["workspace detection"]["ignores directory without .notedown"] = function()
 	local workspace_path = utils.create_test_workspace("/tmp/test-other-workspace")
 	local child = utils.new_child_neovim()
 
-	-- Change to the test workspace
+	-- Change to the test workspace (no .notedown directory created)
 	child.lua('vim.fn.chdir("' .. workspace_path .. '")')
 
-	-- Set up notedown with different workspace
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "auto", notedown_workspaces = { "/tmp/different-workspace" } } })'
-	)
+	-- Set up notedown (automatic detection)
+	child.lua('require("notedown").setup({ server = { cmd = { "echo", "mock-server" } } })')
 
 	-- Create a markdown buffer
 	child.lua('vim.cmd("edit README.md")')
@@ -90,76 +89,46 @@ T["workspace detection"]["ignores non-configured workspace"] = function()
 
 	MiniTest.expect.equality(status.is_notedown_workspace, false)
 	MiniTest.expect.equality(status.should_use_notedown, false)
+	MiniTest.expect.equality(status.auto_detected, false)
 
 	child.stop()
 	utils.cleanup_test_workspace(workspace_path)
 end
 
-T["parser mode"] = MiniTest.new_set()
-
-T["parser mode"]["respects explicit notedown mode"] = function()
+T["workspace detection"]["finds .notedown in parent directory"] = function()
+	local workspace_path = utils.create_test_workspace("/tmp/test-notedown-parent")
 	local child = utils.new_child_neovim()
 
-	-- Set up with explicit notedown mode
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "notedown" } })'
-	)
+	-- Create .notedown directory in workspace root
+	child.lua('vim.fn.mkdir("' .. workspace_path .. '/.notedown", "p")')
 
-	-- Create a markdown buffer
-	child.lua('vim.cmd("edit test.md")')
+	-- Create nested directory structure
+	local nested_path = workspace_path .. "/docs/nested"
+	child.lua('vim.fn.mkdir("' .. nested_path .. '", "p")')
+
+	-- Change to the nested directory
+	child.lua('vim.fn.chdir("' .. nested_path .. '")')
+
+	-- Set up notedown (automatic detection)
+	child.lua('require("notedown").setup({ server = { cmd = { "echo", "mock-server" } } })')
+
+	-- Create a markdown buffer in the nested directory
+	child.lua('vim.cmd("edit nested-doc.md")')
 
 	-- Get workspace status
 	local status = child.lua_get('require("notedown").get_workspace_status()')
 
+	MiniTest.expect.equality(status.is_notedown_workspace, true)
 	MiniTest.expect.equality(status.should_use_notedown, true)
-	MiniTest.expect.equality(status.parser_mode, "notedown")
+	MiniTest.expect.equality(status.auto_detected, true)
+	-- Should find the workspace root, not the nested directory
+	local expected_path = workspace_path:gsub("^/tmp", "/private/tmp")
+	local actual_path = status.workspace_path or ""
+	local path_matches = (actual_path == workspace_path) or (actual_path == expected_path)
+	MiniTest.expect.equality(path_matches, true)
 
 	child.stop()
-end
-
-T["parser mode"]["respects explicit markdown mode"] = function()
-	local child = utils.new_child_neovim()
-
-	-- Set up with explicit markdown mode
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "markdown" } })'
-	)
-
-	-- Create a markdown buffer
-	child.lua('vim.cmd("edit test.md")')
-
-	-- Get workspace status
-	local status = child.lua_get('require("notedown").get_workspace_status()')
-
-	MiniTest.expect.equality(status.should_use_notedown, false)
-	MiniTest.expect.equality(status.parser_mode, "markdown")
-
-	child.stop()
-end
-
-T["workspace path normalization"] = function()
-	local child = utils.new_child_neovim()
-
-	-- Test tilde expansion and path resolution
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "auto", notedown_workspaces = { "~/test-workspace", "/tmp/absolute-workspace" } } })'
-	)
-
-	-- Check that workspaces were expanded
-	local expanded_workspaces = child.lua_get('require("notedown").get_workspace_status().configured_workspaces')
-
-	-- Should have expanded tilde
-	local found_home = false
-	for _, workspace in ipairs(expanded_workspaces) do
-		if workspace:match("^/.*test%-workspace") then
-			found_home = true
-			break
-		end
-	end
-
-	MiniTest.expect.equality(found_home, true)
-
-	child.stop()
+	utils.cleanup_test_workspace(workspace_path)
 end
 
 return T

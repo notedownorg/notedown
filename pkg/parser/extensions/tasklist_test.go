@@ -1,40 +1,39 @@
 package extensions
 
 import (
-	"bytes"
 	"testing"
 
+	"github.com/notedownorg/notedown/pkg/config"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/text"
 )
 
 func TestTaskCheckBox_NewTaskCheckBox(t *testing.T) {
 	tests := []struct {
-		name    string
-		checked bool
+		name  string
+		state string
 	}{
 		{
-			name:    "unchecked checkbox",
-			checked: false,
+			name:  "unchecked checkbox",
+			state: " ",
 		},
 		{
-			name:    "checked checkbox",
-			checked: true,
+			name:  "checked checkbox",
+			state: "x",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			node := NewTaskCheckBox(tt.checked)
+			node := NewTaskCheckBox(tt.state)
 
 			if node == nil {
 				t.Fatal("Expected node to be created, got nil")
 			}
 
-			if node.IsChecked != tt.checked {
-				t.Errorf("Expected IsChecked = %v, got %v", tt.checked, node.IsChecked)
+			if node.State != tt.state {
+				t.Errorf("Expected State = %q, got %q", tt.state, node.State)
 			}
 
 			if node.Kind() != KindTaskCheckBox {
@@ -45,7 +44,7 @@ func TestTaskCheckBox_NewTaskCheckBox(t *testing.T) {
 }
 
 func TestTaskCheckBox_Dump(t *testing.T) {
-	node := NewTaskCheckBox(true)
+	node := NewTaskCheckBox("x")
 
 	// Test that Dump doesn't panic - we can't easily test the output
 	// since it writes to internal goldmark structures
@@ -66,7 +65,7 @@ func TestKindTaskCheckBox(t *testing.T) {
 }
 
 func TestTaskListParser_Trigger(t *testing.T) {
-	parser := NewTaskListParser()
+	parser := NewTaskListParser(config.GetDefaultConfig())
 	triggers := parser.Trigger()
 
 	if len(triggers) != 1 || triggers[0] != '[' {
@@ -106,7 +105,7 @@ func TestTaskListParser_Parse(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension()))
+			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension(config.GetDefaultConfig())))
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var checkboxes []*TaskCheckBox
@@ -125,8 +124,9 @@ func TestTaskListParser_Parse(t *testing.T) {
 			}
 
 			for i, cb := range checkboxes {
-				if cb.IsChecked != tt.wantChecked[i] {
-					t.Errorf("Checkbox %d: expected IsChecked = %v, got %v", i, tt.wantChecked[i], cb.IsChecked)
+				isChecked := cb.State != " " && cb.State != ""
+				if isChecked != tt.wantChecked[i] {
+					t.Errorf("Checkbox %d: expected checked = %v, got %v (state: %q)", i, tt.wantChecked[i], isChecked, cb.State)
 				}
 			}
 		})
@@ -159,7 +159,7 @@ func TestTaskListParser_ParseWithExistingChildren(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension()))
+			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension(config.GetDefaultConfig())))
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
@@ -174,141 +174,6 @@ func TestTaskListParser_ParseWithExistingChildren(t *testing.T) {
 
 			if count != tt.wantCount {
 				t.Errorf("Expected %d checkboxes, got %d", tt.wantCount, count)
-			}
-		})
-	}
-}
-
-func TestTaskListHTMLRenderer_RegisterFuncs(t *testing.T) {
-	renderer := NewTaskListHTMLRenderer()
-
-	// Create a mock registerer to test function registration
-	registered := make(map[ast.NodeKind]bool)
-	mockReg := &mockRegisterer{registered: registered}
-
-	renderer.RegisterFuncs(mockReg)
-
-	if !registered[KindTaskCheckBox] {
-		t.Error("Expected TaskCheckBox renderer to be registered")
-	}
-}
-
-func TestTaskListHTMLRenderer_RenderTaskCheckBox(t *testing.T) {
-	tests := []struct {
-		name     string
-		checked  bool
-		wantHTML string
-	}{
-		{
-			name:     "checked checkbox",
-			checked:  true,
-			wantHTML: `<input checked="" disabled="" type="checkbox">`,
-		},
-		{
-			name:     "unchecked checkbox",
-			checked:  false,
-			wantHTML: `<input disabled="" type="checkbox">`,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			renderer := NewTaskListHTMLRenderer()
-			node := NewTaskCheckBox(tt.checked)
-			buf := &bytes.Buffer{}
-			writer := &testBufWriter{buf}
-
-			r := renderer.(*taskListHTMLRenderer)
-			status, err := r.renderTaskCheckBox(writer, []byte{}, node, true)
-			if err != nil {
-				t.Errorf("Unexpected error: %v", err)
-			}
-
-			if status != ast.WalkContinue {
-				t.Errorf("Expected WalkContinue, got %v", status)
-			}
-
-			html := buf.String()
-			if html != tt.wantHTML {
-				t.Errorf("Expected HTML %q, got %q", tt.wantHTML, html)
-			}
-		})
-	}
-}
-
-func TestTaskListHTMLRenderer_RenderTaskCheckBoxNotEntering(t *testing.T) {
-	// Test that renderer does nothing when not entering
-	renderer := NewTaskListHTMLRenderer()
-	node := NewTaskCheckBox(true)
-	buf := &bytes.Buffer{}
-	writer := &testBufWriter{buf}
-
-	r := renderer.(*taskListHTMLRenderer)
-	status, err := r.renderTaskCheckBox(writer, []byte{}, node, false)
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-
-	if status != ast.WalkContinue {
-		t.Errorf("Expected WalkContinue, got %v", status)
-	}
-
-	html := buf.String()
-	if html != "" {
-		t.Errorf("Expected empty output when not entering, got %q", html)
-	}
-}
-
-func TestTaskListIntegration(t *testing.T) {
-	tests := []struct {
-		name     string
-		markdown string
-		wantHTML string
-	}{
-		{
-			name:     "simple task list",
-			markdown: "- [x] Completed task\n- [ ] Incomplete task",
-			wantHTML: `<ul>
-<li><input checked="" disabled="" type="checkbox">Completed task</li>
-<li><input disabled="" type="checkbox">Incomplete task</li>
-</ul>
-`,
-		},
-		{
-			name:     "mixed task and regular list",
-			markdown: "- [x] Task item\n- Regular item\n- [ ] Another task",
-			wantHTML: `<ul>
-<li><input checked="" disabled="" type="checkbox">Task item</li>
-<li>Regular item</li>
-<li><input disabled="" type="checkbox">Another task</li>
-</ul>
-`,
-		},
-		{
-			name:     "ordered task list",
-			markdown: "1. [x] First task\n2. [ ] Second task",
-			wantHTML: `<ol>
-<li><input checked="" disabled="" type="checkbox">First task</li>
-<li><input disabled="" type="checkbox">Second task</li>
-</ol>
-`,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(
-				goldmark.WithExtensions(NewTaskListExtension()),
-			)
-
-			var buf bytes.Buffer
-			if err := md.Convert([]byte(tt.markdown), &buf); err != nil {
-				t.Fatalf("Failed to convert markdown: %v", err)
-			}
-
-			html := buf.String()
-			if html != tt.wantHTML {
-				t.Errorf("Expected HTML:\n%s\nGot HTML:\n%s", tt.wantHTML, html)
 			}
 		})
 	}
@@ -349,7 +214,7 @@ func TestTaskListASTParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension()))
+			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension(config.GetDefaultConfig())))
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var checkboxes []*TaskCheckBox
@@ -368,8 +233,11 @@ func TestTaskListASTParsing(t *testing.T) {
 			}
 
 			for i, cb := range checkboxes {
-				if i < len(tt.wantStates) && cb.IsChecked != tt.wantStates[i] {
-					t.Errorf("Checkbox %d: expected IsChecked = %v, got %v", i, tt.wantStates[i], cb.IsChecked)
+				if i < len(tt.wantStates) {
+					isChecked := cb.State != " " && cb.State != ""
+					if isChecked != tt.wantStates[i] {
+						t.Errorf("Checkbox %d: expected checked = %v, got %v (state: %q)", i, tt.wantStates[i], isChecked, cb.State)
+					}
 				}
 			}
 		})
@@ -417,7 +285,7 @@ func TestTaskListContextualParsing(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension()))
+			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension(config.GetDefaultConfig())))
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
@@ -477,7 +345,7 @@ func TestTaskListEdgeCases(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension()))
+			md := goldmark.New(goldmark.WithExtensions(NewTaskListExtension(config.GetDefaultConfig())))
 			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
 
 			var count int
@@ -514,42 +382,4 @@ func createNodeOfKind(kind ast.NodeKind) ast.Node {
 	default:
 		return ast.NewParagraph() // fallback
 	}
-}
-
-// mockRegisterer implements renderer.NodeRendererFuncRegisterer for testing
-type mockRegisterer struct {
-	registered map[ast.NodeKind]bool
-}
-
-func (r *mockRegisterer) Register(kind ast.NodeKind, fn renderer.NodeRendererFunc) {
-	r.registered[kind] = true
-}
-
-// testBufWriter implements util.BufWriter for testing
-type testBufWriter struct {
-	*bytes.Buffer
-}
-
-func (w *testBufWriter) Buffered() int {
-	return w.Len()
-}
-
-func (w *testBufWriter) Available() int {
-	return 0 // Not used in our tests
-}
-
-func (w *testBufWriter) WriteString(s string) (int, error) {
-	return w.Buffer.WriteString(s)
-}
-
-func (w *testBufWriter) WriteByte(c byte) error {
-	return w.Buffer.WriteByte(c)
-}
-
-func (w *testBufWriter) WriteRune(r rune) (int, error) {
-	return w.Buffer.WriteRune(r)
-}
-
-func (w *testBufWriter) Flush() error {
-	return nil // Buffer doesn't need flushing
 }

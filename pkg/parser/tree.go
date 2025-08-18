@@ -317,16 +317,16 @@ func (l *List) AddChild(child Node) {
 // ListItem represents a list item node
 type ListItem struct {
 	*BaseNode
-	TaskList bool
-	Checked  bool
+	TaskList  bool
+	TaskState string // The actual task state value (e.g., " ", "x", "wip", "in-progress")
 }
 
 // NewListItem creates a new list item node
-func NewListItem(taskList, checked bool, rng Range) *ListItem {
+func NewListItem(taskList bool, taskState string, rng Range) *ListItem {
 	return &ListItem{
-		BaseNode: NewBaseNode(NodeListItem, rng),
-		TaskList: taskList,
-		Checked:  checked,
+		BaseNode:  NewBaseNode(NodeListItem, rng),
+		TaskList:  taskList,
+		TaskState: taskState,
 	}
 }
 

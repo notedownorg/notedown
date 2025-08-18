@@ -4,23 +4,38 @@ local config = require("notedown.config")
 -- Store the final config for use in other functions
 local final_config = {}
 
--- Check if current working directory matches any configured notedown workspace
-local function is_notedown_workspace(file_path)
-	if not final_config.parser or not final_config.parser.notedown_workspaces then
-		return false
-	end
+-- Find the .notedown directory by walking up the directory tree from the given path
+local function find_notedown_workspace(start_path)
+	-- Convert to absolute path to ensure consistent behavior
+	local current_path = vim.fn.resolve(vim.fn.fnamemodify(start_path, ":p:h"))
 
-	local cwd = vim.fn.resolve(vim.fn.getcwd())
+	-- Walk up the directory tree
+	while current_path do
+		local notedown_dir = current_path .. "/.notedown"
 
-	for _, workspace in ipairs(final_config.parser.notedown_workspaces) do
-		-- Workspace paths are already expanded and resolved during setup
-		-- Check if current working directory exactly matches workspace path
-		if cwd == workspace then
-			return true, workspace
+		-- Check if .notedown directory exists
+		if vim.fn.isdirectory(notedown_dir) == 1 then
+			return current_path
 		end
+
+		-- Move to parent directory
+		local parent_path = vim.fn.fnamemodify(current_path, ":h")
+
+		-- If we've reached the root and haven't found .notedown, stop
+		if parent_path == current_path then
+			break
+		end
+
+		current_path = parent_path
 	end
 
-	return false
+	return nil
+end
+
+-- Check if the given file is in a notedown workspace
+local function is_notedown_workspace(file_path)
+	local workspace_root = find_notedown_workspace(file_path or vim.fn.getcwd())
+	return workspace_root ~= nil, workspace_root
 end
 
 -- Determine if notedown parser should be used for a buffer
@@ -32,19 +47,8 @@ local function should_use_notedown_parser(bufnr)
 		return false
 	end
 
-	-- Respect explicit user preference
-	if final_config.parser.mode == "notedown" then
-		return true
-	elseif final_config.parser.mode == "markdown" then
-		return false
-	end
-
-	-- Auto mode: use workspace detection
-	if final_config.parser.mode == "auto" then
-		return is_notedown_workspace(file_path)
-	end
-
-	return false
+	-- Always use workspace detection (automatic mode)
+	return is_notedown_workspace(file_path)
 end
 
 -- Get current workspace status for a buffer
@@ -52,7 +56,7 @@ function M.get_workspace_status(bufnr)
 	bufnr = bufnr or vim.api.nvim_get_current_buf()
 	local file_path = vim.api.nvim_buf_get_name(bufnr)
 
-	local is_workspace, workspace_path = is_notedown_workspace()
+	local is_workspace, workspace_path = is_notedown_workspace(file_path)
 	local should_use_notedown = should_use_notedown_parser(bufnr)
 
 	return {
@@ -60,9 +64,9 @@ function M.get_workspace_status(bufnr)
 		cwd = vim.fn.getcwd(),
 		is_notedown_workspace = is_workspace,
 		workspace_path = workspace_path,
-		parser_mode = final_config.parser.mode,
 		should_use_notedown = should_use_notedown,
-		configured_workspaces = final_config.parser.notedown_workspaces,
+		auto_detected = is_workspace, -- Indicates automatic .notedown detection
+		parser_mode = is_workspace and "notedown" or "markdown"
 	}
 end
 
@@ -70,63 +74,6 @@ function M.setup(opts)
 	opts = opts or {}
 
 	final_config = vim.tbl_deep_extend("force", config.defaults, opts)
-
-	-- Expand and normalize workspace paths during setup
-	if final_config.parser and final_config.parser.notedown_workspaces then
-		local expanded_workspaces = {}
-		for _, workspace in ipairs(final_config.parser.notedown_workspaces) do
-			-- Expand ~ and resolve the path
-			local expanded = vim.fn.expand(workspace)
-			local resolved = vim.fn.resolve(expanded)
-			table.insert(expanded_workspaces, resolved)
-		end
-
-		-- Filter out child directories and notify about ignored paths
-		local filtered_workspaces = {}
-		local ignored_paths = {}
-
-		for _, workspace in ipairs(expanded_workspaces) do
-			local is_child = false
-
-			-- Check if this workspace is a child of any existing workspace
-			for _, existing in ipairs(filtered_workspaces) do
-				if workspace:find("^" .. vim.pesc(existing) .. "/") then
-					is_child = true
-					table.insert(ignored_paths, workspace)
-					break
-				end
-			end
-
-			if not is_child then
-				-- Check if any existing workspaces are children of this one
-				local children_to_remove = {}
-				for i, existing in ipairs(filtered_workspaces) do
-					if existing:find("^" .. vim.pesc(workspace) .. "/") then
-						table.insert(children_to_remove, i)
-						table.insert(ignored_paths, existing)
-					end
-				end
-
-				-- Remove children (in reverse order to maintain indices)
-				for i = #children_to_remove, 1, -1 do
-					table.remove(filtered_workspaces, children_to_remove[i])
-				end
-
-				table.insert(filtered_workspaces, workspace)
-			end
-		end
-
-		-- Notify about ignored paths
-		if #ignored_paths > 0 then
-			vim.notify(
-				"Notedown: Ignored workspace paths (child directories of other workspaces):\n  "
-					.. table.concat(ignored_paths, "\n  "),
-				vim.log.levels.WARN
-			)
-		end
-
-		final_config.parser.notedown_workspaces = filtered_workspaces
-	end
 
 	-- Set up parser selection based on workspace detection
 	vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
@@ -147,17 +94,22 @@ function M.setup(opts)
 	vim.api.nvim_create_autocmd("FileType", {
 		pattern = { "markdown", "notedown" },
 		callback = function()
-			-- Start LSP
-			local root_dir = final_config.server.root_dir()
+			-- Start LSP with intelligent root directory detection
+			local bufnr = vim.api.nvim_get_current_buf()
+			local file_path = vim.api.nvim_buf_get_name(bufnr)
+
+			-- Try to find .notedown workspace, fallback to cwd
+			local workspace_root = find_notedown_workspace(file_path) or final_config.server.root_dir()
+
 			vim.lsp.start({
 				name = final_config.server.name,
 				cmd = final_config.server.cmd,
-				root_dir = root_dir,
+				root_dir = workspace_root,
 				capabilities = final_config.server.capabilities,
 				workspace_folders = {
 					{
-						uri = vim.uri_from_fname(root_dir),
-						name = vim.fs.basename(root_dir),
+						uri = vim.uri_from_fname(workspace_root),
+						name = vim.fs.basename(workspace_root),
 					},
 				},
 			})
@@ -199,7 +151,6 @@ end
 local function calculate_new_cursor_position(text_edits, original_line, original_char, move_up, original_content)
 	-- Strategy: Find which edit places our original content at a new location
 	-- We need to match content, not just line numbers
-	
 
 	for i, edit in ipairs(text_edits) do
 		local start_line = edit.range.start.line + 1 -- Convert to 1-based
@@ -217,7 +168,7 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 			-- The issue is that edits can change line numbers, so we need to calculate
 			-- the final position after considering the cumulative effect
 			local cumulative_line_offset = 0
-			
+
 			-- Calculate how many lines were added/removed by previous edits
 			for prev_i = 1, i - 1 do
 				local prev_edit = text_edits[prev_i]
@@ -225,11 +176,11 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 				local prev_lines_added = #vim.split(prev_edit.newText, "\n") - 1
 				cumulative_line_offset = cumulative_line_offset + (prev_lines_added - prev_lines_removed)
 			end
-			
+
 			-- Find which line within this edit contains our text
 			local lines_in_edit = vim.split(edit.newText, "\n")
 			local target_line_offset = 0
-			
+
 			for j, line in ipairs(lines_in_edit) do
 				local line_without_markers = line:gsub("^%s*[-*+] ", ""):gsub("^%s*%d+%. ", "")
 				if line_without_markers:find(original_text, 1, true) then
@@ -237,9 +188,8 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 					break
 				end
 			end
-			
+
 			local new_line = start_line + cumulative_line_offset + target_line_offset
-			
 
 			-- Validate direction
 			local valid_direction = true
@@ -272,11 +222,15 @@ local function calculate_new_cursor_position(text_edits, original_line, original
 						new_char = new_text_start + offset_in_text
 					end
 				end
-				
+
 				-- Special handling for task lists - position cursor at the checkbox for completed tasks
 				local checkbox_pattern = "^%s*%- %[.%] "
 				local completed_task_pattern = "^%s*%- %[x%] "
-				if original_content:match(completed_task_pattern) and new_line_content and new_line_content:match(completed_task_pattern) then
+				if
+					original_content:match(completed_task_pattern)
+					and new_line_content
+					and new_line_content:match(completed_task_pattern)
+				then
 					-- Position cursor at the closing bracket of the checkbox for completed tasks only
 					local checkbox_pos = new_line_content:find("%]")
 					if checkbox_pos then

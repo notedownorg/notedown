@@ -46,12 +46,10 @@ vim.api.nvim_create_user_command("NotedownWorkspaceStatus", function()
 		[[
 Notedown Workspace Status:
   File: %s
-  Parser Mode: %s
   In Notedown Workspace: %s
   Should Use Notedown Parser: %s
   ]],
 		status.file_path or "No file",
-		status.parser_mode,
 		status.is_notedown_workspace and "Yes" or "No",
 		status.should_use_notedown and "Yes" or "No"
 	)
@@ -60,13 +58,10 @@ Notedown Workspace Status:
 		message = message .. string.format("  Matched Workspace: %s\n", status.workspace_path)
 	end
 
-	if status.configured_workspaces and #status.configured_workspaces > 0 then
-		message = message .. "  Configured Workspaces:\n"
-		for _, workspace in ipairs(status.configured_workspaces) do
-			message = message .. string.format("    - %s\n", workspace)
-		end
+	if status.auto_detected then
+		message = message .. "  Detection Method: Auto-detected (.notedown directory)\n"
 	else
-		message = message .. "  No workspaces configured\n"
+		message = message .. "  Detection Method: No .notedown directory found\n"
 	end
 
 	print(message)

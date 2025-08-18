@@ -10,6 +10,7 @@ import (
 
 	"github.com/notedownorg/notedown/lsp/pkg/lsp"
 	"github.com/notedownorg/notedown/lsp/pkg/notedownls/indexes"
+	"github.com/notedownorg/notedown/pkg/config"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 
@@ -197,7 +198,7 @@ func (s *Server) GetWorkspaceRoots() []WorkspaceRoot {
 	return s.workspace.GetWorkspaceRoots()
 }
 
-// handleCompletion provides wikilink completion suggestions
+// handleCompletion provides wikilink and task state completion suggestions
 func (s *Server) handleCompletion(params json.RawMessage) (any, error) {
 	var completionParams lsp.CompletionParams
 	if err := json.Unmarshal(params, &completionParams); err != nil {
@@ -217,10 +218,31 @@ func (s *Server) handleCompletion(params json.RawMessage) (any, error) {
 		return &lsp.CompletionList{IsIncomplete: false, Items: []lsp.CompletionItem{}}, nil
 	}
 
+	// Check if we're in a task state context first
+	taskContext := s.getTaskContext(doc, completionParams.Position)
+	if taskContext != nil {
+		s.logger.Debug("detected task context", "prefix", taskContext.Prefix, "isComplete", taskContext.IsComplete)
+
+		// Load workspace configuration for task states
+		cfg, err := s.loadWorkspaceConfig()
+		if err != nil {
+			s.logger.Error("failed to load workspace config for task completion", "error", err)
+			return &lsp.CompletionList{IsIncomplete: false, Items: []lsp.CompletionItem{}}, nil
+		}
+
+		// Get task state completion items
+		items := s.getTaskStateCompletions(taskContext.Prefix, cfg, !taskContext.IsComplete)
+		s.logger.Debug("generated task state completion items", "count", len(items))
+		return &lsp.CompletionList{
+			IsIncomplete: false,
+			Items:        items,
+		}, nil
+	}
+
 	// Check if we're in a wikilink context
 	wikilinkInfo := s.getWikilinkContext(doc, completionParams.Position)
 	if wikilinkInfo == nil {
-		s.logger.Debug("not in wikilink context, returning empty completion")
+		s.logger.Debug("not in wikilink or task context, returning empty completion")
 		return &lsp.CompletionList{IsIncomplete: false, Items: []lsp.CompletionItem{}}, nil
 	}
 
@@ -241,6 +263,13 @@ type WikilinkContext struct {
 	Prefix     string    // The partial wikilink text before cursor
 	IsComplete bool      // Whether the wikilink is complete (has closing ]])
 	Range      lsp.Range // The range of the wikilink prefix
+}
+
+// TaskContext contains information about the current task state being edited
+type TaskContext struct {
+	Prefix     string    // The partial task state text before cursor
+	IsComplete bool      // Whether the task state is complete (has closing ])
+	Range      lsp.Range // The range of the task state prefix
 }
 
 // getWikilinkContext analyzes the cursor position to determine if we're in a wikilink
@@ -290,6 +319,91 @@ func (s *Server) getWikilinkContext(doc *Document, position lsp.Position) *Wikil
 		Range: lsp.Range{
 			Start: lsp.Position{Line: position.Line, Character: lastWikilinkStart + 2},
 			End:   lsp.Position{Line: position.Line, Character: endCharacter},
+		},
+	}
+}
+
+// getTaskContext analyzes the cursor position to determine if we're in a task state
+func (s *Server) getTaskContext(doc *Document, position lsp.Position) *TaskContext {
+	lines := strings.Split(doc.Content, "\n")
+	if position.Line >= len(lines) {
+		return nil
+	}
+
+	line := lines[position.Line]
+	if position.Character > len(line) {
+		return nil
+	}
+
+	// Look for task list pattern: - [ at start of line (with optional whitespace)
+	// This matches patterns like:
+	// - [ ]
+	// - [x]
+	// - [wip]
+	// etc.
+
+	// First, check if this line looks like a task list item
+	trimmedLine := strings.TrimLeft(line, " \t")
+	if !strings.HasPrefix(trimmedLine, "- [") {
+		return nil
+	}
+
+	// Find the position of the opening [ for the task state
+	taskStart := strings.Index(line, "- [")
+	if taskStart == -1 {
+		return nil
+	}
+
+	// The task state starts right after "- ["
+	stateStart := taskStart + 3
+
+	// Check if cursor is within the task state bracket
+	if position.Character < stateStart {
+		return nil // cursor is before the task state
+	}
+
+	// Look for the closing ] to determine if the task state is complete
+	afterStateStart := line[stateStart:]
+	closeIndex := strings.Index(afterStateStart, "]")
+
+	// If there's no closing bracket, or cursor is after it, we're not in task context
+	if closeIndex == -1 {
+		// No closing bracket yet - we might be typing the state
+		if position.Character <= len(line) {
+			prefix := line[stateStart:position.Character]
+			return &TaskContext{
+				Prefix:     prefix,
+				IsComplete: false,
+				Range: lsp.Range{
+					Start: lsp.Position{Line: position.Line, Character: stateStart},
+					End:   lsp.Position{Line: position.Line, Character: position.Character},
+				},
+			}
+		}
+		return nil
+	}
+
+	stateEnd := stateStart + closeIndex
+
+	// Check if cursor is within the task state brackets
+	if position.Character > stateEnd {
+		return nil // cursor is after the closing bracket
+	}
+
+	// Extract the current prefix up to the cursor position
+	prefixEnd := position.Character
+	if prefixEnd > stateEnd {
+		prefixEnd = stateEnd
+	}
+
+	prefix := line[stateStart:prefixEnd]
+
+	return &TaskContext{
+		Prefix:     prefix,
+		IsComplete: true,
+		Range: lsp.Range{
+			Start: lsp.Position{Line: position.Line, Character: stateStart},
+			End:   lsp.Position{Line: position.Line, Character: stateEnd},
 		},
 	}
 }
@@ -522,6 +636,86 @@ func (s *Server) getDirectoryPathCompletions(prefix, currentDocURI string, needs
 					FilterText: &suggestedFile,
 					SortText:   &sortKey,
 				})
+			}
+		}
+	}
+
+	return items
+}
+
+// getTaskStateCompletions generates completion items for task states
+func (s *Server) getTaskStateCompletions(prefix string, cfg *config.Config, needsClosing bool) []lsp.CompletionItem {
+	var items []lsp.CompletionItem
+
+	// Generate completions for each configured task state
+	for i, state := range cfg.Tasks.States {
+		// Collect all possible values (main value + aliases)
+		allValues := []string{state.Value}
+		allValues = append(allValues, state.Aliases...)
+
+		for j, value := range allValues {
+			// Filter based on prefix
+			if prefix == "" || strings.HasPrefix(strings.ToLower(value), strings.ToLower(prefix)) {
+				insertText := value
+				if needsClosing {
+					insertText += "]"
+				}
+
+				kind := lsp.CompletionItemKindEnum
+
+				// Build detail: name + conceal (if set)
+				detail := state.Name
+				if state.Conceal != nil && *state.Conceal != "" {
+					detail += fmt.Sprintf(" %s", *state.Conceal)
+				}
+
+				// Sort by config order, then group main value with its aliases
+				// Format: configOrder_aliasIndex_value
+				// This groups: value1, value1alias1, value1alias2, value2, value2alias1, etc.
+				sortKey := fmt.Sprintf("%02d_%02d_%s", i, j, value)
+
+				item := lsp.CompletionItem{
+					Label:      value,
+					Kind:       &kind,
+					Detail:     &detail,
+					InsertText: &insertText,
+					FilterText: &value,
+					SortText:   &sortKey,
+				}
+
+				// Build concise documentation (Option 2 format)
+				var docParts []string
+
+				if j > 0 {
+					// For aliases: "Alias for 'x' (main value). See also: X, completed"
+					docParts = append(docParts, fmt.Sprintf("Alias for '%s' (main value)", state.Value))
+					if len(state.Aliases) > 1 {
+						// Show other aliases (excluding current one)
+						var otherAliases []string
+						for _, alias := range state.Aliases {
+							if alias != value {
+								otherAliases = append(otherAliases, alias)
+							}
+						}
+						if len(otherAliases) > 0 {
+							docParts = append(docParts, fmt.Sprintf("See also: %s", strings.Join(otherAliases, ", ")))
+						}
+					}
+				} else {
+					// For main values: description + see also (aliases)
+					if state.Description != nil && *state.Description != "" {
+						docParts = append(docParts, *state.Description)
+					}
+					if len(state.Aliases) > 0 {
+						docParts = append(docParts, fmt.Sprintf("See also: %s", strings.Join(state.Aliases, ", ")))
+					}
+				}
+
+				if len(docParts) > 0 {
+					item.Documentation = strings.Join(docParts, "\n\n")
+				}
+
+				items = append(items, item)
 			}
 		}
 	}
@@ -789,6 +983,25 @@ func (s *Server) refreshAllDocumentDiagnostics() {
 	}
 
 	s.logger.Debug("refreshed diagnostics for all open documents", "count", len(s.documents))
+}
+
+// loadWorkspaceConfig loads the configuration for the current workspace
+func (s *Server) loadWorkspaceConfig() (*config.Config, error) {
+	// Get workspace roots
+	workspaceRoots := s.GetWorkspaceRoots()
+	if len(workspaceRoots) == 0 {
+		// No workspace, use default config
+		return config.GetDefaultConfig(), nil
+	}
+
+	// Try to load config from the first workspace root
+	cfg, err := config.LoadConfig(workspaceRoots[0].Path)
+	if err != nil {
+		s.logger.Debug("failed to load workspace config, using default", "error", err, "path", workspaceRoots[0].Path)
+		return config.GetDefaultConfig(), nil
+	}
+
+	return cfg, nil
 }
 
 // Shutdown handles cleanup when the server is shutting down

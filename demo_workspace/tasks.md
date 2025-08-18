@@ -5,20 +5,20 @@ Comprehensive task management with nested hierarchies and wikilink references.
 ## Active Projects
 
 ### LSP Server Development
-- [ ] Core functionality
-  - [ ] Implement [[features/document-sync|document synchronization]]
-  - [ ] Build [[features/completion-engine|completion engine]]
-    - [ ] File path completion
-    - [ ] [[wikilinks|Wikilink]] target completion
+- [/] Core functionality
+  - [x] Implement [[features/document-sync|document synchronization]]
+  - [wip] Build [[features/completion-engine|completion engine]]
+    - [x] File path completion
+    - [/] [[wikilinks|Wikilink]] target completion
     - [ ] Context-aware suggestions
   - [ ] Add [[features/definition-provider|go-to-definition]]
-    - [ ] Parse wikilink targets
-    - [ ] Resolve file paths
-    - [ ] Handle missing files gracefully
-- [ ] Testing and quality
-  - [ ] Unit tests for [[components/parser|parser components]]
-  - [ ] Integration tests for [[components/lsp-server|LSP server]]
-  - [ ] Performance tests with [[test-data/large-workspace|large workspaces]]
+    - [x] Parse wikilink targets
+    - [wip] Resolve file paths
+    - [?] Handle missing files gracefully
+- [-] Testing and quality
+  - [x] Unit tests for [[components/parser|parser components]]
+  - [!] Integration tests for [[components/lsp-server|LSP server]]
+  - [?] Performance tests with [[test-data/large-workspace|large workspaces]]
 - [ ] Documentation
   - [ ] Update [[docs/api-reference|API reference]]
   - [ ] Create [[tutorials/setup-guide|setup guide]]

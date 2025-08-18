@@ -3,6 +3,7 @@ package parser
 import (
 	"bytes"
 
+	"github.com/notedownorg/notedown/pkg/config"
 	"github.com/notedownorg/notedown/pkg/parser/extensions"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -22,8 +23,11 @@ type NotedownParser struct {
 	goldmark goldmark.Markdown
 }
 
-// NewParser creates a new Notedown parser
+// NewParser creates a new Notedown parser with workspace configuration
 func NewParser() Parser {
+	// Load workspace configuration (fallback to default if no workspace found)
+	cfg, _ := config.LoadConfig(".")
+
 	return &NotedownParser{
 		goldmark: goldmark.New(
 			goldmark.WithExtensions(
@@ -32,7 +36,7 @@ func NewParser() Parser {
 				extension.Linkify,
 				extension.Footnote,
 				extensions.NewWikilinkExtension(),
-				extensions.NewTaskListExtension(),
+				extensions.NewTaskListExtension(cfg),
 			),
 			goldmark.WithParserOptions(
 				parser.WithAttribute(),
@@ -216,7 +220,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 	case *ast.ListItem:
 		// Check if this is a task list item by looking for TaskCheckBox children
 		taskList := false
-		checked := false
+		taskState := ""
 
 		// Walk through children to find TaskCheckBox
 		for child := n.FirstChild(); child != nil; child = child.NextSibling() {
@@ -225,7 +229,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 				for grandchild := textBlock.FirstChild(); grandchild != nil; grandchild = grandchild.NextSibling() {
 					if taskCheckbox, ok := grandchild.(*extensions.TaskCheckBox); ok {
 						taskList = true
-						checked = taskCheckbox.IsChecked
+						taskState = taskCheckbox.State
 						break
 					}
 				}
@@ -235,7 +239,7 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 			}
 		}
 
-		return NewListItem(taskList, checked, rng)
+		return NewListItem(taskList, taskState, rng)
 
 	case *ast.Emphasis:
 		return NewEmphasis(rng)

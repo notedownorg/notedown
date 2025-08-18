@@ -1,0 +1,49 @@
+tasks:
+  states:
+    - value: " "
+      name: "todo"
+      description: "A task that needs to be completed"
+      aliases: []
+      
+    - value: "x"
+      name: "done"
+      description: "A completed task"
+      conceal: "✅"
+      aliases: ["X", "✓", "✔", "completed", "finished"]
+      
+    - value: "/"
+      name: "in-progress"
+      description: "A task currently being worked on"
+      conceal: "⏳"
+      aliases: ["wip", "WIP", "working"]
+      
+    - value: "-"
+      name: "cancelled"
+      description: "A task that has been cancelled and will not be completed"
+      conceal: "❌"
+      aliases: ["~", "cancelled", "wont-do", "rejected"]
+      
+    - value: "?"
+      name: "question"
+      description: "A task that needs clarification or more information"
+      conceal: "❓"
+      aliases: ["Q", "unclear", "help-needed", "blocked"]
+      
+    - value: "!"
+      name: "urgent"
+      description: "A high priority task that should be completed soon"
+      conceal: "🔥"
+      aliases: ["urgent", "priority", "critical", "important"]
+      
+    - value: "R"
+      name: "review"
+      description: |
+        A task that requires review or approval before completion.
+        
+        This state is useful for:
+        • Code reviews
+        • Document approvals
+        • Quality assurance checks
+        • Peer validation
+      conceal: "👁️"
+      aliases: ["review", "needs-review", "pending-approval"]

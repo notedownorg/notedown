@@ -49,13 +49,12 @@ T["autocmd registration"]["sets correct filetype for notedown workspace"] = func
 	local workspace_path = utils.create_test_workspace("/tmp/test-filetype-workspace")
 	local child = utils.new_child_neovim()
 
+	-- Create .notedown directory to make it a notedown workspace
+	child.lua('vim.fn.mkdir("' .. workspace_path .. '/.notedown", "p")')
+
 	-- Change to workspace and set up notedown
 	child.lua('vim.fn.chdir("' .. workspace_path .. '")')
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, parser = { mode = "auto", notedown_workspaces = { "'
-			.. workspace_path
-			.. '" } } })'
-	)
+	child.lua('require("notedown").setup({ server = { cmd = { "echo", "mock-server" } } })')
 
 	-- Open a markdown file
 	child.lua('vim.cmd("edit README.md")')
@@ -118,21 +117,27 @@ T["keybinding setup"] = function()
 end
 
 T["configuration merging"] = function()
+	local workspace_path = utils.create_test_workspace("/tmp/test-config-merge")
 	local child = utils.new_child_neovim()
 
-	-- Set up notedown with custom config
-	child.lua(
-		'require("notedown").setup({ server = { name = "custom-notedown", cmd = { "custom-command" } }, parser = { mode = "notedown", notedown_workspaces = { "/custom/workspace" } } })'
-	)
+	-- Create .notedown directory to make it a notedown workspace
+	child.lua('vim.fn.mkdir("' .. workspace_path .. '/.notedown", "p")')
+
+	-- Change to notedown workspace and set up notedown with custom config
+	child.lua('vim.fn.chdir("' .. workspace_path .. '")')
+	child.lua('require("notedown").setup({ server = { name = "custom-notedown", cmd = { "custom-command" } } })')
 
 	-- Verify the configuration was merged correctly by checking workspace status
 	local status = child.lua_get('require("notedown").get_workspace_status()')
 
 	MiniTest.expect.equality(status.parser_mode, "notedown")
-	MiniTest.expect.equality(#status.configured_workspaces >= 1, true)
-	MiniTest.expect.equality(status.configured_workspaces[1], "/custom/workspace")
+	MiniTest.expect.equality(status.is_notedown_workspace, true)
+	-- Use the resolved path to avoid issues with symlinks (/tmp -> /private/tmp on macOS)
+	MiniTest.expect.equality(status.workspace_path ~= nil, true)
+	MiniTest.expect.equality(status.workspace_path:match("test%-config%-merge$") ~= nil, true)
 
 	child.stop()
+	utils.cleanup_test_workspace(workspace_path)
 end
 
 T["module functions"] = MiniTest.new_set()

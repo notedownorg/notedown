@@ -8,7 +8,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 
 - 🔗 **Wikilink Support**: Intelligent completion and navigation for `[[wikilinks]]`
 - 📝 **List Movement**: Reorganize list items with mk/mj keybindings and smart cursor following
-- 🏠 **Workspace Detection**: Automatically uses notedown parser when opened directly in configured workspaces
+- 🏠 **Automatic Workspace Detection**: Uses notedown parser when `.notedown/` directory is found
 - 🧠 **Smart LSP Integration**: Seamless language server integration with document synchronization
 - 🚀 **LSP Integration**: Full Notedown Language Server Protocol support
 - ⚡ **Fast**: Efficient workspace detection with path-based matching
@@ -28,9 +28,8 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 {
   "notedownorg/notedown.nvim",
   opts = {
-    -- your configuration comes here
-    -- or leave it empty to use the default settings
-    -- refer to the configuration section below
+    -- Most users need no configuration!
+    -- Just create a .notedown/ directory in your project root
   }
 }
 
@@ -70,15 +69,6 @@ require("notedown").setup({
     end,
     capabilities = vim.lsp.protocol.make_client_capabilities(),
   },
-  parser = {
-    mode = "auto", -- "auto" | "notedown" | "markdown"
-    notedown_workspaces = {
-      -- Add your notedown workspace paths here
-      -- Note: Only activates when Neovim is opened directly in these directories
-      "~/notes",
-      "~/github.com/notedownorg/notedown",
-    },
-  },
   keybindings = {
     -- Keybindings for list item movement
     move_list_item_up = "mk",   -- Move up
@@ -87,43 +77,59 @@ require("notedown").setup({
 })
 ```
 
-### Parser Modes
+### Workspace Detection
 
-- **`"auto"`** (default): Use notedown parser when Neovim is opened directly in configured workspaces
-- **`"notedown"`**: Always use notedown parser for all markdown files
-- **`"markdown"`**: Always use standard markdown parser
+**The plugin automatically detects Notedown workspaces** by looking for a `.notedown/` directory:
 
-### Workspace Configuration
+1. **Starting from the current file's directory**, the plugin walks up the directory tree
+2. **First `.notedown/` directory found** marks the workspace root  
+3. **Files in detected workspaces** automatically use the notedown parser and LSP features
+4. **Files outside workspaces** use standard markdown behavior
 
-Configure paths where notedown features should be enabled:
+**No configuration required** - just create a `.notedown/` directory in your project root!
 
-```lua
-require("notedown").setup({
-  parser = {
-    notedown_workspaces = {
-      "/Users/username/notes",           -- Your personal notes
-      "/Users/username/projects/docs",   -- Project documentation
-      "/Users/username/obsidian-vault",  -- Obsidian vault
-    }
-  }
-})
+#### Setting Up a Workspace
+
+```bash
+# Navigate to your project/notes directory
+cd ~/my-notes
+
+# Create .notedown directory to mark it as a workspace
+mkdir .notedown
+
+# Optional: Add workspace configuration
+echo "tasks:" > .notedown/settings.yaml
+echo "  states:" >> .notedown/settings.yaml
+echo "    - value: ' '" >> .notedown/settings.yaml
+echo "      name: todo" >> .notedown/settings.yaml
 ```
 
-**Note**: Workspace paths support:
-- Tilde expansion (`~/notes` → `/Users/username/notes`)
-- Exact directory matching (Neovim must be opened directly in the configured directory)
-- Symlink resolution for reliable path matching
-- Automatic filtering of parent/child relationships (child directories are ignored with a warning)
+#### Workspace Detection Examples
+
+```
+Project Structure:
+├── my-notes/
+│   ├── .notedown/           ← Workspace root detected here
+│   ├── daily/
+│   │   └── today.md         ← Opens as notedown
+│   ├── projects/
+│   │   └── work.md          ← Opens as notedown  
+│   └── README.md            ← Opens as notedown
+
+├── other-project/
+│   └── README.md            ← Opens as markdown (no .notedown)
+```
 
 ## 🚀 Usage
 
 ### Automatic Features
 
-Once configured, the plugin automatically:
-- Detects when Neovim is opened in configured workspaces
-- Starts the notedown language server for markdown files
+The plugin automatically:
+- Detects Notedown workspaces by finding `.notedown/` directories
+- Starts the notedown language server for markdown files in workspaces
 - Provides wikilink completion with `[[`
 - Enables go-to-definition for wikilinks
+- Sets the LSP root directory to the detected workspace root
 
 ### LSP Features
 
@@ -178,14 +184,10 @@ Check the workspace status for the current buffer:
 ```
 Notedown Workspace Status:
   File: /Users/username/notes/ideas.md
-  Current Directory: /Users/username/notes
-  Parser Mode: auto
   In Notedown Workspace: Yes
   Should Use Notedown Parser: Yes
   Matched Workspace: /Users/username/notes
-  Configured Workspaces:
-    - /Users/username/notes
-    - /Users/username/projects/docs
+  Detection Method: Auto-detected (.notedown directory)
 ```
 
 #### `:NotedownReload`
@@ -264,15 +266,16 @@ require("notedown").setup({
 
 ### Wikilink Completion Not Working
 
-1. Ensure Neovim is opened directly in a configured workspace directory
+1. Ensure a `.notedown/` directory exists in your project root or parent directories
 2. Check that LSP server is running: `:LspInfo`
-3. Try typing `[[` and wait for completion popup
+3. Verify workspace detection: `:NotedownWorkspaceStatus`
+4. Try typing `[[` and wait for completion popup
 
 ### Parser Issues
 
 1. Check LSP server status: `:LspInfo`
-2. Verify parser mode: `:NotedownWorkspaceStatus`
-3. Try forcing parser mode: `parser = { mode = "notedown" }`
+2. Verify workspace detection: `:NotedownWorkspaceStatus`
+3. Ensure `.notedown/` directory exists in your project root or a parent directory
 
 ## 🤝 Contributing
 
