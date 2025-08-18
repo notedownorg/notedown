@@ -540,16 +540,16 @@ func (s *Server) getItemRangeForSwap(item1, item2 *ListItem) (lsp.Range, lsp.Ran
 
 	// For adjacent items, we need to ensure ranges don't overlap
 	// The first item should end exactly where the second item starts
-	if item1End + 1 == item2Start {
+	if item1End+1 == item2Start {
 		// Items are adjacent - first item takes up to but not including item2Start
 		// second item takes from item2Start to item2End + 1
 		return lsp.Range{
-			Start: lsp.Position{Line: item1Start, Character: 0},
-			End:   lsp.Position{Line: item2Start, Character: 0}, // Don't include item2Start
-		}, lsp.Range{
-			Start: lsp.Position{Line: item2Start, Character: 0},
-			End:   lsp.Position{Line: item2End + 1, Character: 0},
-		}
+				Start: lsp.Position{Line: item1Start, Character: 0},
+				End:   lsp.Position{Line: item2Start, Character: 0}, // Don't include item2Start
+			}, lsp.Range{
+				Start: lsp.Position{Line: item2Start, Character: 0},
+				End:   lsp.Position{Line: item2End + 1, Character: 0},
+			}
 	} else {
 		// Items are not adjacent - use normal range calculation
 		return s.getItemFullRange(item1), s.getItemFullRange(item2)

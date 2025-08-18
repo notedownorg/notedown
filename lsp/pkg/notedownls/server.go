@@ -933,7 +933,6 @@ func (s *Server) generateWikilinkDiagnostics(uri, content string) []lsp.Diagnost
 	return diagnostics
 }
 
-
 // positionFromOffset converts a byte offset to line and character position
 func (s *Server) positionFromOffset(content string, offset int) (int, int) {
 	lines := strings.Split(content[:offset], "\n")
