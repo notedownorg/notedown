@@ -1,7 +1,6 @@
 # Test List
 
 - First item
-- Third item
 - Second item
 - Fourth item
 

@@ -75,6 +75,8 @@ func (s *Server) handleExecuteCommand(params json.RawMessage) (any, error) {
 		return s.handleMoveListItemUp(executeParams.Arguments)
 	case "notedown.moveListItemDown":
 		return s.handleMoveListItemDown(executeParams.Arguments)
+	case "notedown.getListItemBoundaries":
+		return s.handleGetListItemBoundaries(executeParams.Arguments)
 	default:
 		return nil, fmt.Errorf("unknown command: %s", executeParams.Command)
 	}
@@ -585,4 +587,93 @@ func (s *Server) getChildrenText(item *ListItem) string {
 
 	traverse(item)
 	return text.String()
+}
+
+// BoundaryResponse represents the response for list item boundary requests
+type BoundaryResponse struct {
+	Start lsp.Position `json:"start"`
+	End   lsp.Position `json:"end"`
+	Found bool         `json:"found"`
+}
+
+// handleGetListItemBoundaries returns the boundaries of a list item and all its children
+func (s *Server) handleGetListItemBoundaries(arguments []any) (any, error) {
+	if len(arguments) < 2 {
+		return nil, fmt.Errorf("getListItemBoundaries requires document URI and position arguments")
+	}
+
+	// Extract document URI
+	documentURI, ok := arguments[0].(string)
+	if !ok {
+		return nil, fmt.Errorf("first argument must be document URI (string)")
+	}
+
+	// Extract position
+	positionMap, ok := arguments[1].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("second argument must be position object")
+	}
+
+	line, ok := positionMap["line"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("position must have line number")
+	}
+
+	character, ok := positionMap["character"].(float64)
+	if !ok {
+		return nil, fmt.Errorf("position must have character number")
+	}
+
+	position := lsp.Position{
+		Line:      int(line),
+		Character: int(character),
+	}
+
+	s.logger.Debug("getting list item boundaries", "uri", documentURI, "line", position.Line, "character", position.Character)
+
+	// Get the document
+	doc, exists := s.GetDocument(documentURI)
+	if !exists {
+		s.logger.Error("document not found for boundary request", "uri", documentURI)
+		return &BoundaryResponse{Found: false}, nil
+	}
+
+	// Parse list hierarchy
+	hierarchy, err := s.parseListHierarchy(doc.Content)
+	if err != nil {
+		s.logger.Error("failed to parse list hierarchy for boundaries", "error", err)
+		return &BoundaryResponse{Found: false}, nil
+	}
+
+	// Find the list item at the cursor position
+	item := hierarchy.findItemAtPosition(position)
+	if item == nil {
+		s.logger.Debug("no list item found at position for boundaries", "line", position.Line, "character", position.Character)
+		return &BoundaryResponse{Found: false}, nil
+	}
+
+	// Calculate the boundaries including all children
+	startLine := item.StartLine
+	endLine := s.findLastChildLine(item)
+
+	// Create boundary response
+	response := &BoundaryResponse{
+		Start: lsp.Position{
+			Line:      startLine,
+			Character: 0, // Start at beginning of line
+		},
+		End: lsp.Position{
+			Line:      endLine + 1, // Include next line for proper text object behavior
+			Character: 0,
+		},
+		Found: true,
+	}
+
+	s.logger.Debug("calculated list item boundaries",
+		"start_line", response.Start.Line,
+		"end_line", response.End.Line,
+		"item_start", startLine,
+		"item_end", endLine)
+
+	return response, nil
 }

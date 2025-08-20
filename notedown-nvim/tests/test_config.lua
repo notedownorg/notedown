@@ -30,9 +30,9 @@ T["config defaults"] = function()
 	local server_name = child.lua_get('require("notedown.config").defaults.server.name')
 	MiniTest.expect.equality(server_name, "notedown")
 
-	-- Test keybindings defaults
-	local move_up_key = child.lua_get('require("notedown.config").defaults.keybindings.move_list_item_up')
-	MiniTest.expect.equality(move_up_key, "mk")
+	-- Test that server config exists
+	local server_cmd = child.lua_get('require("notedown.config").defaults.server.cmd')
+	MiniTest.expect.equality(type(server_cmd), "table")
 
 	child.stop()
 end

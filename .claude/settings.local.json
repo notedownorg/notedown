@@ -28,7 +28,9 @@
       "Bash(chmod:*)",
       "Bash(timeout 30s nvim:*)",
       "Bash(time nvim:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(luac:*)",
+      "Bash(timeout 10s nvim:*)"
     ],
     "deny": []
   }
