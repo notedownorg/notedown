@@ -57,8 +57,11 @@ function M.initialize()
 	shared_session.child = utils.new_child_neovim()
 
 	-- Setup notedown with LSP server pointing to base workspace
-	local setup_config = string.format(
-		[[
+
+	-- Execute setup in the child process
+	shared_session.child.lua(
+		string.format(
+			[[
 		require('notedown').setup({
 			server = {
 				name = "notedown",
@@ -70,16 +73,22 @@ function M.initialize()
 				notedown_workspaces = { %q }
 			}
 		})
+		
+		-- Create a buffer and set filetype to trigger LSP
+		local buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(buf, %q .. "/test.md")
+		vim.api.nvim_set_current_buf(buf)
+		vim.bo.filetype = "notedown"
 	]],
-		shared_session.binary_path,
-		shared_session.workspace_base,
-		shared_session.workspace_base
+			shared_session.binary_path,
+			shared_session.workspace_base,
+			shared_session.workspace_base,
+			shared_session.workspace_base
+		)
 	)
 
-	shared_session.child.lua(setup_config)
-
-	-- Wait for LSP to initialize
-	lsp.wait_for_ready(shared_session.child)
+	-- Wait for LSP to initialize using shared logic
+	lsp.wait_for_lsp_clients(shared_session.child)
 
 	shared_session.is_initialized = true
 	return shared_session

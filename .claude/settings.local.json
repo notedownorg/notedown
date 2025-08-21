@@ -30,7 +30,10 @@
       "Bash(time nvim:*)",
       "Bash(git add:*)",
       "Bash(luac:*)",
-      "Bash(timeout 10s nvim:*)"
+      "Bash(timeout 10s nvim:*)",
+      "Bash(lua:*)",
+      "Bash(timeout:*)",
+      "Bash(/Users/liam/github.com/notedownorg/notedown/delete-around-list/notedown-lsp-test --help)"
     ],
     "deny": []
   }
