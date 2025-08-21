@@ -7,7 +7,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 ## ✨ Features
 
 - 🔗 **Wikilink Support**: Intelligent completion and navigation for `[[wikilinks]]`
-- 📝 **List Movement**: Reorganize list items with mk/mj keybindings and smart cursor following
+- ✂️ **List Text Object**: Precisely select, delete, yank, and manipulate list items with `dal`, `yal`, `cal`, `val`
 - 🏠 **Automatic Workspace Detection**: Uses notedown parser when `.notedown/` directory is found
 - 🧠 **Smart LSP Integration**: Seamless language server integration with document synchronization
 - 🚀 **LSP Integration**: Full Notedown Language Server Protocol support
@@ -69,11 +69,8 @@ require("notedown").setup({
     end,
     capabilities = vim.lsp.protocol.make_client_capabilities(),
   },
-  keybindings = {
-    -- Keybindings for list item movement
-    move_list_item_up = "mk",   -- Move up
-    move_list_item_down = "mj", -- Move down
-  },
+  -- Most users need no additional configuration!
+  -- The 'al' text object is automatically available
 })
 ```
 
@@ -147,33 +144,31 @@ Type `[[` to trigger intelligent completion:
 - Use `gd` or your configured go-to-definition keybinding
 - Jump to the target file or create it if it doesn't exist
 
-### List Movement
+### List Text Object
 
-Reorganize list items quickly with intuitive keybindings:
+The plugin provides an "around list" text object (`al`) for precise list manipulation:
 
-- **`mk`**: Move list item up  
-- **`mj`**: Move list item down
+- **`dal`**: Delete around list item (puts in default register for pasting)
+- **`yal`**: Yank around list item for moving to another location
+- **`cal`**: Change around list item (delete and enter insert mode)
+- **`val`**: Visually select around list item
+- **`"xdal`**: Delete around list item into register `x`
 
-Features:
-- **Smart cursor following**: Cursor stays with the moved content
-- **Multi-level support**: Works with nested lists of any depth
-- **List type aware**: Handles bullet lists, numbered lists, and task lists
-- **Auto-renumbering**: Updates list numbers when moving numbered items
-- **Character position preservation**: Maintains cursor position within moved text
+The text object works with **any list type** and includes **all children**:
 
-Example:
 ```markdown
-1. First item
-2. Second item   <- cursor here, press mk
-3. Third item
+- Main item                    <- cursor anywhere on this line
+  - Child item A               <- these children are included
+    - Deep nested item
+  - Child item B               <- all children included
+- Next main item               <- this is NOT included
 ```
 
-Becomes:
-```markdown
-1. First item
-2. Third item
-3. Second item   <- cursor follows the moved item
-```
+**Use cases:**
+- **Reorganizing**: `dal` to cut, move cursor, `p` to paste
+- **Duplicating**: `yal` to copy, move cursor, `p` to paste
+- **Refactoring**: `cal` to replace entire list structure
+- **Selection**: `val` to select for other operations
 
 ### Commands
 
@@ -199,25 +194,6 @@ Reload the plugin and restart the LSP server:
 - Restarts language server
 
 ## 🔧 Advanced Configuration
-
-### Custom Keybindings
-
-Customize list movement keybindings to your preference:
-
-```lua
-require("notedown").setup({
-  keybindings = {
-    move_list_item_up = "[e",     -- Use bracket notation
-    move_list_item_down = "]e",   -- Use bracket notation
-    -- or
-    move_list_item_up = "<leader>k",   -- Use leader-based
-    move_list_item_down = "<leader>j", -- Use leader-based
-    -- or
-    move_list_item_up = "<M-k>",   -- Use Alt (may need terminal config)
-    move_list_item_down = "<M-j>", -- Use Alt (may need terminal config)
-  },
-})
-```
 
 ### Custom LSP Server Command
 

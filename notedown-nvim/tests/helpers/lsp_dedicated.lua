@@ -51,9 +51,27 @@ end
 
 -- Wait for LSP client to be ready and initialized
 function M.wait_for_ready(child, timeout)
-	-- Simple sleep to allow LSP server to start
-	vim.loop.sleep(2000)
-	return true
+	return M.wait_for_lsp_clients(child, timeout)
+end
+
+-- Shared function to wait for LSP clients to be available
+function M.wait_for_lsp_clients(child, timeout)
+	timeout = timeout or 10000 -- 10 second default timeout
+	local start_time = vim.loop.now()
+
+	while vim.loop.now() - start_time < timeout do
+		local client_count = child.lua_get("#vim.lsp.get_active_clients()")
+		if client_count > 0 then
+			-- LSP client found, wait a bit more for it to be fully ready
+			vim.loop.sleep(1000)
+			return true
+		end
+		vim.loop.sleep(500)
+	end
+
+	print("LSP server did not start within timeout of", timeout, "ms")
+	error("LSP server did not start within timeout")
+	return false
 end
 
 -- Clean up locally built LSP binary

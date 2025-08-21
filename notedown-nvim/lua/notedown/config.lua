@@ -9,11 +9,7 @@ M.defaults = {
 		end,
 		capabilities = vim.lsp.protocol.make_client_capabilities(),
 	},
-	keybindings = {
-		-- Keybindings for list item movement
-		move_list_item_up = "mk",
-		move_list_item_down = "mj",
-	},
+	-- No additional configuration needed - the 'al' text object is automatically available
 }
 
 return M

@@ -92,26 +92,25 @@ T["autocmd registration"]["sets correct filetype for non-notedown workspace"] = 
 	utils.cleanup_test_workspace(workspace_path)
 end
 
-T["keybinding setup"] = function()
+T["text object setup"] = function()
 	local child = utils.new_child_neovim()
 
 	-- Set up notedown
-	child.lua(
-		'require("notedown").setup({ server = { cmd = { "echo", "mock-server" } }, keybindings = { move_list_item_up = "<leader>ku", move_list_item_down = "<leader>kd" } })'
-	)
+	child.lua('require("notedown").setup({ server = { cmd = { "echo", "mock-server" } } })')
 
 	-- Open a markdown file to trigger FileType autocmd
 	child.lua('vim.cmd("edit test.md")')
 
+	-- Set filetype to notedown to trigger text object setup
+	child.lua('vim.bo.filetype = "notedown"')
+
 	-- Wait a moment for autocmd to fire
 	vim.loop.sleep(100)
 
-	-- Check that keybindings are actually registered
-	local ku_mapping = child.lua_get('vim.fn.maparg("<leader>ku", "n")')
-	local kd_mapping = child.lua_get('vim.fn.maparg("<leader>kd", "n")')
+	-- Check that text object is registered (al should be available in operator-pending mode)
+	local al_mapping_exists = child.lua_get('vim.fn.mapcheck("al", "o") ~= ""')
 
-	MiniTest.expect.no_equality(ku_mapping, "")
-	MiniTest.expect.no_equality(kd_mapping, "")
+	MiniTest.expect.equality(al_mapping_exists, true)
 
 	child.stop()
 end

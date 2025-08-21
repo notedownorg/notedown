@@ -57,8 +57,11 @@ function M.initialize()
 	shared_session.child = utils.new_child_neovim()
 
 	-- Setup notedown with LSP server pointing to base workspace
-	local setup_config = string.format(
-		[[
+
+	-- Execute setup in the child process
+	shared_session.child.lua(
+		string.format(
+			[[
 		require('notedown').setup({
 			server = {
 				name = "notedown",
@@ -70,16 +73,22 @@ function M.initialize()
 				notedown_workspaces = { %q }
 			}
 		})
+		
+		-- Create a buffer and set filetype to trigger LSP
+		local buf = vim.api.nvim_create_buf(false, true)
+		vim.api.nvim_buf_set_name(buf, %q .. "/test.md")
+		vim.api.nvim_set_current_buf(buf)
+		vim.bo.filetype = "notedown"
 	]],
-		shared_session.binary_path,
-		shared_session.workspace_base,
-		shared_session.workspace_base
+			shared_session.binary_path,
+			shared_session.workspace_base,
+			shared_session.workspace_base,
+			shared_session.workspace_base
+		)
 	)
 
-	shared_session.child.lua(setup_config)
-
-	-- Wait for LSP to initialize
-	lsp.wait_for_ready(shared_session.child)
+	-- Wait for LSP to initialize using shared logic
+	lsp.wait_for_lsp_clients(shared_session.child)
 
 	shared_session.is_initialized = true
 	return shared_session
@@ -130,6 +139,15 @@ function M.open_file(file_path)
 
 	-- Ensure filetype is set to notedown for proper command registration
 	child.lua('vim.bo.filetype = "notedown"')
+
+	-- Explicitly set up the text object for testing
+	child.lua('require("notedown").setup_list_text_object()')
+
+	-- Verify the text object was set up
+	local al_exists = child.lua_get('vim.fn.mapcheck("al", "o") ~= ""')
+	if not al_exists then
+		error("Text object 'al' was not set up properly in test environment")
+	end
 
 	-- Ensure document is properly opened in LSP
 	child.lua(string.format(
@@ -191,6 +209,26 @@ end
 function M.get_cursor_position()
 	local child = M.get_child()
 	return child.lua_get("vim.api.nvim_win_get_cursor(0)")
+end
+
+-- Execute a vim command or key sequence in shared neovim instance
+function M.execute_vim_command(command)
+	local child = M.get_child()
+
+	-- Handle text object operations (like yal, dal) as normal mode key sequences
+	if command:match("^[ydcv]al$") then
+		-- These are operator + text object combinations, execute as normal mode keys
+		child.lua(string.format("vim.cmd('normal! %s')", command))
+	else
+		-- Regular commands
+		child.cmd(command)
+	end
+end
+
+-- Get register content from shared neovim instance
+function M.get_register_content()
+	local child = M.get_child()
+	return child.lua_get('vim.fn.getreg("")')
 end
 
 -- Clean up a test workspace directory

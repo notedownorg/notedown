@@ -99,8 +99,7 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 			CodeActionProvider: &lsp.CodeActionOptions{},
 			ExecuteCommandProvider: &lsp.ExecuteCommandOptions{
 				Commands: []string{
-					"notedown.moveListItemUp",
-					"notedown.moveListItemDown",
+					"notedown.getListItemBoundaries",
 				},
 			},
 			// DiagnosticProvider: &lsp.DiagnosticOptions{}, // Disabled to avoid pull diagnostic conflicts
