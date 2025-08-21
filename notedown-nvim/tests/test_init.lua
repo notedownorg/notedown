@@ -100,7 +100,7 @@ T["text object setup"] = function()
 
 	-- Open a markdown file to trigger FileType autocmd
 	child.lua('vim.cmd("edit test.md")')
-	
+
 	-- Set filetype to notedown to trigger text object setup
 	child.lua('vim.bo.filetype = "notedown"')
 

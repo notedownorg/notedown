@@ -130,10 +130,10 @@ function M.open_file(file_path)
 
 	-- Ensure filetype is set to notedown for proper command registration
 	child.lua('vim.bo.filetype = "notedown"')
-	
+
 	-- Explicitly set up the text object for testing
 	child.lua('require("notedown").setup_list_text_object()')
-	
+
 	-- Verify the text object was set up
 	local al_exists = child.lua_get('vim.fn.mapcheck("al", "o") ~= ""')
 	if not al_exists then
@@ -205,7 +205,7 @@ end
 -- Execute a vim command or key sequence in shared neovim instance
 function M.execute_vim_command(command)
 	local child = M.get_child()
-	
+
 	-- Handle text object operations (like yal, dal) as normal mode key sequences
 	if command:match("^[ydcv]al$") then
 		-- These are operator + text object combinations, execute as normal mode keys

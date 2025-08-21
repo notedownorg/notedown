@@ -147,7 +147,6 @@ local function get_notedown_command_client()
 	return nil
 end
 
-
 -- Get list item boundaries via LSP command
 function M.get_list_item_boundaries()
 	local client = get_notedown_command_client()
@@ -185,17 +184,17 @@ end
 
 -- Text object for "around list" (al)
 function M.setup_list_text_object()
-	vim.keymap.set({"o", "x"}, "al", function()
+	vim.keymap.set({ "o", "x" }, "al", function()
 		local boundaries = M.get_list_item_boundaries()
 		if boundaries and boundaries.found then
 			local start_line = boundaries.start.line + 1
 			local finish_line = boundaries["end"].line
-			
-			vim.api.nvim_win_set_cursor(0, {start_line, 0})
+
+			vim.api.nvim_win_set_cursor(0, { start_line, 0 })
 			vim.cmd("normal! V")
-			
+
 			if finish_line > start_line then
-				vim.api.nvim_win_set_cursor(0, {finish_line, 0})
+				vim.api.nvim_win_set_cursor(0, { finish_line, 0 })
 			end
 		else
 			vim.notify("No list item found at cursor", vim.log.levels.WARN)
