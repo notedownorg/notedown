@@ -127,7 +127,6 @@ func (s *Server) findLastLineInNode(node parser.Node) int {
 	return lastLine
 }
 
-
 // BoundaryResponse represents the response for list item boundary requests
 type BoundaryResponse struct {
 	Start lsp.Position `json:"start"`
