@@ -62,7 +62,7 @@ checksum:
 
 
 snapshot:
-  name_template: "{{ .Env.NIGHTLY_VERSION }}"
+  version_template: "{{ .Env.NIGHTLY_VERSION }}"
 
 changelog:
   sort: asc
