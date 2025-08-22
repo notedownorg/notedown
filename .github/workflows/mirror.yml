@@ -7,7 +7,7 @@ on:
     paths:
       - 'neovim/**'
   workflow_dispatch:
-
+  pull_request:
 jobs:
   neovim:
     name: notedown.nvim
@@ -23,4 +23,4 @@ jobs:
         source-dir: 'neovim'
         target-repo: 'notedownorg/notedown.nvim'
         target-branch: 'main'
-        github-token: ${{ secrets.GITHUB_TOKEN }}
+        github-token: ${{ secrets.MIRRORING_TOKEN }}
