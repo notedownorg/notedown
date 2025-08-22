@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - 'nvim/**'
-  pull_request:
   workflow_dispatch:
 
 jobs:
