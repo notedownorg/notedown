@@ -146,6 +146,61 @@ Paragraph with [x] checkbox not in list.`,
 				},
 			},
 		},
+		{
+			name: "wikilinks and markdown links should be ignored",
+			content: `# Mixed Content
+
+- [[wikilink]] Regular list item with wikilink
+- [markdown-link](http://example.com) Regular list item with markdown link
+- [[docs/architecture]] Full path wikilink
+- [[target|display]] Wikilink with display text
+- [x] Valid task
+- [invalid] Invalid task that should be flagged
+- [ ] Another valid task
+
+Regular paragraph with [brackets] that should be ignored.
+`,
+			expectedCount: 1,
+			expectedCodes: []string{"invalid-task-state"},
+			expectedRanges: []lsp.Range{
+				{
+					Start: lsp.Position{Line: 7, Character: 2},
+					End:   lsp.Position{Line: 7, Character: 11},
+				},
+			},
+		},
+		{
+			name: "edge cases with complex brackets and spacing",
+			content: `# Edge Cases
+
+- [x]Valid task without space after bracket should not be detected
+- [ ] Valid task with space
+- [invalid]No space after bracket should not be detected  
+- [wrong] Space after bracket should be detected as invalid
+- [[wikilink]] Should be ignored
+- [[complex/path/file]] Should be ignored
+- [[target|display text]] Should be ignored
+- [link text](https://example.com) Should be ignored
+- [complex link text](path/to/file.md) Should be ignored
+- Text with [brackets] in middle should be ignored
+
+1. [x] Valid numbered task
+2. [bad] Invalid numbered task
+3. [[numbered/wikilink]] Should be ignored
+`,
+			expectedCount: 2,
+			expectedCodes: []string{"invalid-task-state", "invalid-task-state"},
+			expectedRanges: []lsp.Range{
+				{
+					Start: lsp.Position{Line: 5, Character: 2},
+					End:   lsp.Position{Line: 5, Character: 9},
+				},
+				{
+					Start: lsp.Position{Line: 14, Character: 3},
+					End:   lsp.Position{Line: 14, Character: 8},
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
