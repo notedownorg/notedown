@@ -58,10 +58,6 @@ archives:
 checksum:
   name_template: 'checksums.txt'
 
-signs:
-  - cmd: cosign
-    args: ["sign-blob", "--yes", "--bundle", "${artifact}.bundle", "${artifact}"]
-    artifacts: checksum
 
 snapshot:
   name_template: "{{ .Env.NIGHTLY_VERSION }}"

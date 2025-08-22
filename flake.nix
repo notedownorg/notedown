@@ -31,7 +31,6 @@
               neovim
               golangci-lint
               goreleaser
-              cosign
             ];
           };
         }
