@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/language-server/pkg/lsp"
 )
 
 // handleDidOpen handles textDocument/didOpen notifications

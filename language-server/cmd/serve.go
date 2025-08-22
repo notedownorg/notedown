@@ -18,8 +18,8 @@ import (
 	"bufio"
 	"os"
 
-	"github.com/notedownorg/notedown/lsp/pkg/lsp"
-	"github.com/notedownorg/notedown/lsp/pkg/notedownls"
+	"github.com/notedownorg/notedown/language-server/pkg/lsp"
+	"github.com/notedownorg/notedown/language-server/pkg/notedownls"
 	"github.com/notedownorg/notedown/pkg/log"
 	"github.com/notedownorg/notedown/pkg/version"
 	"github.com/spf13/cobra"

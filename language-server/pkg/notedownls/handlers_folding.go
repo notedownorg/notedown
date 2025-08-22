@@ -19,7 +19,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/language-server/pkg/lsp"
 )
 
 // handleFoldingRange handles textDocument/foldingRange requests

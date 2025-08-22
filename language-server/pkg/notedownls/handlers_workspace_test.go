@@ -19,7 +19,7 @@ import (
 	"slices"
 	"testing"
 
-	"github.com/notedownorg/notedown/lsp/pkg/lsp"
+	"github.com/notedownorg/notedown/language-server/pkg/lsp"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 

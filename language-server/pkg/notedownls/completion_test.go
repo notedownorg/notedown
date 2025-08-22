@@ -17,8 +17,8 @@ package notedownls
 import (
 	"testing"
 
-	"github.com/notedownorg/notedown/lsp/pkg/lsp"
-	"github.com/notedownorg/notedown/lsp/pkg/notedownls/indexes"
+	"github.com/notedownorg/notedown/language-server/pkg/lsp"
+	"github.com/notedownorg/notedown/language-server/pkg/notedownls/indexes"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 

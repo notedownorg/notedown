@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'nvim/**'
+      - 'neovim/**'
   workflow_dispatch:
 
 jobs:
@@ -17,10 +17,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Push nvim to separate repository
+    - name: Push neovim to separate repository
       uses: ./.github/actions/push-subdir
       with:
-        source-dir: 'nvim'
+        source-dir: 'neovim'
         target-repo: 'notedownorg/notedown.nvim'
         target-branch: 'main'
         github-token: ${{ secrets.GITHUB_TOKEN }}

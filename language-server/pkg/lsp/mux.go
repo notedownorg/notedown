@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/notedownorg/notedown/lsp/pkg/jsonrpc"
+	"github.com/notedownorg/notedown/language-server/pkg/jsonrpc"
 	"github.com/notedownorg/notedown/pkg/log"
 )
 

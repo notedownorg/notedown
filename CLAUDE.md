@@ -23,7 +23,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `go test ./language-server/pkg/...` - Test LSP server packages
 - `go test ./language-server/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
+- `cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
 
 ### Building
 - `go build -o bin/notedown-language-server ./language-server/` - Build LSP server binary
@@ -93,7 +93,7 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Neovim Plugin (`nvim/`)
+### 3. Neovim Plugin (`neovim/`)
 - **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
 - **LSP Integration**: Automatic LSP server startup and configuration
 - **Parser Modes**: Configurable parser selection (auto/notedown/markdown)
@@ -146,7 +146,7 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 - **Language Specification**: Full language documentation available in `language/` directory
 
 ### Editor Integration
-- **Neovim Plugin**: Complete Neovim integration provided in `nvim/`
+- **Neovim Plugin**: Complete Neovim integration provided in `neovim/`
   - Lua-based configuration and initialization (`lua/notedown/`)
   - Plugin bootstrapping (`plugin/notedown.lua`)
   - Automatically installed to `~/.config/notedown/nvim/` with `make install`

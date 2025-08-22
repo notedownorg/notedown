@@ -14,6 +14,8 @@
 
 project_name: notedown-language-server
 
+version_template: "{{ .Env.NIGHTLY_VERSION }}"
+
 before:
   hooks:
     - go mod tidy
@@ -62,7 +64,7 @@ signs:
     artifacts: checksum
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ .Env.NIGHTLY_VERSION }}"
 
 changelog:
   sort: asc
@@ -90,45 +92,9 @@ changelog:
       order: 999
 
 release:
-  github:
-    owner: notedownorg
-    name: notedown
-  draft: false
-  prerelease: auto
-  mode: replace
-  header: |
-    ## Notedown Language Server {{ .Tag }}
-    
-    This release contains the Notedown Language Server binary for multiple platforms.
-    
-    ### Installation
-    
-    Download the appropriate binary for your platform from the assets below, extract it, and place it in your PATH.
-    
-    Alternatively, install using Go:
-    
-    ```bash
-    go install github.com/notedownorg/notedown/language-server@{{ .Tag }}
-    ```
-    
-    ### Usage
-    
-    ```bash
-    notedown-language-server serve
-    ```
-    
-    ### Checksums
-    
-    All binaries are checksummed and the checksums are signed with [cosign](https://github.com/sigstore/cosign).
-    
-    1. Download the files you want, and the `checksums.txt` file from the assets below.
-    2. Verify the signature: `cosign verify-blob --certificate-identity 'https://github.com/notedownorg/notedown/.github/workflows/release.yml@refs/tags/{{ .Tag }}' --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' --signature 'checksums.txt.sig' checksums.txt`
-    3. Verify the checksums: `sha256sum --ignore-missing -c checksums.txt`
-  footer: |
-    **Full Changelog**: https://github.com/notedownorg/notedown/compare/{{ .PreviousTag }}...{{ .Tag }}
-  name_template: "{{ .ProjectName }} {{ .Version }}"
+  disable: true
 
-# Disable unwanted features for language server releases
+# Disable unwanted features for nightly builds
 brews: []
 dockers: []
 nfpms: []
