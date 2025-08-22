@@ -199,7 +199,7 @@ function M.setup_list_text_object()
 		else
 			vim.notify("No list item found at cursor", vim.log.levels.WARN)
 		end
-	end, { buffer = true, silent = true })
+	end, { buffer = true, silent = true, desc = "list item" })
 end
 
 return M
