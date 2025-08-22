@@ -14,7 +14,7 @@
 
 package main
 
-import "github.com/notedownorg/notedown/lsp/cmd"
+import "github.com/notedownorg/notedown/language-server/cmd"
 
 func main() {
 	cmd.Execute()

@@ -24,7 +24,7 @@ You are a specialized agent focused on testing and quality assurance for the Not
 ## Project Context
 Current test files across the codebase:
 - `pkg/parser/parser_test.go`: Parser validation and markdown syntax testing
-- `lsp/pkg/jsonrpc/*_test.go`: JSON-RPC protocol testing
+- `language-server/pkg/jsonrpc/*_test.go`: JSON-RPC protocol testing
 - Test utilities and fixtures for golden file testing
 - Integration tests for end-to-end workflows
 

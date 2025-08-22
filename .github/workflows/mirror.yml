@@ -5,23 +5,23 @@ on:
     branches:
       - main
     paths:
-      - 'notedown-nvim/**'
+      - 'nvim/**'
   pull_request:
   workflow_dispatch:
 
 jobs:
   neovim:
-    name: Mirror notedown-nvim subdirectory
+    name: notedown.nvim
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
     
-    - name: Push notedown-nvim to separate repository
+    - name: Push nvim to separate repository
       uses: ./.github/actions/push-subdir
       with:
-        source-dir: 'notedown-nvim'
+        source-dir: 'nvim'
         target-repo: 'notedownorg/notedown.nvim'
         target-branch: 'main'
         github-token: ${{ secrets.GITHUB_TOKEN }}

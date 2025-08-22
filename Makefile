@@ -35,7 +35,7 @@ mod:
 
 format: licenser
 	gofmt -w .
-	stylua notedown-nvim/
+	stylua nvim/
 
 lint:
 	golangci-lint run
@@ -46,7 +46,7 @@ test-lsp:
 	go test ./...
 
 test-nvim:
-	cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
+	cd nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
 install: clean
 	go build -ldflags "\
@@ -55,9 +55,9 @@ install: clean
 		-X github.com/notedownorg/notedown/pkg/version.commit=$(COMMIT) \
 		-X github.com/notedownorg/notedown/pkg/version.date=$(DATE)" \
 		-o $(shell go env GOPATH)/bin/notedown-language-server \
-		./lsp/
+		./language-server/
 	mkdir -p ~/.config/notedown/nvim
-	cp -r notedown-nvim/* ~/.config/notedown/nvim/
+	cp -r nvim/* ~/.config/notedown/nvim/
 
 clean:
 	rm -f $(shell go env GOPATH)/bin/notedown-language-server

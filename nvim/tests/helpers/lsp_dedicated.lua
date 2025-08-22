@@ -35,7 +35,7 @@ function M.get_binary_path()
 
 	local binary_name = "notedown-lsp-test"
 	local binary_path = project_root .. "/" .. binary_name
-	local lsp_source = project_root .. "/lsp/"
+	local lsp_source = project_root .. "/language-server/"
 
 	-- Build the LSP server from local source
 	local build_cmd = string.format("cd %s && go build -o %s %s", project_root, binary_path, lsp_source)

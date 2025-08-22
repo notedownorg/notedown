@@ -30,8 +30,10 @@
               stylua
               neovim
               golangci-lint
+              goreleaser
             ];
           };
         }
       );
 }
+

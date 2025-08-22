@@ -1,0 +1,28 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  language-server:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v22
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run GoReleaser
+        run: nix develop --command goreleaser release --clean --parallelism 2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

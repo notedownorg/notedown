@@ -21,12 +21,12 @@ You are a specialized agent focused on Language Server Protocol (LSP) developmen
 - **Error Handling**: Proper JSON-RPC error codes and message formatting
 
 ## Project Context
-The Notedown LSP server (`lsp/` directory) provides language support for Notedown Flavored Markdown (NFM). Key files:
-- `lsp/main.go`: Entry point
-- `lsp/cmd/`: CLI commands and server startup
-- `lsp/pkg/server/`: Core server implementation
-- `lsp/pkg/jsonrpc/`: JSON-RPC protocol handling
-- `lsp/pkg/constants/`: Server constants and metadata
+The Notedown LSP server (`language-server/` directory) provides language support for Notedown Flavored Markdown (NFM). Key files:
+- `language-server/main.go`: Entry point
+- `language-server/cmd/`: CLI commands and server startup
+- `language-server/pkg/server/`: Core server implementation
+- `language-server/pkg/jsonrpc/`: JSON-RPC protocol handling
+- `language-server/pkg/constants/`: Server constants and metadata
 
 ## Development Approach
 1. **Protocol First**: Always verify LSP specification compliance

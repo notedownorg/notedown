@@ -41,10 +41,10 @@ tests/testdata/list_movement/
 #### Running Tests
 ```bash
 # Run all golden file tests
-cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run_file('tests/test_list_movement_golden.lua')" -c "qall!"
+cd nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run_file('tests/test_list_movement_golden.lua')" -c "qall!"
 
 # Run specific test pattern
-cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run_file('tests/test_list_movement_golden.lua', {filter = 'nested'})" -c "qall!"
+cd nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run_file('tests/test_list_movement_golden.lua', {filter = 'nested'})" -c "qall!"
 ```
 
 #### Updating Golden Files
