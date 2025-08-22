@@ -34,3 +34,19 @@ jobs:
     
     - name: Run Language Server tests
       run: make test-lsp
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v25
+    
+    - name: Test release build
+      run: nix develop --command goreleaser release --config .goreleaser.notedown-language-server.yaml --snapshot --clean --parallelism 2

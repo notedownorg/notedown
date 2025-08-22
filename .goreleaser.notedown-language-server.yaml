@@ -50,16 +50,12 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
-      - README.md
+      - README.MD
       - LICENSE
 
 checksum:
   name_template: 'checksums.txt'
 
-signs:
-  - cmd: cosign
-    args: ["sign-blob", "--yes", "${artifact}"]
-    artifacts: checksum
 
 snapshot:
   name_template: "{{ incpatch .Version }}-next"
@@ -117,13 +113,16 @@ release:
     notedown-language-server serve
     ```
     
-    ### Checksums
+    ### Verification with Checksums
     
-    All binaries are checksummed and the checksums are signed with [cosign](https://github.com/sigstore/cosign).
+    Download `checksums.txt` and verify your binary:
+    ```bash
+    # Linux/macOS
+    sha256sum --ignore-missing -c checksums.txt
     
-    1. Download the files you want, and the `checksums.txt` file from the assets below.
-    2. Verify the signature: `cosign verify-blob --certificate-identity 'https://github.com/notedownorg/notedown/.github/workflows/release.yml@refs/tags/{{ .Tag }}' --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' --signature 'checksums.txt.sig' checksums.txt`
-    3. Verify the checksums: `sha256sum --ignore-missing -c checksums.txt`
+    # Windows
+    certutil -hashfile notedown-language-server.exe SHA256
+    ```
   footer: |
     **Full Changelog**: https://github.com/notedownorg/notedown/compare/{{ .PreviousTag }}...{{ .Tag }}
   name_template: "{{ .ProjectName }} {{ .Version }}"

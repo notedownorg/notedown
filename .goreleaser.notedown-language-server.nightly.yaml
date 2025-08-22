@@ -52,16 +52,12 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
-      - README.md
+      - README.MD
       - LICENSE
 
 checksum:
   name_template: 'checksums.txt'
 
-signs:
-  - cmd: cosign
-    args: ["sign-blob", "--yes", "${artifact}"]
-    artifacts: checksum
 
 snapshot:
   name_template: "{{ .Env.NIGHTLY_VERSION }}"
