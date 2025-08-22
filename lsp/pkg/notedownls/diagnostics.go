@@ -140,8 +140,9 @@ func (s *Server) findInvalidTaskCheckboxes(doc *parser.Document, content string,
 	var diagnostics []lsp.Diagnostic
 
 	// Step 1: Use regex to find all potential task checkbox patterns in list items
-	// Pattern: line start + list marker (-, *, +, or number.) + whitespace + [text]
-	taskRegex := regexp.MustCompile(`(?m)^(\s*[-*+]|\s*\d+\.)\s*(\[([^\]]*)\])`)
+	// Pattern: line start + list marker (-, *, +, or number.) + whitespace + [text] + whitespace
+	// The trailing whitespace requirement distinguishes task checkboxes from wikilinks/markdown links
+	taskRegex := regexp.MustCompile(`(?m)^(\s*[-*+]|\s*\d+\.)\s*(\[([^\]]*)\])\s`)
 	matches := taskRegex.FindAllStringSubmatchIndex(content, -1)
 
 	if len(matches) == 0 {
