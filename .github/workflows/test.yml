@@ -16,7 +16,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Install Nix
-      uses: cachix/install-nix-action@v25
+      uses: cachix/install-nix-action@v31
     
     - name: Run Neovim tests
       run: make test-nvim
@@ -30,7 +30,7 @@ jobs:
       uses: actions/checkout@v4
     
     - name: Install Nix
-      uses: cachix/install-nix-action@v25
+      uses: cachix/install-nix-action@v31
     
     - name: Run Language Server tests
       run: make test-lsp
@@ -46,7 +46,7 @@ jobs:
         fetch-depth: 0
     
     - name: Install Nix
-      uses: cachix/install-nix-action@v25
+      uses: cachix/install-nix-action@v31
     
     - name: Test release build
       run: nix develop --command goreleaser release --config .goreleaser.notedown-language-server.yaml --snapshot --clean --parallelism 2
