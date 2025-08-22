@@ -114,10 +114,10 @@ function M.setup(opts)
 				},
 			})
 
-			-- Enable treesitter-based folding for notedown files
+			-- Enable LSP-based folding for notedown files
 			if vim.bo.filetype == "notedown" then
 				vim.opt_local.foldmethod = "expr"
-				vim.opt_local.foldexpr = "v:lua.vim.treesitter.foldexpr()"
+				vim.opt_local.foldexpr = "v:lua.vim.lsp.foldexpr()"
 				vim.opt_local.foldenable = true
 				vim.opt_local.foldlevel = 99 -- Start with all folds open
 			end

@@ -18,7 +18,7 @@ A Neovim plugin for [Notedown Flavored Markdown](https://github.com/notedownorg/
 
 - Neovim >= 0.9.0
 - [notedown-language-server](https://github.com/notedownorg/notedown) (built and available in PATH)
-- TreeSitter with markdown parser installed (for folding support in notedown files)
+- Neovim with LSP support (for folding support in notedown files)
 
 ## 📦 Installation
 
