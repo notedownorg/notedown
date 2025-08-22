@@ -104,3 +104,29 @@ type WorkDoneProgressParams struct {
 type PartialResultParams struct {
 	PartialResultToken *string `json:"partialResultToken,omitempty"`
 }
+
+// FoldingRangeParams represents the parameters for textDocument/foldingRange requests
+type FoldingRangeParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	WorkDoneProgressParams
+	PartialResultParams
+}
+
+// FoldingRange represents a foldable range in a text document
+type FoldingRange struct {
+	StartLine      int               `json:"startLine"`
+	StartCharacter *int              `json:"startCharacter,omitempty"`
+	EndLine        int               `json:"endLine"`
+	EndCharacter   *int              `json:"endCharacter,omitempty"`
+	Kind           *FoldingRangeKind `json:"kind,omitempty"`
+	CollapsedText  *string           `json:"collapsedText,omitempty"`
+}
+
+// FoldingRangeKind represents the kind of a folding range
+type FoldingRangeKind string
+
+const (
+	FoldingRangeKindComment FoldingRangeKind = "comment"
+	FoldingRangeKindImports FoldingRangeKind = "imports"
+	FoldingRangeKindRegion  FoldingRangeKind = "region"
+)
