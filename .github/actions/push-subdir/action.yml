@@ -1,0 +1,77 @@
+name: 'Push Subdirectory'
+description: 'Push a subdirectory to a separate repository'
+inputs:
+  source-dir:
+    description: 'Source subdirectory to push'
+    required: true
+  target-repo:
+    description: 'Target repository (owner/repo)'
+    required: true
+  target-branch:
+    description: 'Target branch name'
+    required: false
+    default: 'main'
+  github-token:
+    description: 'GitHub token with repo permissions'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Validate inputs
+      shell: bash
+      run: |
+        if [ ! -d "${{ inputs.source-dir }}" ]; then
+          echo "Error: Source directory '${{ inputs.source-dir }}' does not exist"
+          exit 1
+        fi
+        
+        if [[ ! "${{ inputs.target-repo }}" =~ ^[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+$ ]]; then
+          echo "Error: Target repository must be in format 'owner/repo'"
+          exit 1
+        fi
+    
+    - name: Configure Git
+      shell: bash
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    
+    - name: Create filtered repository with history
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+      run: |
+        # Create temporary directory and clone repo
+        TEMP_DIR=$(mktemp -d)
+        echo "TEMP_DIR=$TEMP_DIR" >> $GITHUB_ENV
+        
+        git clone --no-hardlinks . "$TEMP_DIR"
+        cd "$TEMP_DIR"
+        
+        # Use git filter-branch to extract subdirectory history
+        echo "Extracting ${{ inputs.source-dir }} history with git filter-branch"
+        git filter-branch --prune-empty --subdirectory-filter "${{ inputs.source-dir }}" -- --all
+        
+        # Clean up filter-branch refs
+        git for-each-ref --format="delete %(refname)" refs/original | git update-ref --stdin
+        git reflog expire --expire=now --all
+        git gc --prune=now
+        
+        # Add remote and push with history
+        git remote remove origin 2>/dev/null || true
+        git remote add origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ inputs.target-repo }}.git"
+        
+        # Push all branches and tags
+        git push --force --all origin
+        git push --force --tags origin
+        
+        echo "Successfully pushed to ${{ inputs.target-repo }} with full history"
+    
+    - name: Cleanup
+      shell: bash
+      if: always()
+      run: |
+        if [ -d "$TEMP_DIR" ]; then
+          rm -rf "$TEMP_DIR"
+        fi

@@ -20,14 +20,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Testing Individual Components
 - `go test ./pkg/parser/...` - Test parser package
-- `go test ./lsp/pkg/...` - Test LSP server packages
-- `go test ./lsp/pkg/notedownls/...` - Test Notedown-specific LSP implementation
+- `go test ./language-server/pkg/...` - Test LSP server packages
+- `go test ./language-server/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd notedown-nvim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
+- `cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
 
 ### Building
-- `go build -o bin/notedown-language-server ./lsp/` - Build LSP server binary
-- `go run ./lsp/ serve` - Run LSP server directly
+- `go build -o bin/notedown-language-server ./language-server/` - Build LSP server binary
+- `go run ./language-server/ serve` - Run LSP server directly
 - `make install` - Build with version info and install to GOPATH/bin
 
 ### Code Quality
@@ -54,7 +54,7 @@ Key files:
 - `extensions/wikilink.go` - Wikilink syntax support
 - `extensions/tasklist.go` - Task list syntax support
 
-### 2. LSP Server (`lsp/`)
+### 2. LSP Server (`language-server/`)
 - **Server Implementation**: Custom LSP server implementation with JSON-RPC protocol handling
 - **JSON-RPC**: Custom JSON-RPC implementation with batch support and error handling in `pkg/jsonrpc/`
 - **Command Structure**: Cobra-based CLI with `serve` command for LSP mode
@@ -75,7 +75,7 @@ Key components:
 - **Protocol Methods**: All LSP 3.17 methods defined in `methods.go`
 - **Initialization**: Proper LSP lifecycle with initialize/initialized sequence
 
-#### Notedown Language Server Implementation (`lsp/pkg/notedownls/`)
+#### Notedown Language Server Implementation (`language-server/pkg/notedownls/`)
 - **Server**: Main notedownls Server struct that implements LSP interface for Notedown features
 - **Document Management**: Thread-safe document storage with content tracking and lifecycle management
 - **Workspace Management**: WorkspaceManager handles workspace roots, file discovery, and Markdown file indexing
@@ -93,7 +93,7 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Neovim Plugin (`notedown-nvim/`)
+### 3. Neovim Plugin (`neovim/`)
 - **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
 - **LSP Integration**: Automatic LSP server startup and configuration
 - **Parser Modes**: Configurable parser selection (auto/notedown/markdown)
@@ -146,7 +146,7 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 - **Language Specification**: Full language documentation available in `language/` directory
 
 ### Editor Integration
-- **Neovim Plugin**: Complete Neovim integration provided in `notedown-nvim/`
+- **Neovim Plugin**: Complete Neovim integration provided in `neovim/`
   - Lua-based configuration and initialization (`lua/notedown/`)
   - Plugin bootstrapping (`plugin/notedown.lua`)
   - Automatically installed to `~/.config/notedown/nvim/` with `make install`

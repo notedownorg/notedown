@@ -7,7 +7,7 @@ Comprehensive testing strategies and guidelines.
 ### Unit Tests
 - Parser functionality: `pkg/parser/parser_test.go`
 - Wikilink extension: `pkg/parser/extensions/wikilink_test.go`
-- JSON-RPC protocol: `lsp/pkg/jsonrpc/*_test.go`
+- JSON-RPC protocol: `language-server/pkg/jsonrpc/*_test.go`
 
 ### Integration Tests
 - End-to-end LSP communication

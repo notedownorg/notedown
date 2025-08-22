@@ -17,7 +17,7 @@ Comprehensive task management with nested hierarchies and wikilink references.
     - [?] Handle missing files gracefully
 - [-] Testing and quality
   - [x] Unit tests for [[components/parser|parser components]]
-  - [!] Integration tests for [[components/lsp-server|LSP server]]
+  - [!] Integration tests for [[components/language-server|language server]]
   - [?] Performance tests with [[test-data/large-workspace|large workspaces]]
 - [ ] Documentation
   - [ ] Update [[docs/api-reference|API reference]]
@@ -116,7 +116,7 @@ Comprehensive task management with nested hierarchies and wikilink references.
 
 ### Version 1.0 Goals
 - [ ] Stable LSP server
-  - [ ] Complete [[lsp/core-methods|core LSP method]] implementation
+  - [ ] Complete [[language-server/core-methods|core LSP method]] implementation
   - [ ] Robust [[error-handling/graceful-degradation|error handling]]
   - [ ] Comprehensive [[testing/automated-suite|test suite]]
 - [ ] Editor integrations
