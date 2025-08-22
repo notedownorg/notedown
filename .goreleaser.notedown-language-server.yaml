@@ -50,7 +50,7 @@ archives:
       {{- else }}{{ .Arch }}{{ end }}
       {{- if .Arm }}v{{ .Arm }}{{ end }}
     files:
-      - README.md
+      - README.MD
       - LICENSE
 
 checksum:
