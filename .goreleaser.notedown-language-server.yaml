@@ -58,7 +58,7 @@ checksum:
 
 signs:
   - cmd: cosign
-    args: ["sign-blob", "--yes", "${artifact}"]
+    args: ["sign-blob", "--yes", "--bundle", "${artifact}.bundle", "${artifact}"]
     artifacts: checksum
 
 snapshot:
