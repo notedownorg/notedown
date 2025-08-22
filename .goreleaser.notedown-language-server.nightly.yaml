@@ -16,8 +16,6 @@ version: 2
 
 project_name: notedown-language-server
 
-version_template: "{{ .Env.NIGHTLY_VERSION }}"
-
 before:
   hooks:
     - go mod tidy
