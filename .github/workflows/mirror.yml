@@ -1,0 +1,27 @@
+name: mirror
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'notedown-nvim/**'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  neovim:
+    name: Mirror notedown-nvim subdirectory
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Push notedown-nvim to separate repository
+      uses: ./.github/actions/push-subdir
+      with:
+        source-dir: 'notedown-nvim'
+        target-repo: 'notedownorg/notedown.nvim'
+        target-branch: 'main'
+        github-token: ${{ secrets.GITHUB_TOKEN }}
