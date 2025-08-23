@@ -99,32 +99,48 @@ release:
     
     This release contains the Notedown Language Server binary for multiple platforms.
     
-    ### Installation
+    ### 📦 Installation
     
-    Download the appropriate binary for your platform from the assets below, extract it, and place it in your PATH.
-    
-    Alternatively, install using Go:
-    
+    **Linux x86_64:**
     ```bash
-    go install github.com/notedownorg/notedown/language-server@{{ .Tag }}
+    curl -L "https://github.com/notedownorg/notedown/releases/download/{{ .Tag }}/notedown-language-server_Linux_x86_64.tar.gz" | tar -xz && sudo mv notedown-language-server /usr/local/bin/
     ```
     
-    ### Usage
+    **Linux ARM64:**
+    ```bash
+    curl -L "https://github.com/notedownorg/notedown/releases/download/{{ .Tag }}/notedown-language-server_Linux_arm64.tar.gz" | tar -xz && sudo mv notedown-language-server /usr/local/bin/
+    ```
     
+    **macOS Intel:**
+    ```bash
+    curl -L "https://github.com/notedownorg/notedown/releases/download/{{ .Tag }}/notedown-language-server_Darwin_x86_64.tar.gz" | tar -xz && sudo mv notedown-language-server /usr/local/bin/
+    ```
+    
+    **macOS Apple Silicon:**
+    ```bash
+    curl -L "https://github.com/notedownorg/notedown/releases/download/{{ .Tag }}/notedown-language-server_Darwin_arm64.tar.gz" | tar -xz && sudo mv notedown-language-server /usr/local/bin/
+    ```
+    
+    ### 🚀 Usage
+    
+    Start the language server:
     ```bash
     notedown-language-server serve
     ```
     
-    ### Verification with Checksums
+    ### 🔐 Security: Verify Downloads
     
-    Download `checksums.txt` and verify your binary:
-    ```bash
-    # Linux/macOS
-    sha256sum --ignore-missing -c checksums.txt
+    Always verify your download using the provided checksums:
     
-    # Windows
-    certutil -hashfile notedown-language-server.exe SHA256
-    ```
+    1. **Download** `checksums.txt` from the assets
+    2. **Verify** your binary:
+       ```bash
+       # Linux/macOS
+       sha256sum --ignore-missing -c checksums.txt
+       
+       # Alternative verification
+       sha256sum notedown-language-server_*.tar.gz
+       ```
   footer: |
     **Full Changelog**: https://github.com/notedownorg/notedown/compare/{{ .PreviousTag }}...{{ .Tag }}
   name_template: "{{ .ProjectName }} {{ .Version }}"
