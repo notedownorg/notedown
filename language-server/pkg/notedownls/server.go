@@ -101,6 +101,7 @@ func (s *Server) Initialize(params lsp.InitializeParams) (lsp.InitializeResult, 
 			ExecuteCommandProvider: &lsp.ExecuteCommandOptions{
 				Commands: []string{
 					"notedown.getListItemBoundaries",
+					"notedown.getConcealRanges",
 				},
 			},
 			// DiagnosticProvider: &lsp.DiagnosticOptions{}, // Disabled to avoid pull diagnostic conflicts
