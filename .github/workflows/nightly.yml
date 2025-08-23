@@ -95,15 +95,34 @@ jobs:
 
           ### 📦 Installation
 
-          #### Download Binary
-          1. Download the appropriate binary for your platform from the assets below
-          2. Extract the archive: \`tar -xzf notedown-language-server_*.tar.gz\`
-          3. Move to your PATH: \`mv notedown-language-server /usr/local/bin/\`
-          4. Make executable: \`chmod +x /usr/local/bin/notedown-language-server\`
+          #### Linux x86_64
+          \`\`\`bash
+          curl -L "https://github.com/notedownorg/notedown/releases/download/${NIGHTLY_VERSION}/notedown-language-server_Linux_x86_64.tar.gz" | tar -xz && chmod +x notedown-language-server && sudo mv notedown-language-server /usr/local/bin/
+          \`\`\`
+          
+          #### Linux ARM64
+          \`\`\`bash
+          curl -L "https://github.com/notedownorg/notedown/releases/download/${NIGHTLY_VERSION}/notedown-language-server_Linux_arm64.tar.gz" | tar -xz && chmod +x notedown-language-server && sudo mv notedown-language-server /usr/local/bin/
+          \`\`\`
+          
+          #### macOS Intel
+          \`\`\`bash
+          curl -L "https://github.com/notedownorg/notedown/releases/download/${NIGHTLY_VERSION}/notedown-language-server_Darwin_x86_64.tar.gz" | tar -xz && chmod +x notedown-language-server && sudo mv notedown-language-server /usr/local/bin/
+          \`\`\`
+          
+          #### macOS Apple Silicon
+          \`\`\`bash
+          curl -L "https://github.com/notedownorg/notedown/releases/download/${NIGHTLY_VERSION}/notedown-language-server_Darwin_arm64.tar.gz" | tar -xz && chmod +x notedown-language-server && sudo mv notedown-language-server /usr/local/bin/
+          \`\`\`
 
           #### Verify Installation
           \`\`\`bash
           notedown-language-server version
+          \`\`\`
+
+          #### Start Language Server
+          \`\`\`bash
+          notedown-language-server serve
           \`\`\`
 
           ### 🔍 What's Changed
