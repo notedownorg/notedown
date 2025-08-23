@@ -71,7 +71,7 @@ jobs:
           echo "Generated nightly version: $NIGHTLY_VERSION"
 
       - name: Build with GoReleaser
-        run: nix develop --command goreleaser build --config .goreleaser.notedown-language-server.nightly.yaml --clean --parallelism 2
+        run: nix develop --command goreleaser release --config .goreleaser.notedown-language-server.nightly.yaml --snapshot --clean --parallelism 2
         env:
           NIGHTLY_VERSION: ${{ steps.version.outputs.version }}
 
