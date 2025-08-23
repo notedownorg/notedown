@@ -603,14 +603,14 @@ func TestWikilinkConcealRanges(t *testing.T) {
 			name:             "multiple wikilinks - mixed",
 			markdown:         "[[simple]] and [[complex|display]]",
 			wantHasPipe:      []bool{false, true},
-			wantConcealStart: []int{0, 2},  // Second one starts after [[
+			wantConcealStart: []int{0, 2}, // Second one starts after [[
 			wantConcealEnd:   []int{0, 9}, // Second one ends before |
 		},
 		{
 			name:             "wikilink with spaces in target",
 			markdown:         "[[my page|My Page]]",
 			wantHasPipe:      []bool{true},
-			wantConcealStart: []int{2},  // Start after [[
+			wantConcealStart: []int{2}, // Start after [[
 			wantConcealEnd:   []int{9}, // End before |
 		},
 	}

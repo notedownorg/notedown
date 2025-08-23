@@ -94,8 +94,8 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 
 		// Calculate conceal range: from after [[ to before |
 		// concealStart is relative to the start of the wikilink (after [[)
-		concealStart = 2           // Start after [[
-		concealEnd = 2 + pipePos   // End before |
+		concealStart = 2         // Start after [[
+		concealEnd = 2 + pipePos // End before |
 	}
 	target = strings.TrimSpace(target)
 	displayText = strings.TrimSpace(displayText)

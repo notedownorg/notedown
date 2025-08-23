@@ -831,10 +831,10 @@ T["wikilink concealment"]["handles multiple wikilinks in single document"] = fun
 	-- Create test file with multiple wikilinks
 	utils.write_file(
 		workspace .. "/test.md",
-		"# Test Document\n\n" ..
-		"See [[first]] and [[second]] for basics.\n\n" ..
-		"Also check [[docs/third|third document]] for details.\n\n" ..
-		"Finally, [[nonexistent]] doesn't exist yet."
+		"# Test Document\n\n"
+			.. "See [[first]] and [[second]] for basics.\n\n"
+			.. "Also check [[docs/third|third document]] for details.\n\n"
+			.. "Finally, [[nonexistent]] doesn't exist yet."
 	)
 
 	-- Setup LSP
@@ -853,7 +853,7 @@ T["wikilink concealment"]["handles multiple wikilinks in single document"] = fun
 
 	-- Verify all wikilink syntax remains in buffer
 	local buffer_content = child.lua_get('table.concat(vim.api.nvim_buf_get_lines(0, 0, -1, false), "\\n")')
-	
+
 	-- Check that all wikilinks are present in the buffer
 	MiniTest.expect.equality(
 		string.find(buffer_content, "%[%[first%]%]") ~= nil,

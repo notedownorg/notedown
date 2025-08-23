@@ -117,7 +117,7 @@ function M.setup(opts)
 
 			-- Ensure LSP is attached to this buffer (start if not already started)
 			local workspace_root = find_notedown_workspace(file_path) or final_config.server.root_dir()
-			
+
 			vim.lsp.start({
 				name = final_config.server.name,
 				cmd = final_config.server.cmd,
