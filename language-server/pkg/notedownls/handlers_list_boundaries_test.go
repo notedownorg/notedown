@@ -368,3 +368,171 @@ func TestHandleGetListItemBoundaries_NumberedList(t *testing.T) {
 	assert.Equal(t, 6, response.End.Line) // After "Sub item b" (exclusive)
 	assert.Equal(t, 0, response.End.Character)
 }
+
+func TestHandleGetConcealRanges_WithPipeWikilinks(t *testing.T) {
+	server := createTestServerForBoundaries()
+
+	// Test content with wikilinks that have pipes
+	content := `# Document with Wikilinks
+
+Here is a [[simple]] wikilink.
+
+And here is a [[docs/architecture|architecture documentation]] with display text.
+
+Multiple wikilinks: [[target1|display1]] and [[target2|display2]].
+
+Regular text without wikilinks.`
+
+	// Add document to server
+	doc := &Document{
+		URI:     "file:///test.md",
+		Content: content,
+	}
+	server.documents[doc.URI] = doc
+
+	arguments := []any{"file:///test.md"}
+
+	result, err := server.handleGetConcealRanges(arguments)
+	require.NoError(t, err)
+
+	// Assert the result has the expected conceal ranges
+	response, ok := result.(*ConcealRangesResponse)
+	require.True(t, ok)
+
+	// Should find 3 wikilinks with pipes
+	assert.Len(t, response.Ranges, 3)
+
+	// Check first wikilink with pipe: [[docs/architecture|architecture documentation]]
+	range1 := response.Ranges[0]
+	assert.Equal(t, "wikilinkTarget", range1.ConcealType)
+	assert.Equal(t, 4, range1.Start.Line)       // Line with the wikilink (0-based)
+	assert.Equal(t, 16, range1.Start.Character) // After [[
+	assert.Equal(t, 4, range1.End.Line)         // Same line
+	assert.Equal(t, 33, range1.End.Character)   // Before |
+
+	// Check second wikilink with pipe: [[target1|display1]]
+	range2 := response.Ranges[1]
+	assert.Equal(t, "wikilinkTarget", range2.ConcealType)
+	assert.Equal(t, 6, range2.Start.Line)       // Line with multiple wikilinks
+	assert.Equal(t, 22, range2.Start.Character) // After [[
+	assert.Equal(t, 6, range2.End.Line)         // Same line
+	assert.Equal(t, 29, range2.End.Character)   // Before |
+
+	// Check third wikilink with pipe: [[target2|display2]]
+	range3 := response.Ranges[2]
+	assert.Equal(t, "wikilinkTarget", range3.ConcealType)
+	assert.Equal(t, 6, range3.Start.Line)       // Same line as range2
+	assert.Equal(t, 47, range3.Start.Character) // After [[
+	assert.Equal(t, 6, range3.End.Line)         // Same line
+	assert.Equal(t, 54, range3.End.Character)   // Before |
+}
+
+func TestHandleGetConcealRanges_NoPipeWikilinks(t *testing.T) {
+	server := createTestServerForBoundaries()
+
+	// Test content with only simple wikilinks (no pipes)
+	content := `# Simple Wikilinks
+
+Here are some [[simple]] and [[basic]] wikilinks.
+
+No pipe wikilinks here: [[page1]] and [[page2]].`
+
+	// Add document to server
+	doc := &Document{
+		URI:     "file:///test.md",
+		Content: content,
+	}
+	server.documents[doc.URI] = doc
+
+	arguments := []any{"file:///test.md"}
+
+	result, err := server.handleGetConcealRanges(arguments)
+	require.NoError(t, err)
+
+	// Assert no conceal ranges for wikilinks without pipes
+	response, ok := result.(*ConcealRangesResponse)
+	require.True(t, ok)
+	assert.Len(t, response.Ranges, 0)
+}
+
+func TestHandleGetConcealRanges_MixedWikilinks(t *testing.T) {
+	server := createTestServerForBoundaries()
+
+	// Test content with mixed wikilinks
+	content := `# Mixed Wikilinks
+
+Simple: [[page]]
+With pipe: [[target|display]]
+Another simple: [[another]]
+Another with pipe: [[docs/guide|Guide]]`
+
+	// Add document to server
+	doc := &Document{
+		URI:     "file:///test.md",
+		Content: content,
+	}
+	server.documents[doc.URI] = doc
+
+	arguments := []any{"file:///test.md"}
+
+	result, err := server.handleGetConcealRanges(arguments)
+	require.NoError(t, err)
+
+	// Assert only ranges for wikilinks with pipes
+	response, ok := result.(*ConcealRangesResponse)
+	require.True(t, ok)
+	assert.Len(t, response.Ranges, 2)
+
+	// Should only have the two with pipes
+	assert.Equal(t, "wikilinkTarget", response.Ranges[0].ConcealType)
+	assert.Equal(t, "wikilinkTarget", response.Ranges[1].ConcealType)
+}
+
+func TestHandleGetConcealRanges_DocumentNotFound(t *testing.T) {
+	server := createTestServerForBoundaries()
+
+	arguments := []any{"file:///nonexistent.md"}
+
+	result, err := server.handleGetConcealRanges(arguments)
+	require.NoError(t, err)
+
+	// Assert empty ranges for non-existent document
+	response, ok := result.(*ConcealRangesResponse)
+	require.True(t, ok)
+	assert.Len(t, response.Ranges, 0)
+}
+
+func TestHandleGetConcealRanges_InvalidArguments(t *testing.T) {
+	server := createTestServerForBoundaries()
+
+	tests := []struct {
+		name      string
+		arguments []any
+		expectErr bool
+	}{
+		{
+			name:      "no arguments",
+			arguments: []any{},
+			expectErr: true,
+		},
+		{
+			name:      "invalid URI type",
+			arguments: []any{123},
+			expectErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := server.handleGetConcealRanges(tt.arguments)
+
+			if tt.expectErr {
+				assert.Error(t, err)
+				assert.Nil(t, result)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, result)
+			}
+		})
+	}
+}

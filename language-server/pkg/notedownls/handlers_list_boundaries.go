@@ -41,6 +41,8 @@ func (s *Server) handleExecuteCommand(params json.RawMessage) (any, error) {
 	switch executeParams.Command {
 	case "notedown.getListItemBoundaries":
 		return s.handleGetListItemBoundaries(executeParams.Arguments)
+	case "notedown.getConcealRanges":
+		return s.handleGetConcealRanges(executeParams.Arguments)
 	default:
 		return nil, fmt.Errorf("unknown command: %s", executeParams.Command)
 	}
@@ -211,5 +213,99 @@ func (s *Server) handleGetListItemBoundaries(arguments []any) (any, error) {
 		"item_start", startLine,
 		"item_end", endLine)
 
+	return response, nil
+}
+
+// ConcealRange represents a range that should be concealed
+type ConcealRange struct {
+	Start       lsp.Position `json:"start"`
+	End         lsp.Position `json:"end"`
+	ConcealType string       `json:"concealType"`
+}
+
+// ConcealRangesResponse represents the response for getConcealRanges requests
+type ConcealRangesResponse struct {
+	Ranges []ConcealRange `json:"ranges"`
+}
+
+// WikilinkFinder helps find wikilinks with conceal ranges using the parser AST
+type WikilinkFinder struct {
+	concealRanges []ConcealRange
+}
+
+// Visit implements the Visitor interface to find wikilinks with conceal ranges
+func (f *WikilinkFinder) Visit(node parser.Node) error {
+	if node.Type() != parser.NodeWikilink {
+		return nil
+	}
+
+	wikilink, ok := node.(*parser.Wikilink)
+	if !ok || !wikilink.HasPipe {
+		return nil // Only process wikilinks with pipes
+	}
+
+	// Convert parser Range to LSP Position
+	concealRange := ConcealRange{
+		Start: lsp.Position{
+			Line:      wikilink.ConcealRange.Start.Line - 1,   // Convert to 0-based
+			Character: wikilink.ConcealRange.Start.Column - 1, // Convert to 0-based
+		},
+		End: lsp.Position{
+			Line:      wikilink.ConcealRange.End.Line - 1,   // Convert to 0-based
+			Character: wikilink.ConcealRange.End.Column - 1, // Convert to 0-based
+		},
+		ConcealType: "wikilinkTarget",
+	}
+
+	f.concealRanges = append(f.concealRanges, concealRange)
+	return nil
+}
+
+// handleGetConcealRanges returns all conceal ranges for wikilinks in a document
+func (s *Server) handleGetConcealRanges(arguments []any) (any, error) {
+	if len(arguments) < 1 {
+		return nil, fmt.Errorf("getConcealRanges requires document URI argument")
+	}
+
+	// Extract document URI
+	documentURI, ok := arguments[0].(string)
+	if !ok {
+		return nil, fmt.Errorf("first argument must be document URI (string)")
+	}
+
+	s.logger.Debug("getting conceal ranges", "uri", documentURI)
+
+	// Get the document
+	doc, exists := s.GetDocument(documentURI)
+	if !exists {
+		s.logger.Error("document not found for conceal ranges request", "uri", documentURI)
+		return &ConcealRangesResponse{Ranges: []ConcealRange{}}, nil
+	}
+
+	// Use the existing parser to parse the document
+	p := parser.NewParser()
+	parsedDoc, err := p.ParseString(doc.Content)
+	if err != nil {
+		s.logger.Error("failed to parse document for conceal ranges", "error", err)
+		return &ConcealRangesResponse{Ranges: []ConcealRange{}}, nil
+	}
+
+	// Create a finder visitor to collect all wikilink conceal ranges
+	finder := &WikilinkFinder{
+		concealRanges: make([]ConcealRange, 0),
+	}
+
+	// Walk the AST to find all wikilinks with conceal ranges
+	walker := parser.NewWalker(finder)
+	if err := walker.Walk(parsedDoc); err != nil {
+		s.logger.Error("failed to walk AST for conceal ranges", "error", err)
+		return &ConcealRangesResponse{Ranges: []ConcealRange{}}, nil
+	}
+
+	response := &ConcealRangesResponse{
+		Ranges: finder.concealRanges,
+	}
+
+	s.logger.Debug("found conceal ranges", "count", len(response.Ranges))
 	return response, nil
 }

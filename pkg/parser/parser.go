@@ -172,7 +172,17 @@ func (p *NotedownParser) astToTreeNode(astNode ast.Node, source []byte) Node {
 
 	// Handle wikilink nodes
 	if wikilink, ok := astNode.(*extensions.WikilinkAST); ok {
-		return NewWikilink(wikilink.Target, wikilink.DisplayText, rng)
+		var concealRange Range
+		if wikilink.HasPipe {
+			// Calculate absolute conceal range from relative positions
+			concealStart := p.offsetToPosition(rng.Start.Offset+wikilink.ConcealStart, source)
+			concealEnd := p.offsetToPosition(rng.Start.Offset+wikilink.ConcealEnd, source)
+			concealRange = Range{
+				Start: concealStart,
+				End:   concealEnd,
+			}
+		}
+		return NewWikilinkWithConceal(wikilink.Target, wikilink.DisplayText, rng, wikilink.HasPipe, concealRange)
 	}
 
 	// Debug: Check for heading first

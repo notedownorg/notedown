@@ -569,3 +569,102 @@ func TestWikilinkEdgeCases(t *testing.T) {
 		})
 	}
 }
+
+func TestWikilinkConcealRanges(t *testing.T) {
+	tests := []struct {
+		name             string
+		markdown         string
+		wantHasPipe      []bool
+		wantConcealStart []int
+		wantConcealEnd   []int
+	}{
+		{
+			name:             "simple wikilink - no pipe",
+			markdown:         "[[page]]",
+			wantHasPipe:      []bool{false},
+			wantConcealStart: []int{0},
+			wantConcealEnd:   []int{0},
+		},
+		{
+			name:             "wikilink with pipe",
+			markdown:         "[[target|display]]",
+			wantHasPipe:      []bool{true},
+			wantConcealStart: []int{2}, // Start after [[
+			wantConcealEnd:   []int{8}, // End before |
+		},
+		{
+			name:             "wikilink with longer target",
+			markdown:         "[[docs/architecture|architecture]]",
+			wantHasPipe:      []bool{true},
+			wantConcealStart: []int{2},  // Start after [[
+			wantConcealEnd:   []int{19}, // End before |
+		},
+		{
+			name:             "multiple wikilinks - mixed",
+			markdown:         "[[simple]] and [[complex|display]]",
+			wantHasPipe:      []bool{false, true},
+			wantConcealStart: []int{0, 2}, // Second one starts after [[
+			wantConcealEnd:   []int{0, 9}, // Second one ends before |
+		},
+		{
+			name:             "wikilink with spaces in target",
+			markdown:         "[[my page|My Page]]",
+			wantHasPipe:      []bool{true},
+			wantConcealStart: []int{2}, // Start after [[
+			wantConcealEnd:   []int{9}, // End before |
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			md := goldmark.New(goldmark.WithExtensions(NewWikilinkExtension()))
+			doc := md.Parser().Parse(text.NewReader([]byte(tt.markdown)))
+
+			var wikilinks []*WikilinkAST
+			_ = ast.Walk(doc, func(node ast.Node, entering bool) (ast.WalkStatus, error) {
+				if entering {
+					if wl, ok := node.(*WikilinkAST); ok {
+						wikilinks = append(wikilinks, wl)
+					}
+				}
+				return ast.WalkContinue, nil
+			})
+
+			if len(wikilinks) != len(tt.wantHasPipe) {
+				t.Errorf("Expected %d wikilinks, got %d", len(tt.wantHasPipe), len(wikilinks))
+				return
+			}
+
+			for i, wl := range wikilinks {
+				if wl.HasPipe != tt.wantHasPipe[i] {
+					t.Errorf("Wikilink %d: expected HasPipe %v, got %v", i, tt.wantHasPipe[i], wl.HasPipe)
+				}
+				if wl.ConcealStart != tt.wantConcealStart[i] {
+					t.Errorf("Wikilink %d: expected ConcealStart %d, got %d", i, tt.wantConcealStart[i], wl.ConcealStart)
+				}
+				if wl.ConcealEnd != tt.wantConcealEnd[i] {
+					t.Errorf("Wikilink %d: expected ConcealEnd %d, got %d", i, tt.wantConcealEnd[i], wl.ConcealEnd)
+				}
+			}
+		})
+	}
+}
+
+func TestWikilinkDumpWithConcealInfo(t *testing.T) {
+	node := &WikilinkAST{
+		Target:       "test-target",
+		DisplayText:  "Test Display",
+		HasPipe:      true,
+		ConcealStart: 2,
+		ConcealEnd:   14,
+	}
+
+	// Test that Dump doesn't panic with the new fields
+	defer func() {
+		if r := recover(); r != nil {
+			t.Errorf("Dump panicked: %v", r)
+		}
+	}()
+
+	node.Dump([]byte("[[test-target|Test Display]]"), 0)
+}

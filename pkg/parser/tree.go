@@ -283,16 +283,31 @@ func NewLink(url, title string, rng Range) *Link {
 // Wikilink represents a wikilink node ([[page]] or [[page|display]])
 type Wikilink struct {
 	*BaseNode
-	Target      string
-	DisplayText string
+	Target       string
+	DisplayText  string
+	HasPipe      bool  // Whether this wikilink has a pipe separator
+	ConcealRange Range // Range of text that should be concealed (target| portion)
 }
 
 // NewWikilink creates a new wikilink node
 func NewWikilink(target, displayText string, rng Range) *Wikilink {
 	return &Wikilink{
-		BaseNode:    NewBaseNode(NodeWikilink, rng),
-		Target:      target,
-		DisplayText: displayText,
+		BaseNode:     NewBaseNode(NodeWikilink, rng),
+		Target:       target,
+		DisplayText:  displayText,
+		HasPipe:      false,
+		ConcealRange: Range{},
+	}
+}
+
+// NewWikilinkWithConceal creates a new wikilink node with conceal information
+func NewWikilinkWithConceal(target, displayText string, rng Range, hasPipe bool, concealRange Range) *Wikilink {
+	return &Wikilink{
+		BaseNode:     NewBaseNode(NodeWikilink, rng),
+		Target:       target,
+		DisplayText:  displayText,
+		HasPipe:      hasPipe,
+		ConcealRange: concealRange,
 	}
 }
 
