@@ -908,7 +908,7 @@ T["wikilink concealment"]["reapplies concealment after LSP attach"] = function()
 
 	-- Open test file (LSP should attach automatically)
 	child.lua('vim.cmd("edit ' .. workspace .. '/test.md")')
-	
+
 	-- Wait for LSP to be ready and concealment to be applied
 	lsp.wait_for_ready(child)
 	vim.loop.sleep(2000)
