@@ -17,7 +17,7 @@ package vhstests
 import (
 	"testing"
 	"time"
-	
+
 	"github.com/notedownorg/notedown/vhs-tests/pkg/notedown"
 )
 
@@ -29,11 +29,10 @@ var vhsTests = []notedown.VHSTest{
 	{Name: "wikilink-diagnostics", Workspace: "diagnostics-test", Timeout: 300 * time.Second},
 }
 
-
 // TestVHSFramework runs all VHS tests using the clean runner approach.
 func TestVHSFramework(t *testing.T) {
 	runner := notedown.NewNotedownVHSRunner()
-	
+
 	for _, test := range vhsTests {
 		test := test // capture loop variable
 		t.Run(test.Name, func(t *testing.T) {
@@ -42,4 +41,3 @@ func TestVHSFramework(t *testing.T) {
 		})
 	}
 }
-
