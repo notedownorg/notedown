@@ -35,6 +35,20 @@ jobs:
     - name: Run Language Server tests
       run: make test-lsp
 
+  vhs:
+    name: vhs
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v31
+    
+    - name: Run VHS tests
+      run: make test-vhs
+
   release:
     name: release
     runs-on: ubuntu-latest

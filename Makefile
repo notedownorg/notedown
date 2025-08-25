@@ -25,6 +25,8 @@ DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
 check: clean format mod lint test
 
+all: hygiene test dirty
+
 hygiene: format mod
 
 dirty:
@@ -40,13 +42,19 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: test-lsp test-nvim
+test: test-pkg test-lsp test-nvim
+
+test-pkg:
+	go test ./pkg/...
 
 test-lsp:
-	go test ./...
+	go test ./language-server/...
 
 test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
+
+test-vhs:
+	go test -parallel 4 -v ./vhs-tests/...
 
 install: clean
 	go build -ldflags "\

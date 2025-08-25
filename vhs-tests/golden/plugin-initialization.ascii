@@ -1,0 +1,906 @@
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+E282: Cannot read from "/tmp/nix-shell.xKhT7x/vhs-test-plugin-initialization820381108/plugin/init.lua"
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+:LspInfo
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+E492: Not an editor command: LspInfo
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+E492: Not an editor command: LspInfo
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+E492: Not an editor command: LspInfo
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+/target
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+/target                                                                                                                          [1/1]
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+/target                                                                                                                          [1/1]
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+/target                                                                                                                          [1/1]
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+:echo 'Plugin loaded successfully'
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+Plugin loaded successfully
+────────────────────────────────────────────────────────────────────────────────
+# Plugin Initialization Test
+
+This is a test document to verify that the Notedown plugin initializes correctly.
+
+## Features to Test
+
+- LSP server connection
+- Plugin loading
+- Basic functionality
+
+## Wikilinks
+
+This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         13,28          All
+Plugin loaded successfully
+────────────────────────────────────────────────────────────────────────────────
