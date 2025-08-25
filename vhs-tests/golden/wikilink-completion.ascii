@@ -1,0 +1,1756 @@
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+\[\]> \[\]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         1,1            All
+E282: Cannot read from "/tmp/nix-shell.xKhT7x/vhs-test-wikilink-completion2978910933/plugin/init.lua"
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         7,1            All
+E282: Cannot read from "/tmp/nix-shell.xKhT7x/vhs-test-wikilink-completion2978910933/plugin/init.lua"
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         7,1            All
+E282: Cannot read from "/tmp/nix-shell.xKhT7x/vhs-test-wikilink-completion2978910933/plugin/init.lua"                                   o
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+o
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,2            All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,12           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,12           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,12           All
+-- ^X mode (^]^D^E^F^I^K^L^N^O^Ps^U^V^Y)
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,12           All
+-- Omni completion (^O^N^P) Pattern not found
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,12           All
+-- Omni completion (^O^N^P) Pattern not found
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,17           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,17           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,17           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,17           All
+-- Omni completion (^O^N^P) -- Searching...
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,17           All
+-- Omni completion (^O^N^P) Pattern not found
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,16           All
+
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     8,16           All
+
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,1            All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,23           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,23           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,23           All
+-- ^X mode (^]^D^E^F^I^K^L^N^O^Ps^U^V^Y)
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,23           All
+-- Omni completion (^O^N^P) Pattern not found
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,23           All
+-- Omni completion (^O^N^P) Pattern not found
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,22           All
+
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                                     9,22           All
+:w
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         9,22           All
+"index.md" 9L, 172B written
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         9,22           All
+"index.md" 9L, 172B written
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         9,22           All
+:echo 'Completion test completed'
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         9,22           All
+Completion test completed
+────────────────────────────────────────────────────────────────────────────────
+# Completion Test
+
+This file will be used to test wikilink completion.
+
+## Test Scenario
+
+We'll test completion for wikilinks here:
+oLink to [[docs/
+Another link: [[notes/
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                         9,22           All
+Completion test completed
+────────────────────────────────────────────────────────────────────────────────

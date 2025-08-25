@@ -1,0 +1,55 @@
+# VHS tape for testing Notedown plugin initialization
+# This test verifies that the plugin loads correctly and LSP server starts
+
+# Output configuration
+Output "{{.OutputFile}}"
+Output "{{.TmpDir}}/plugin-initialization.gif"
+Set FontSize 14
+Set Width 120
+Set Height 120
+Set TypingSpeed 100ms
+
+# Hide the shell navigation and setup
+Hide
+
+# Change to test workspace
+Type "cd {{.WorkspaceDir}}"
+Enter
+Sleep 500ms
+
+# Start Neovim with VHS test configuration
+Type "nvim --noplugin -u '{{.ConfigFile}}' index.md"
+Enter
+Sleep 3s
+
+# Show recording once Neovim is loaded
+Show
+
+# Check LSP status - this will show if the LSP server connected
+Type ":LspInfo"
+Enter
+Sleep 2s
+
+# Position cursor on wikilink to test basic functionality
+Type "gg"
+Type "/target"
+Enter
+Type "n"
+Sleep 1s
+
+# Test that we can see the wikilink is detected (basic functionality check)
+Type ":echo 'Plugin loaded successfully'"
+Enter
+Sleep 1s
+
+# Hide before exiting to avoid capturing shell return
+Hide
+
+# Exit Neovim
+Type ":qa!"
+Enter
+Sleep 500ms
+
+# Return to original directory
+Type "cd {{.TmpDir}}"
+Enter

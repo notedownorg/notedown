@@ -8,6 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `make test` - Run all tests (LSP, Neovim, and integration)
 - `make test-lsp` - Run Go tests only (`go test ./...`)
 - `make test-nvim` - Run Neovim plugin tests only
+- `make test-vhs` - Run VHS end-to-end terminal tests
 - `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy
@@ -39,7 +40,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of four main components:
+This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of five main components:
 
 ### 1. Parser Package (`pkg/parser/`)
 - **Core Parser**: Built on `goldmark` with custom extensions for NFM
@@ -93,7 +94,16 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Neovim Plugin (`neovim/`)
+### 3. VHS Testing Framework (`vhs-tests/`)
+- **Clean Architecture**: Refactored from monolithic tests to clean runner-based framework
+- **NotedownVHSRunner**: Handles all boilerplate (LSP building, plugin installation, workspace setup, cleanup)
+- **Data-Driven Tests**: Tests defined as simple `VHSTest` structs with name, workspace, and timeout
+- **Template Rendering**: Dynamic VHS tape generation from Go templates with test-specific data
+- **Parallel Execution**: Safe concurrent test execution with shared binary building via `sync.Once`
+- **Golden File Testing**: Automated comparison with auto-creation of missing golden files
+- **Visual Inspection**: Generates GIFs alongside ASCII output for debugging and documentation
+
+### 4. Neovim Plugin (`neovim/`)
 - **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
 - **LSP Integration**: Automatic LSP server startup and configuration
 - **Parser Modes**: Configurable parser selection (auto/notedown/markdown)
@@ -105,7 +115,16 @@ Key files:
 - `plugin/notedown.lua` - Plugin bootstrapping
 - `tests/` - Mini.nvim-based test suite
 
-### 4. Shared Packages (`pkg/`)
+### 4. VHS Testing Framework (`vhs-tests/`)
+- **Clean Runner**: `pkg/notedown/runner.go` provides `NotedownVHSRunner` for all VHS testing boilerplate
+- **Test Definitions**: Simple `VHSTest` data structures define test cases (name, workspace, timeout)
+- **Template System**: Dynamic VHS template rendering from `testdata/templates/*.tape.tmpl`
+- **Golden File Testing**: Automated comparison with testify assertions and auto-creation of missing files
+- **Parallel Execution**: Tests run concurrently with shared LSP binary building using `sync.Once`
+- **Workspace Isolation**: Each test gets isolated temporary directories and workspaces
+- **Visual Output**: Generates both ASCII (for regression testing) and GIF (for visual inspection)
+
+### 5. Shared Packages (`pkg/`)
 - **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
 - **Versioning**: Build-time version information (`pkg/version/`)
 
@@ -116,14 +135,20 @@ Key files:
 - Custom wikilink and tasklist extensions for NFM-specific syntax
 
 ### Testing Strategy
-- Unit tests for parser components (`parser_test.go`)
-- JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
-- Logger tests with different output formats and levels
-- Notedownls tests cover completion, workspace management, and wikilink indexing
-- Neovim plugin tests with Mini.nvim framework for realistic scenarios
-- Demo workspace available in `demo_workspace/` with sample Markdown files and directory structure, including examples of ambiguous wikilinks
-- Test files use standard Go testing conventions
-- Focus on AST conversion accuracy and position tracking
+- **Unit Tests**: Parser components (`parser_test.go`), JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
+- **Integration Tests**: Logger tests with different output formats and levels, Notedownls tests cover completion, workspace management, and wikilink indexing
+- **Neovim Plugin Tests**: Mini.nvim framework for realistic scenarios with shared/dedicated LSP sessions
+- **End-to-End VHS Tests**: Terminal-based testing using VHS (Video Home System) for complete user workflows:
+  - Clean framework located at `vhs-tests/pkg/notedown/runner.go` with simple `NotedownVHSRunner`
+  - Tests defined as data structures in `vhs-tests/framework_test.go` with parallel execution
+  - VHS templates in `vhs-tests/testdata/templates/*.tape.tmpl` for dynamic rendering
+  - Test workspaces in `vhs-tests/workspaces/` and parent `workspaces/` directory
+  - Golden file comparison in `vhs-tests/golden/*.ascii` with auto-creation
+  - GIF generation in `vhs-tests/gifs/*.gif` for visual inspection
+  - Parallel LSP binary building with `sync.Once` to avoid redundant builds
+  - Per-test cleanup and isolated temporary directories
+- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files, VHS-specific test workspaces in `vhs-tests/workspaces/`
+- **Conventions**: Standard Go testing, focus on AST conversion accuracy and position tracking
 
 ### Wikilink Index System
 The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
