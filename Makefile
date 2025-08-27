@@ -46,7 +46,10 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: test-pkg test-lsp test-nvim
+test: deps test-pkg test-lsp test-nvim
+
+deps:
+	go mod download
 
 test-pkg:
 	go test ./pkg/...
@@ -57,11 +60,15 @@ test-lsp:
 test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
+# VHS tests require large dependencies (Chromium, FFmpeg) via nix
+# Pre-download Go modules to avoid CI timeout during test execution
 test-vhs:
+	go mod download
 	go test -parallel 4 -v ./vhs-tests/...
 
 test-vhs-golden:
 	rm -f vhs-tests/golden/*.ascii
+	go mod download
 	go test -parallel 4 -v ./vhs-tests/...
 
 install: clean
