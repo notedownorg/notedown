@@ -275,6 +275,11 @@ func normalizeOutput(content string) string {
 	diagnosticRe := regexp.MustCompile(`(?m)^VHS Test: LSP Binary configured as:.*$\n?`)
 	content = diagnosticRe.ReplaceAllString(content, "")
 
+	// Remove inconsistent LSP status messages from Neovim status line
+	// These can vary based on timing of LSP connection during recording
+	lspStatusRe := regexp.MustCompile(`(?m)^Notedown LSP server not active$\n?`)
+	content = lspStatusRe.ReplaceAllString(content, "")
+
 	return content
 }
 
