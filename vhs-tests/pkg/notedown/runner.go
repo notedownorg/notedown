@@ -58,24 +58,17 @@ func NewNotedownVHSRunner() *NotedownVHSRunner {
 
 // RunTest executes a VHS test with all necessary setup and cleanup.
 func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
-	t.Logf("=== Starting VHS test: %s ===", test.Name)
-
 	// Cleanup old files and VHS processes (skip in CI to avoid termination)
 	if !isCI() {
-		t.Logf("Phase 1: Cleaning up test files and VHS processes...")
 		cleanupTestFiles(test.Name)
 		cleanupVHSProcesses()
-	} else {
-		t.Logf("Phase 1: Skipping cleanup in CI environment")
 	}
 
 	// Create temporary directory for test
-	t.Logf("Phase 2: Creating temporary directory...")
 	tmpDir, err := os.MkdirTemp("", "vhs-test-"+test.Name)
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
-	t.Logf("Phase 2: Temporary directory created at %s", tmpDir)
 	defer func() {
 		if err := os.RemoveAll(tmpDir); err != nil {
 			t.Logf("Failed to cleanup temp dir: %v", err)
@@ -83,31 +76,24 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	}()
 
 	// Build LSP server
-	t.Logf("Phase 3: Building LSP server binary...")
 	lspBinary, err := r.lspBuilder()
 	if err != nil {
 		t.Fatalf("Failed to build LSP server: %v", err)
 	}
-	t.Logf("Phase 3: LSP server built at %s", lspBinary)
 
 	// Install plugin with specific LSP binary path
-	t.Logf("Phase 4: Installing Neovim plugin...")
 	pluginDir := filepath.Join(tmpDir, "plugin")
 	if err := installPluginWithLSP(pluginDir, lspBinary); err != nil {
 		t.Fatalf("Failed to install plugin: %v", err)
 	}
-	t.Logf("Phase 4: Plugin installed")
 
 	// Create workspace
-	t.Logf("Phase 5: Creating test workspace...")
 	workspaceDir := filepath.Join(tmpDir, "workspace")
 	if err := r.workspaceCreator(test.Workspace, workspaceDir); err != nil {
 		t.Fatalf("Failed to create workspace: %v", err)
 	}
-	t.Logf("Phase 5: Workspace created at %s", workspaceDir)
 
 	// Render template
-	t.Logf("Phase 6: Rendering VHS template...")
 	outputFile := filepath.Join(tmpDir, test.Name+".ascii")
 	gifFile := filepath.Join("gifs", test.Name+".gif")
 	configFile := filepath.Join(pluginDir, "init.lua")
@@ -125,10 +111,8 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}
-	t.Logf("Phase 6: Template rendered to %s", tapeFile)
 
 	// Execute VHS
-	t.Logf("Phase 7: Executing VHS...")
 	timeout := test.Timeout
 	if timeout == 0 {
 		timeout = 300 * time.Second
@@ -138,26 +122,14 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	if err != nil {
 		t.Fatalf("VHS execution failed: %v", err)
 	}
-	t.Logf("Phase 7: VHS execution completed")
 
 	// Assert golden file match
-	t.Logf("Phase 8: Comparing with golden file...")
 	goldenFile := filepath.Join("golden", test.Name+".ascii")
 	r.assertGoldenMatch(t, goldenFile, result)
-	t.Logf("Phase 8: Golden file comparison completed")
 
 	// Copy GIF to gifs directory for visual inspection
 	srcGif := filepath.Join(tmpDir, test.Name+".gif")
 	if fileExists(srcGif) {
-		// Check size of source GIF
-		if info, err := os.Stat(srcGif); err == nil {
-			if info.Size() == 0 {
-				t.Logf("Warning: GIF file %s is empty (0 bytes) - this may indicate VHS lacks graphics support in current environment", srcGif)
-			} else {
-				t.Logf("GIF file %s successfully generated: %d bytes", srcGif, info.Size())
-			}
-		}
-
 		if err := os.MkdirAll("gifs", 0750); err != nil {
 			t.Logf("Failed to create gifs directory: %v", err)
 			return
@@ -165,11 +137,7 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 		if err := copyFile(srcGif, gifFile); err != nil {
 			t.Logf("Failed to copy GIF file: %v", err)
 		}
-	} else {
-		t.Logf("GIF file not generated: %s (VHS may not support GIF output in this environment)", srcGif)
 	}
-
-	t.Logf("=== VHS test %s completed successfully ===", test.Name)
 }
 
 // renderTemplate renders a VHS template with the given data.
