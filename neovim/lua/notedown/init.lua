@@ -59,6 +59,20 @@ function M.get_workspace_status(bufnr)
 	local is_workspace, workspace_path = is_notedown_workspace(file_path)
 	local should_use_notedown = should_use_notedown_parser(bufnr)
 
+	-- Check LSP client status
+	local lsp_clients = vim.lsp.get_clients({ bufnr = bufnr, name = "notedown" })
+	local lsp_active = #lsp_clients > 0
+	local lsp_status = "Not connected"
+
+	if lsp_active then
+		local client = lsp_clients[1]
+		if client.is_stopped() then
+			lsp_status = "Stopped"
+		else
+			lsp_status = "Active"
+		end
+	end
+
 	return {
 		file_path = file_path,
 		cwd = vim.fn.getcwd(),
@@ -67,6 +81,9 @@ function M.get_workspace_status(bufnr)
 		should_use_notedown = should_use_notedown,
 		auto_detected = is_workspace, -- Indicates automatic .notedown detection
 		parser_mode = is_workspace and "notedown" or "markdown",
+		lsp_active = lsp_active,
+		lsp_status = lsp_status,
+		lsp_client_count = #lsp_clients,
 	}
 end
 
