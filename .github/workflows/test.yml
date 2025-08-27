@@ -46,9 +46,6 @@ jobs:
     - name: Install Nix
       uses: cachix/install-nix-action@v31
     
-    - name: Download Go dependencies
-      run: make deps
-    
     - name: Run VHS tests
       run: make test-vhs
 

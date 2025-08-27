@@ -46,10 +46,7 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: deps test-pkg test-lsp test-nvim
-
-deps:
-	go mod download
+test: test-pkg test-lsp test-nvim
 
 test-pkg:
 	go test ./pkg/...
@@ -60,15 +57,19 @@ test-lsp:
 test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
-# VHS tests require large dependencies (Chromium, FFmpeg) via nix
-# Pre-download Go modules to avoid CI timeout during test execution
 test-vhs:
-	go mod download
-	go test -parallel 4 -v ./vhs-tests/...
+	@echo "=== Starting VHS test execution ==="
+	@echo "Current time: $$(date)"
+	@echo "Memory usage: $$(free -h || echo 'free command not available')"
+	@echo "Disk usage: $$(df -h . || echo 'df command not available')"
+	@echo "VHS availability: $$(which vhs || echo 'vhs not found in PATH')"
+	@echo "VHS version: $$(vhs --version || echo 'vhs version check failed')"
+	@echo "Process limits: $$(ulimit -a || echo 'ulimit check failed')"
+	GOMAXPROCS=2 go test -parallel 2 -v -x -count=1 ./vhs-tests/... 2>&1 | tee /tmp/vhs-test.log || (echo "Go test failed with exit code: $$?"; echo "=== Last 50 lines of output ==="; tail -50 /tmp/vhs-test.log; exit 1)
+	@echo "=== VHS test execution completed at $$(date) ==="
 
 test-vhs-golden:
 	rm -f vhs-tests/golden/*.ascii
-	go mod download
 	go test -parallel 4 -v ./vhs-tests/...
 
 install: clean
