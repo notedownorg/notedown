@@ -60,10 +60,14 @@ func NewNotedownVHSRunner() *NotedownVHSRunner {
 func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	t.Logf("=== Starting VHS test: %s ===", test.Name)
 
-	// Cleanup old files and VHS processes
-	t.Logf("Phase 1: Cleaning up test files and VHS processes...")
-	cleanupTestFiles(test.Name)
-	cleanupVHSProcesses()
+	// Cleanup old files and VHS processes (skip in CI to avoid termination)
+	if !isCI() {
+		t.Logf("Phase 1: Cleaning up test files and VHS processes...")
+		cleanupTestFiles(test.Name)
+		cleanupVHSProcesses()
+	} else {
+		t.Logf("Phase 1: Skipping cleanup in CI environment")
+	}
 
 	// TEMPORARY: Skip actual VHS execution for debugging CI termination issue
 	t.Logf("=== SKIPPING ACTUAL VHS EXECUTION FOR CI DEBUGGING ===")
