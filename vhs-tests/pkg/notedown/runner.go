@@ -409,6 +409,10 @@ vim.opt.termguicolors = true
 vim.opt.timeout = false
 vim.opt.ttimeout = false
 
+-- Force consistent terminal dimensions for status line consistency
+vim.opt.columns = 120
+vim.opt.lines = 30
+
 -- Add Lua package path for the plugin
 package.path = package.path .. ";` + pluginDir + `/neovim/lua/?.lua;` + pluginDir + `/neovim/lua/?/init.lua"
 

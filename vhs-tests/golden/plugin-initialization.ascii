@@ -417,24 +417,24 @@ index.md
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-[No Name] [RO]                                                                                                            8,1            All
+[No Name] [RO]                                                                                        8,1            All
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
 " ============================================================================
 " Netrw Directory Listing                                        (netrw v175)
@@ -464,24 +464,24 @@ index.md
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-[No Name] [RO]                                                                                                            8,1            All
+[No Name] [RO]                                                                                        8,1            All
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
 " ============================================================================
 " Netrw Directory Listing                                        (netrw v175)
@@ -511,25 +511,25 @@ index.md
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-[No Name] [RO]                                                                                                            8,1            All
+[No Name] [RO]                                                                                        8,1            All
 :edit index.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -559,25 +559,25 @@ index.md
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :edit index.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -607,25 +607,25 @@ index.md                                                                        
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :edit index.md
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -655,25 +655,25 @@ index.md                                                                        
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :NotedownWorkspaceStatus
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -695,23 +695,6 @@ index.md                                                                        
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
 
 Notedown Workspace Status:
   File: /tmp/vhs-test-normalized/workspace/index.md
@@ -722,6 +705,23 @@ Notedown Workspace Status:
   Detection Method: Auto-detected (.notedown directory)
 
 Press ENTER or type command to continue
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -743,23 +743,6 @@ Press ENTER or type command to continue
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
 
 Notedown Workspace Status:
   File: /tmp/vhs-test-normalized/workspace/index.md
@@ -770,4 +753,21 @@ Notedown Workspace Status:
   Detection Method: Auto-detected (.notedown directory)
 
 Press ENTER or type command to continue
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
