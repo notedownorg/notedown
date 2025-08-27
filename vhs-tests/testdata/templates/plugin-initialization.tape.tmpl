@@ -23,8 +23,8 @@ Type "clear"
 Enter
 Sleep 500ms
 
-# Start Neovim with clean environment
-Type "nvim --clean -u '{{.ConfigFile}}' index.md"
+# Start Neovim with clean environment in directory mode
+Type "nvim --clean -u '{{.ConfigFile}}' ."
 Enter
 
 # Show recording only after Neovim fully loads
@@ -33,6 +33,11 @@ Show
 
 # Wait for plugin to fully initialize
 Sleep 3s
+
+# Open the index.md file
+Type ":edit index.md"
+Enter
+Sleep 2s
 
 # Test Notedown workspace status command
 Type ":NotedownWorkspaceStatus"

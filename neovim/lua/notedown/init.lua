@@ -166,23 +166,56 @@ function M.setup(opts)
 end
 
 -- Get the appropriate notedown LSP client for command execution
-local function get_notedown_command_client()
-	local clients = vim.lsp.get_clients({ name = "notedown" })
-	if #clients == 0 then
-		vim.notify("Notedown LSP server not active", vim.log.levels.WARN)
+-- If timeout_ms is provided, will retry every 100ms until timeout is exceeded
+-- Otherwise tries once and returns nil if not found
+local function get_notedown_command_client(timeout_ms)
+	local function try_get_client()
+		local clients = vim.lsp.get_clients({ name = "notedown" })
+		if #clients == 0 then
+			return nil
+		end
+
+		-- Find the client that supports executeCommand
+		for _, client in ipairs(clients) do
+			if client.server_capabilities and client.server_capabilities.executeCommandProvider then
+				return client
+			end
+		end
 		return nil
 	end
 
-	-- Find the client that supports executeCommand
-	for _, client in ipairs(clients) do
-		if client.server_capabilities and client.server_capabilities.executeCommandProvider then
-			return client
+	-- If no timeout specified, try once and return
+	if not timeout_ms then
+		local client = try_get_client()
+		if not client then
+			local clients = vim.lsp.get_clients({ name = "notedown" })
+			if #clients == 0 then
+				vim.notify("Notedown LSP server not active", vim.log.levels.WARN)
+			else
+				vim.notify("No notedown client supports executeCommand", vim.log.levels.WARN)
+			end
 		end
+		return client
 	end
 
-	vim.notify("No notedown client supports executeCommand", vim.log.levels.WARN)
-	return nil
+	-- Retry with timeout
+	local start_time = vim.loop.now()
+	local client = try_get_client()
+
+	while not client and (vim.loop.now() - start_time) < timeout_ms do
+		vim.wait(100)
+		client = try_get_client()
+	end
+
+	if not client then
+		vim.notify("Notedown LSP server not active after " .. timeout_ms .. "ms timeout", vim.log.levels.WARN)
+	end
+
+	return client
 end
+
+-- Exposed for testing
+M._get_notedown_command_client = get_notedown_command_client
 
 -- Get list item boundaries via LSP command
 function M.get_list_item_boundaries()
@@ -249,7 +282,7 @@ function M.setup_wikilink_concealment(bufnr)
 
 	-- Function to apply conceal ranges from LSP
 	local function apply_conceal_ranges()
-		local client = get_notedown_command_client()
+		local client = get_notedown_command_client(2000) -- 2 second timeout
 		if not client then
 			return
 		end

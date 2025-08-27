@@ -389,19 +389,17 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
-  1 # Plugin Initialization Test
-  2
-  3 This is a test document to verify that the Notedown plugin initializes correctly.
-  4
-  5 ## Features to Test
-  6
-  7 - LSP server connection
-  8 - Plugin loading
-  9 - Basic functionality
- 10
- 11 ## Wikilinks
- 12
- 13 This document contains a [[target]] wikilink to test basic functionality.
+" ============================================================================
+" Netrw Directory Listing                                        (netrw v175)
+"   /tmp/vhs-test-normalized/workspace
+"   Sorted by      name
+"   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+"   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+" ==============================================================================
+../
+./
+.notedown/
+index.md
 ~
 ~
 ~
@@ -434,7 +432,104 @@
 ~
 ~
 ~
-index.md                                                                                                                  1,1            All
+~
+~
+[No Name] [RO]                                                                                                            8,1            All
+────────────────────────────────────────────────────────────────────────────────
+" ============================================================================
+" Netrw Directory Listing                                        (netrw v175)
+"   /tmp/vhs-test-normalized/workspace
+"   Sorted by      name
+"   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+"   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+" ==============================================================================
+../
+./
+.notedown/
+index.md
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+[No Name] [RO]                                                                                                            8,1            All
+────────────────────────────────────────────────────────────────────────────────
+" ============================================================================
+" Netrw Directory Listing                                        (netrw v175)
+"   /tmp/vhs-test-normalized/workspace
+"   Sorted by      name
+"   Sort sequence: [\/]$,\<core\%(\.\d\+\)\=\>,\.h$,\.c$,\.cpp$,\~\=\*$,*,\.o$,\.obj$,\.info$,\.swp$,\.bak$,\~$
+"   Quick Help: <F1>:help  -:go up dir  D:delete  R:rename  s:sort-by  x:special
+" ==============================================================================
+../
+./
+.notedown/
+index.md
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+[No Name] [RO]                                                                                                            8,1            All
+:edit index.md
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
@@ -482,6 +577,55 @@ index.md                                                                        
 ~
 ~
 index.md                                                                                                                  1,1            All
+:edit index.md
+────────────────────────────────────────────────────────────────────────────────
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                  1,1            All
+:edit index.md
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
   2
