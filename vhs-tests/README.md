@@ -61,6 +61,7 @@ go test -parallel 8 -v
 - Generates GIFs automatically in `gifs/` directory for manual inspection
 - Useful for debugging and documentation (not committed to git)
 - Both ASCII and GIF outputs generated simultaneously
+- **Note**: GIF generation requires a graphics environment - files may be empty (0 bytes) in headless CI environments
 
 ### Parallel Execution
 - Tests run concurrently for faster feedback (4 parallel by default)

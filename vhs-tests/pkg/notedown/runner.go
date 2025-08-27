@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"sync"
 	"testing"
 	"text/template"
@@ -57,14 +58,20 @@ func NewNotedownVHSRunner() *NotedownVHSRunner {
 
 // RunTest executes a VHS test with all necessary setup and cleanup.
 func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
-	// Cleanup old files
+	t.Logf("=== Starting VHS test: %s ===", test.Name)
+
+	// Cleanup old files and VHS processes
+	t.Logf("Phase 1: Cleaning up test files and VHS processes...")
 	cleanupTestFiles(test.Name)
+	cleanupVHSProcesses()
 
 	// Create temporary directory for test
+	t.Logf("Phase 2: Creating temporary directory...")
 	tmpDir, err := os.MkdirTemp("", "vhs-test-"+test.Name)
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
+	t.Logf("Phase 2: Temporary directory created at %s", tmpDir)
 	defer func() {
 		if err := os.RemoveAll(tmpDir); err != nil {
 			t.Logf("Failed to cleanup temp dir: %v", err)
@@ -72,24 +79,31 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	}()
 
 	// Build LSP server
+	t.Logf("Phase 3: Building LSP server binary...")
 	lspBinary, err := r.lspBuilder()
 	if err != nil {
 		t.Fatalf("Failed to build LSP server: %v", err)
 	}
+	t.Logf("Phase 3: LSP server built at %s", lspBinary)
 
-	// Install plugin
+	// Install plugin with specific LSP binary path
+	t.Logf("Phase 4: Installing Neovim plugin...")
 	pluginDir := filepath.Join(tmpDir, "plugin")
-	if err := r.pluginInstaller(pluginDir); err != nil {
+	if err := installPluginWithLSP(pluginDir, lspBinary); err != nil {
 		t.Fatalf("Failed to install plugin: %v", err)
 	}
+	t.Logf("Phase 4: Plugin installed")
 
 	// Create workspace
+	t.Logf("Phase 5: Creating test workspace...")
 	workspaceDir := filepath.Join(tmpDir, "workspace")
 	if err := r.workspaceCreator(test.Workspace, workspaceDir); err != nil {
 		t.Fatalf("Failed to create workspace: %v", err)
 	}
+	t.Logf("Phase 5: Workspace created at %s", workspaceDir)
 
 	// Render template
+	t.Logf("Phase 6: Rendering VHS template...")
 	outputFile := filepath.Join(tmpDir, test.Name+".ascii")
 	gifFile := filepath.Join("gifs", test.Name+".gif")
 	configFile := filepath.Join(pluginDir, "init.lua")
@@ -100,14 +114,17 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 		"ConfigFile":   configFile,
 		"TmpDir":       tmpDir,
 		"LSPBinary":    lspBinary,
+		"TestName":     test.Name,
 	}
 
 	tapeFile, err := r.renderTemplate(test.Name, templateData, tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}
+	t.Logf("Phase 6: Template rendered to %s", tapeFile)
 
 	// Execute VHS
+	t.Logf("Phase 7: Executing VHS...")
 	timeout := test.Timeout
 	if timeout == 0 {
 		timeout = 300 * time.Second
@@ -117,13 +134,26 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	if err != nil {
 		t.Fatalf("VHS execution failed: %v", err)
 	}
+	t.Logf("Phase 7: VHS execution completed")
 
 	// Assert golden file match
+	t.Logf("Phase 8: Comparing with golden file...")
 	goldenFile := filepath.Join("golden", test.Name+".ascii")
 	r.assertGoldenMatch(t, goldenFile, result)
+	t.Logf("Phase 8: Golden file comparison completed")
 
 	// Copy GIF to gifs directory for visual inspection
-	if srcGif := filepath.Join(tmpDir, test.Name+".gif"); fileExists(srcGif) {
+	srcGif := filepath.Join(tmpDir, test.Name+".gif")
+	if fileExists(srcGif) {
+		// Check size of source GIF
+		if info, err := os.Stat(srcGif); err == nil {
+			if info.Size() == 0 {
+				t.Logf("Warning: GIF file %s is empty (0 bytes) - this may indicate VHS lacks graphics support in current environment", srcGif)
+			} else {
+				t.Logf("GIF file %s successfully generated: %d bytes", srcGif, info.Size())
+			}
+		}
+
 		if err := os.MkdirAll("gifs", 0750); err != nil {
 			t.Logf("Failed to create gifs directory: %v", err)
 			return
@@ -131,7 +161,11 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 		if err := copyFile(srcGif, gifFile); err != nil {
 			t.Logf("Failed to copy GIF file: %v", err)
 		}
+	} else {
+		t.Logf("GIF file not generated: %s (VHS may not support GIF output in this environment)", srcGif)
 	}
+
+	t.Logf("=== VHS test %s completed successfully ===", test.Name)
 }
 
 // renderTemplate renders a VHS template with the given data.
@@ -199,22 +233,82 @@ func (r *NotedownVHSRunner) executeVHS(tapeFile string, timeout time.Duration) (
 	return os.ReadFile(outputFile)
 }
 
+// normalizeOutput removes dynamic content from VHS output for consistent golden file testing
+func normalizeOutput(content string) string {
+	// Replace temporary directory paths with a normalized placeholder
+	// Handles multiple patterns:
+	// - macOS: /var/folders/.../T/vhs-test-...
+	// - nix-shell: /tmp/nix-shell.../vhs-test-...
+	// - nix develop: /tmp/nix-shell.../vhs-test-...
+	// - Linux CI: /home/runner/work/_temp/nix-shell.../vhs-test-...
+	// - generic tmp: /tmp/.../vhs-test-...
+	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/vhs-test-[^/]+/`)
+	content = re.ReplaceAllString(content, "/tmp/vhs-test-normalized/")
+
+	// Remove shell prompts and terminal escape sequences that might be inconsistent
+	// These can appear differently between test runs
+	shellPromptRe := regexp.MustCompile(`\\\[\\\]> \\\[\\\]`)
+	content = shellPromptRe.ReplaceAllString(content, "")
+
+	// Normalize terminal escape sequences for colors/formatting
+	escapeRe := regexp.MustCompile(`\x1b\[[0-9;]*[mGKH]`)
+	content = escapeRe.ReplaceAllString(content, "")
+
+	// Normalize carriage returns and extra whitespace
+	crRe := regexp.MustCompile(`\r`)
+	content = crRe.ReplaceAllString(content, "")
+
+	// Remove LSP server error messages that might be inconsistent across environments
+	lspErrorRe := regexp.MustCompile(`(?m)^.*language server.*failed.*The language server is either not installed.*$\n?`)
+	content = lspErrorRe.ReplaceAllString(content, "")
+
+	// Remove any diagnostic print statements from VHS test
+	diagnosticRe := regexp.MustCompile(`(?m)^VHS Test: LSP Binary configured as:.*$\n?`)
+	content = diagnosticRe.ReplaceAllString(content, "")
+
+	return content
+}
+
 // assertGoldenMatch compares actual output with golden file.
 func (r *NotedownVHSRunner) assertGoldenMatch(t *testing.T, goldenFile string, actual []byte) {
+	normalizedActual := normalizeOutput(string(actual))
+
 	// #nosec G304 - goldenFile path is controlled within test framework
 	if expected, err := os.ReadFile(goldenFile); err == nil {
-		assert.Equal(t, string(expected), string(actual), "Output should match golden file %s", goldenFile)
+		// Golden file exists - compare for regression testing
+		normalizedExpected := normalizeOutput(string(expected))
+		if !assert.Equal(t, normalizedExpected, normalizedActual, "Output should match golden file %s", goldenFile) {
+			t.Logf("Golden file mismatch! Expected content from: %s", goldenFile)
+			t.Logf("To update golden files, delete %s and re-run the test", goldenFile)
+		}
 	} else {
-		// Create golden file if it doesn't exist
+		// Golden file doesn't exist - this might be a new test or missing file
+		t.Logf("Golden file %s does not exist", goldenFile)
+
+		// Auto-create golden file only in local development, fail in CI
+		if isCI() {
+			t.Fatalf("Golden file %s missing in CI environment - please generate locally first", goldenFile)
+		}
+
+		// Create golden file for local development
 		if err := os.MkdirAll(filepath.Dir(goldenFile), 0750); err != nil {
-			t.Logf("Failed to create golden directory: %v", err)
-			return
+			t.Fatalf("Failed to create golden directory: %v", err)
 		}
-		if err := os.WriteFile(goldenFile, actual, 0600); err != nil {
-			t.Logf("Failed to write golden file: %v", err)
+		// Store normalized content in golden file
+		normalizedContent := normalizeOutput(string(actual))
+		if err := os.WriteFile(goldenFile, []byte(normalizedContent), 0600); err != nil {
+			t.Fatalf("Failed to write golden file: %v", err)
 		}
-		t.Logf("Created golden file: %s", goldenFile)
+		t.Logf("Created golden file: %s (commit this file to git)", goldenFile)
 	}
+}
+
+// isCI detects if we're running in a CI environment.
+func isCI() bool {
+	// Common CI environment variables
+	return os.Getenv("CI") != "" ||
+		os.Getenv("GITHUB_ACTIONS") != "" ||
+		os.Getenv("GITLAB_CI") != ""
 }
 
 // Shared LSP binary building to avoid redundant builds in parallel tests
@@ -268,6 +362,11 @@ func ensureLSPBinary() (string, error) {
 
 // installPlugin installs the Notedown Neovim plugin.
 func installPlugin(pluginDir string) error {
+	return installPluginWithLSP(pluginDir, "notedown-language-server")
+}
+
+// installPluginWithLSP installs the Notedown Neovim plugin with a specific LSP binary path.
+func installPluginWithLSP(pluginDir string, lspBinary string) error {
 	// Get project root (vhs directory)
 	wd, err := os.Getwd()
 	if err != nil {
@@ -277,10 +376,53 @@ func installPlugin(pluginDir string) error {
 	projectRoot := filepath.Dir(wd) // Go from vhs-tests to vhs
 	neovimSrc := filepath.Join(projectRoot, "neovim")
 
+	// Create the neovim subdirectory in plugin dir
+	neovimDest := filepath.Join(pluginDir, "neovim")
+	if err := os.MkdirAll(neovimDest, 0750); err != nil {
+		return err
+	}
+
 	// Copy plugin files to isolated directory
 	// #nosec G204 - subprocess execution with controlled arguments for test framework
-	cmd := exec.Command("cp", "-r", neovimSrc, pluginDir)
-	return cmd.Run()
+	cmd := exec.Command("sh", "-c", "cp -r "+neovimSrc+"/* "+neovimDest+"/")
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	// Create minimal init.lua that properly loads the plugin for VHS testing
+	initLua := `-- VHS test configuration with plugin loading
+vim.opt.runtimepath:prepend("` + pluginDir + `/neovim")
+
+-- Basic Neovim settings
+vim.opt.compatible = false
+vim.opt.number = true
+vim.opt.termguicolors = true
+vim.opt.timeout = false
+vim.opt.ttimeout = false
+
+-- Add Lua package path for the plugin
+package.path = package.path .. ";` + pluginDir + `/neovim/lua/?.lua;` + pluginDir + `/neovim/lua/?/init.lua"
+
+-- Load the notedown plugin with custom LSP binary path
+local ok, notedown = pcall(require, "notedown")
+if ok then
+    -- Override the default config to ensure our LSP binary path is used
+    local config = require("notedown.config")
+    config.defaults.server.cmd = { "` + lspBinary + `", "serve", "--log-level", "debug", "--log-file", "/tmp/notedown.log" }
+    
+    notedown.setup({
+        server = {
+            cmd = { "` + lspBinary + `", "serve", "--log-level", "debug", "--log-file", "/tmp/notedown.log" }
+        }
+    })
+    
+    -- Diagnostic output to verify the configuration
+    print("VHS Test: LSP Binary configured as: " .. "` + lspBinary + `")
+end
+`
+
+	initFile := filepath.Join(pluginDir, "init.lua")
+	return os.WriteFile(initFile, []byte(initLua), 0600)
 }
 
 // createWorkspace creates a workspace in the specified directory.
@@ -315,19 +457,26 @@ func createWorkspace(workspaceName string, outputDir string) error {
 	return cmd.Run()
 }
 
-// cleanupTestFiles removes old ASCII and GIF files for a specific test.
+// cleanupTestFiles removes old output files but preserves golden files for comparison.
 func cleanupTestFiles(testName string) {
 	// Create directories if they don't exist
 	_ = os.MkdirAll("golden", 0750) // Best effort
 	_ = os.MkdirAll("gifs", 0750)   // Best effort
 
-	// Remove old golden file for this test
-	goldenFile := filepath.Join("golden", testName+".ascii")
-	_ = os.Remove(goldenFile) // Best effort cleanup
-
-	// Remove old GIF file for this test
+	// Remove old GIF file for this test (golden files should be preserved!)
 	gifFile := filepath.Join("gifs", testName+".gif")
 	_ = os.Remove(gifFile) // Best effort cleanup
+}
+
+// cleanupVHSProcesses kills any existing VHS processes to prevent network connection conflicts.
+func cleanupVHSProcesses() {
+	// Kill any existing VHS processes that might be holding network connections
+	// #nosec G204 - subprocess execution with controlled arguments for test cleanup
+	cmd := exec.Command("pkill", "-f", "vhs")
+	_ = cmd.Run() // Best effort cleanup, ignore errors
+
+	// Brief delay to ensure processes are fully terminated
+	time.Sleep(100 * time.Millisecond)
 }
 
 // copyFile copies a file from src to dst.

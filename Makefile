@@ -13,7 +13,11 @@
 # limitations under the License.
 
 # Use nix develop shell if nix is available
-export NIX_CONFIG := warn-dirty = false
+define NIX_SETTINGS
+warn-dirty = false
+download-buffer-size = 134217728
+endef
+export NIX_CONFIG := $(NIX_SETTINGS)
 ifneq ($(shell command -v nix 2> /dev/null),)
 SHELL := nix develop --command bash
 endif
@@ -54,6 +58,10 @@ test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
 test-vhs:
+	go test -parallel 4 -v ./vhs-tests/...
+
+test-vhs-golden:
+	rm -f vhs-tests/golden/*.ascii
 	go test -parallel 4 -v ./vhs-tests/...
 
 install: clean

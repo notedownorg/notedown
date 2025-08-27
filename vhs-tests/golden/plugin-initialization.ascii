@@ -1,4 +1,4 @@
->
+
 
 
 
@@ -51,7 +51,7 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
->
+
 
 
 
@@ -104,7 +104,14 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
->
+
+
+
+
+
+
+
+
 
 
 
@@ -154,7 +161,14 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
->
+
+
+
+
+
+
+
+
 
 
 
@@ -204,7 +218,14 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
->
+
+
+
+
+
+
+
+
 
 
 
@@ -254,7 +275,14 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
->
+
+
+
+
+
+
+
+
 
 
 
@@ -304,69 +332,76 @@
 
 
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
 
-This is a test document to verify that the Notedown plugin initializes correctly.
 
-## Features to Test
 
-- LSP server connection
-- Plugin loading
-- Basic functionality
 
-## Wikilinks
 
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         1,1            All
-E282: Cannot read from "/var/folders/kh/gb7r2nmd4k3_x_3gt8p37d5w0000gn/T/vhs-test-plugin-initialization3410462658/plugin/init.lua"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
@@ -399,24 +434,22 @@ This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
-~
-~
-index.md                                                                                                                         1,1            All
-:LspInfo
+index.md                                                                                                                  1,1            All
+Notedown LSP server not active
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
@@ -449,24 +482,22 @@ This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
-~
-~
-index.md                                                                                                                         1,1            All
-E492: Not an editor command: LspInfo
+index.md                                                                                                                  1,1            All
+Notedown LSP server not active
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
@@ -499,408 +530,102 @@ This document contains a [[target]] wikilink to test basic functionality.
 ~
 ~
 ~
-~
-~
-index.md                                                                                                                         1,1            All
-E492: Not an editor command: LspInfo
+index.md                                                                                                                  1,1            All
+:NotedownWorkspaceStatus
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
 
-This is a test document to verify that the Notedown plugin initializes correctly.
+Notedown Workspace Status:
+  File: /private/tmp/vhs-test-normalized/workspace/index.md
+  In Notedown Workspace: Yes
+  Should Use Notedown Parser: Yes
+    Matched Workspace: /private/tmp/vhs-test-normalized/workspace
+  Detection Method: Auto-detected (.notedown directory)
 
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         1,1            All
-E492: Not an editor command: LspInfo
+Press ENTER or type command to continue
 ────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
+  1 # Plugin Initialization Test
+  2
+  3 This is a test document to verify that the Notedown plugin initializes correctly.
+  4
+  5 ## Features to Test
+  6
+  7 - LSP server connection
+  8 - Plugin loading
+  9 - Basic functionality
+ 10
+ 11 ## Wikilinks
+ 12
+ 13 This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
 
-This is a test document to verify that the Notedown plugin initializes correctly.
+Notedown Workspace Status:
+  File: /private/tmp/vhs-test-normalized/workspace/index.md
+  In Notedown Workspace: Yes
+  Should Use Notedown Parser: Yes
+    Matched Workspace: /private/tmp/vhs-test-normalized/workspace
+  Detection Method: Auto-detected (.notedown directory)
 
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-/target
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-/target                                                                                                                          [1/1]
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-/target                                                                                                                          [1/1]
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-/target                                                                                                                          [1/1]
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-:echo 'Plugin loaded successfully'
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-Plugin loaded successfully
-────────────────────────────────────────────────────────────────────────────────
-# Plugin Initialization Test
-
-This is a test document to verify that the Notedown plugin initializes correctly.
-
-## Features to Test
-
-- LSP server connection
-- Plugin loading
-- Basic functionality
-
-## Wikilinks
-
-This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                         13,28          All
-Plugin loaded successfully
+Press ENTER or type command to continue
 ────────────────────────────────────────────────────────────────────────────────

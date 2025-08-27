@@ -18,7 +18,7 @@ require("notedown").setup()
 
 vim.api.nvim_create_user_command("NotedownReload", function()
 	-- Stop existing LSP clients
-	vim.lsp.stop_client(vim.lsp.get_active_clients({ name = "notedown" }))
+	vim.lsp.stop_client(vim.lsp.get_clients({ name = "notedown" }))
 
 	-- Clear module cache
 	package.loaded["notedown"] = nil

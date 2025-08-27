@@ -32,6 +32,8 @@
               golangci-lint
               goreleaser
               vhs
+              ttyd
+              ffmpeg
             ];
           };
         }

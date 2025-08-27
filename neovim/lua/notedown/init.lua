@@ -150,7 +150,7 @@ end
 
 -- Get the appropriate notedown LSP client for command execution
 local function get_notedown_command_client()
-	local clients = vim.lsp.get_active_clients({ name = "notedown" })
+	local clients = vim.lsp.get_clients({ name = "notedown" })
 	if #clients == 0 then
 		vim.notify("Notedown LSP server not active", vim.log.levels.WARN)
 		return nil

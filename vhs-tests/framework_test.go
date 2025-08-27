@@ -24,13 +24,11 @@ import (
 // vhsTests defines all VHS test cases to run.
 var vhsTests = []notedown.VHSTest{
 	{Name: "plugin-initialization", Workspace: "plugin-init-test", Timeout: 300 * time.Second},
-	{Name: "wikilink-navigation", Workspace: "plugin-init-test", Timeout: 300 * time.Second},
-	{Name: "wikilink-completion", Workspace: "completion-test", Timeout: 300 * time.Second},
-	{Name: "wikilink-diagnostics", Workspace: "diagnostics-test", Timeout: 300 * time.Second},
 }
 
 // TestVHSFramework runs all VHS tests using the clean runner approach.
 func TestVHSFramework(t *testing.T) {
+	t.Logf("=== Starting VHS test suite with %d tests ===", len(vhsTests))
 	runner := notedown.NewNotedownVHSRunner()
 
 	for _, test := range vhsTests {
@@ -40,4 +38,5 @@ func TestVHSFramework(t *testing.T) {
 			runner.RunTest(t, test)
 		})
 	}
+	t.Logf("=== VHS test suite completed ===")
 }

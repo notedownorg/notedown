@@ -3,53 +3,48 @@
 
 # Output configuration
 Output "{{.OutputFile}}"
-Output "{{.TmpDir}}/plugin-initialization.gif"
-Set FontSize 14
-Set Width 120
-Set Height 120
-Set TypingSpeed 100ms
+Output "{{.TmpDir}}/{{.TestName}}.gif"
+Set FontSize 12
+Set Width 1200
+Set Height 800
+Set TypingSpeed 50ms
+Set PlaybackSpeed 0.5
 
-# Hide the shell navigation and setup
+# Hide all shell setup
 Hide
 
 # Change to test workspace
-Type "cd {{.WorkspaceDir}}"
+Type "cd '{{.WorkspaceDir}}'"
+Enter
+Sleep 1s
+
+# Clear any existing terminal content
+Type "clear"
 Enter
 Sleep 500ms
 
-# Start Neovim with VHS test configuration
-Type "nvim --noplugin -u '{{.ConfigFile}}' index.md"
+# Start Neovim with clean environment
+Type "nvim --clean -u '{{.ConfigFile}}' index.md"
 Enter
-Sleep 3s
 
-# Show recording once Neovim is loaded
+# Show recording only after Neovim fully loads
+Sleep 4s
 Show
 
-# Check LSP status - this will show if the LSP server connected
-Type ":LspInfo"
-Enter
+# Wait for plugin to fully initialize
 Sleep 2s
 
-# Position cursor on wikilink to test basic functionality
-Type "gg"
-Type "/target"
+# Test Notedown workspace status command
+Type ":NotedownWorkspaceStatus"
 Enter
-Type "n"
-Sleep 1s
-
-# Test that we can see the wikilink is detected (basic functionality check)
-Type ":echo 'Plugin loaded successfully'"
-Enter
-Sleep 1s
-
-# Hide before exiting to avoid capturing shell return
+Sleep 3s
 Hide
 
-# Exit Neovim
-Type ":qa!"
+# Press enter to dismiss the status message
+Type ""
 Enter
-Sleep 500ms
+Sleep 1s
 
-# Return to original directory
-Type "cd {{.TmpDir}}"
+# Exit cleanly
+Type ":qa!"
 Enter

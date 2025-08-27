@@ -28,7 +28,8 @@
       "Bash(timeout 30s nvim:*)",
       "Bash(time nvim:*)",
       "Bash(git add:*)",
-      "Bash(timeout 10s nvim:*)"
+      "Bash(timeout 10s nvim:*)",
+      "Bash(vhs:*)"
     ],
     "deny": [],
     "additionalDirectories": [
