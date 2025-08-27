@@ -58,17 +58,7 @@ test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
 test-vhs:
-	@echo "=== Starting VHS test execution ==="
-	@echo "Current time: $$(date)"
-	@echo "Memory usage: $$(free -h || echo 'free command not available')"
-	@echo "Disk usage: $$(df -h . || echo 'df command not available')"
-	@echo "Display: $${DISPLAY:-'No DISPLAY set'}"
-	@echo "VHS availability: $$(which vhs || echo 'vhs not found in PATH')"
-	@echo "VHS version: $$(timeout 10s vhs --version 2>&1 || echo 'vhs version check failed/timeout')"
-	@echo "Process limits: $$(ulimit -a || echo 'ulimit check failed')"
-	@echo "Environment check: $$(timeout 5s vhs --help >/dev/null 2>&1 && echo 'VHS accessible' || echo 'VHS not accessible')"
-	GOMAXPROCS=2 go test -parallel 2 -v -x -count=1 ./vhs-tests/... 2>&1 | tee /tmp/vhs-test.log || (echo "Go test failed with exit code: $$?"; echo "=== Last 50 lines of output ==="; tail -50 /tmp/vhs-test.log; exit 1)
-	@echo "=== VHS test execution completed at $$(date) ==="
+	go test -v ./vhs-tests/...
 
 test-vhs-golden:
 	rm -f vhs-tests/golden/*.ascii

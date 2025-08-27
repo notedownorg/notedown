@@ -59,12 +59,6 @@ func NewNotedownVHSRunner() *NotedownVHSRunner {
 // RunTest executes a VHS test with all necessary setup and cleanup.
 func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 	t.Logf("=== Starting VHS test: %s ===", test.Name)
-	
-	// TEMPORARY: Skip actual VHS execution for debugging CI termination issue
-	t.Logf("=== SKIPPING ACTUAL VHS EXECUTION FOR CI DEBUGGING ===")
-	t.Logf("Test would normally run VHS test: %s", test.Name)
-	t.Logf("=== VHS test %s completed successfully (skipped) ===", test.Name)
-	return
 
 	// Cleanup old files and VHS processes
 	t.Logf("Phase 1: Cleaning up test files and VHS processes...")
@@ -83,6 +77,12 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 			t.Logf("Failed to cleanup temp dir: %v", err)
 		}
 	}()
+
+	// TEMPORARY: Skip actual VHS execution for debugging CI termination issue
+	t.Logf("=== SKIPPING ACTUAL VHS EXECUTION FOR CI DEBUGGING ===")
+	t.Logf("Test would normally run VHS test: %s", test.Name)
+	t.Logf("=== VHS test %s completed successfully (skipped) ===", test.Name)
+	return
 
 	// Build LSP server
 	t.Logf("Phase 3: Building LSP server binary...")
