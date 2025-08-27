@@ -249,6 +249,10 @@ func normalizeOutput(content string) string {
 	// - generic tmp: /tmp/.../vhs-test-...
 	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|private/tmp|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/vhs-test-[^/]+/`)
 	content = re.ReplaceAllString(content, "/tmp/vhs-test-normalized/")
+	
+	// Also handle /private/tmp directly since the above might not catch all cases
+	privateRe := regexp.MustCompile(`/private(/tmp/vhs-test-normalized/)`)
+	content = privateRe.ReplaceAllString(content, "$1")
 
 	// Remove shell prompts and terminal escape sequences that might be inconsistent
 	// These can appear differently between test runs
