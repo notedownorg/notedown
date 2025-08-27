@@ -13,7 +13,11 @@
 # limitations under the License.
 
 # Use nix develop shell if nix is available
-export NIX_CONFIG := warn-dirty = false
+define NIX_SETTINGS
+warn-dirty = false
+download-buffer-size = 134217728
+endef
+export NIX_CONFIG := $(NIX_SETTINGS)
 ifneq ($(shell command -v nix 2> /dev/null),)
 SHELL := nix develop --command bash
 endif
@@ -24,6 +28,8 @@ COMMIT := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
 check: clean format mod lint test
+
+all: hygiene test dirty
 
 hygiene: format mod
 
@@ -40,13 +46,23 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: test-lsp test-nvim
+test: test-pkg test-lsp test-nvim
+
+test-pkg:
+	go test ./pkg/...
 
 test-lsp:
-	go test ./...
+	go test ./language-server/...
 
 test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
+
+test-vhs:
+	go test -v ./vhs-tests/...
+
+test-vhs-golden:
+	rm -f vhs-tests/golden/*.ascii
+	go test -parallel 4 -v ./vhs-tests/...
 
 install: clean
 	go build -ldflags "\

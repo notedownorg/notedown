@@ -24,16 +24,16 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:pkg.go.dev)",
       "Bash(rm:*)",
-      "Bash(timeout 5s ./integration/notedown-lsp serve:*)",
       "Bash(chmod:*)",
       "Bash(timeout 30s nvim:*)",
       "Bash(time nvim:*)",
       "Bash(git add:*)",
-      "Bash(luac:*)",
       "Bash(timeout 10s nvim:*)",
-      "Bash(lua:*)",
-      "Bash(timeout:*)"
+      "Bash(vhs:*)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/private/tmp"
+    ]
   }
 }

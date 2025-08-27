@@ -1,0 +1,17 @@
+# VHS generated outputs (exclude golden files)
+*.gif
+*.mp4
+*.webm
+
+# Temporary VHS outputs (but keep golden files)
+/tmp/vhs_test_*.ascii
+
+# Golden files should be committed
+!golden/*.ascii
+
+# Temporary workspaces
+workspaces/tmp-*
+
+# Helper script outputs
+*.log
+*.tmp

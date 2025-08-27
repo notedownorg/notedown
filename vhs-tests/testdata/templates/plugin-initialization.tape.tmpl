@@ -1,0 +1,55 @@
+# VHS tape for testing Notedown plugin initialization
+# This test verifies that the plugin loads correctly and LSP server starts
+
+# Output configuration
+Output "{{.OutputFile}}"
+Output "{{.TmpDir}}/{{.TestName}}.gif"
+Set FontSize 12
+Set Width 1200
+Set Height 800
+Set TypingSpeed 50ms
+Set PlaybackSpeed 0.5
+
+# Hide all shell setup
+Hide
+
+# Change to test workspace
+Type "cd '{{.WorkspaceDir}}'"
+Enter
+Sleep 1s
+
+# Clear any existing terminal content
+Type "clear"
+Enter
+Sleep 500ms
+
+# Start Neovim with clean environment in directory mode
+Type "nvim --clean -u '{{.ConfigFile}}' ."
+Enter
+
+# Show recording only after Neovim fully loads
+Sleep 4s
+Show
+
+# Wait for plugin to fully initialize
+Sleep 3s
+
+# Open the index.md file
+Type ":edit index.md"
+Enter
+Sleep 2s
+
+# Test Notedown workspace status command
+Type ":NotedownWorkspaceStatus"
+Enter
+Sleep 3s
+Hide
+
+# Press enter to dismiss the status message
+Type ""
+Enter
+Sleep 1s
+
+# Exit cleanly
+Type ":qa!"
+Enter
