@@ -3,7 +3,8 @@
 
 # Output configuration
 Output "{{.OutputFile}}"
-Output "{{.TmpDir}}/{{.TestName}}.gif"
+# Disable GIF output to avoid graphics/video requirements in CI
+# Output "{{.TmpDir}}/{{.TestName}}.gif"
 Set FontSize 12
 Set Width 1200
 Set Height 800
