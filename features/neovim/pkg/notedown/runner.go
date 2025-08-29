@@ -227,11 +227,6 @@ func (r *NotedownVHSRunner) renderTemplateFromPath(templatePath string, name str
 	return tapeFile, nil
 }
 
-// renderTemplate renders a VHS template with the given data (legacy method).
-func (r *NotedownVHSRunner) renderTemplate(name string, data map[string]interface{}, outputDir string) (string, error) {
-	templateFile := filepath.Join(r.templateDir, name+".tape.tmpl")
-	return r.renderTemplateFromPath(templateFile, name, data, outputDir)
-}
 
 // createWorkspaceFromPath creates a workspace from a specific path.
 func (r *NotedownVHSRunner) createWorkspaceFromPath(workspaceSrc string, outputDir string) error {
