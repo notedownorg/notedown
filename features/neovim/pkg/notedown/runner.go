@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"sync"
 	"testing"
 	"text/template"
@@ -36,6 +37,9 @@ type VHSTest struct {
 	Name      string
 	Workspace string
 	Timeout   time.Duration
+	// Area and Feature support for hierarchical testing
+	Area    string
+	Feature string
 }
 
 // NotedownVHSRunner handles all VHS testing boilerplate for Notedown plugin tests.
@@ -44,28 +48,46 @@ type NotedownVHSRunner struct {
 	lspBuilder       func() (string, error)
 	pluginInstaller  func(string) error
 	workspaceCreator func(string, string) error
+	generateGIF      bool
 }
 
 // NewNotedownVHSRunner creates a new runner with default Notedown-specific setup.
 func NewNotedownVHSRunner() *NotedownVHSRunner {
 	return &NotedownVHSRunner{
-		templateDir:      "testdata/templates",
+		templateDir:      "", // Will be determined by area/feature structure
 		lspBuilder:       ensureLSPBinary,
 		pluginInstaller:  installPlugin,
 		workspaceCreator: createWorkspace,
+		generateGIF:      true, // Default to generating GIFs
 	}
 }
 
-// RunTest executes a VHS test with all necessary setup and cleanup.
+// SetGenerateGIF configures whether GIF files should be generated during testing.
+func (r *NotedownVHSRunner) SetGenerateGIF(generate bool) {
+	r.generateGIF = generate
+}
+
+// RunFeatureTest executes a feature test with area/feature directory structure.
+func (r *NotedownVHSRunner) RunFeatureTest(t *testing.T, test VHSTest) {
+	r.runTestWithPaths(t, test, true)
+}
+
+// RunTest executes a VHS test with all necessary setup and cleanup (legacy support).
 func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
+	r.runTestWithPaths(t, test, false)
+}
+
+// runTestWithPaths is the internal implementation that handles both legacy and feature-based paths.
+func (r *NotedownVHSRunner) runTestWithPaths(t *testing.T, test VHSTest, useFeatureStructure bool) {
 	// Cleanup old files and VHS processes (skip in CI to avoid termination)
 	if !isCI() {
 		cleanupTestFiles(test.Name)
 		cleanupVHSProcesses()
 	}
 
-	// Create temporary directory for test
-	tmpDir, err := os.MkdirTemp("", "vhs-test-"+test.Name)
+	// Create temporary directory for test with short name
+	safeName := strings.ReplaceAll(test.Name, "/", "-")
+	tmpDir, err := os.MkdirTemp("", "notedown")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
@@ -87,27 +109,51 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 		t.Fatalf("Failed to install plugin: %v", err)
 	}
 
-	// Create workspace
-	workspaceDir := filepath.Join(tmpDir, "workspace")
-	if err := r.workspaceCreator(test.Workspace, workspaceDir); err != nil {
+	// Create workspace - resolve paths based on structure
+	var workspaceDir string
+	var workspaceSrc string
+	if useFeatureStructure {
+		// For feature structure: area/feature/workspace
+		featureDir := filepath.Join(test.Area, test.Feature)
+		workspaceDir = filepath.Join(tmpDir, "workspace")
+		workspaceSrc = filepath.Join(featureDir, test.Workspace)
+	} else {
+		// Legacy: workspaces/workspace-name
+		workspaceDir = filepath.Join(tmpDir, "workspace")
+		workspaceSrc = test.Workspace
+	}
+
+	if err := r.createWorkspaceFromPath(workspaceSrc, workspaceDir); err != nil {
 		t.Fatalf("Failed to create workspace: %v", err)
 	}
 
-	// Render template
-	outputFile := filepath.Join(tmpDir, test.Name+".ascii")
-	gifFile := filepath.Join("gifs", test.Name+".gif")
+	// Render template - resolve template path based on structure
+	var outputFile, gifFile, templatePath string
+	if useFeatureStructure {
+		featureDir := filepath.Join(test.Area, test.Feature)
+		outputFile = filepath.Join(tmpDir, safeName+".ascii") // Use safe name for file paths
+		gifFile = filepath.Join(featureDir, "demo.gif")
+		templatePath = filepath.Join(featureDir, "demo.tape.tmpl")
+	} else {
+		outputFile = filepath.Join(tmpDir, test.Name+".ascii")
+		gifFile = filepath.Join("gifs", test.Name+".gif")
+		templatePath = filepath.Join("testdata/templates", test.Name+".tape.tmpl")
+	}
+
 	configFile := filepath.Join(pluginDir, "init.lua")
 
+	// Create consistent template data with safe names (reuse safeName from earlier)
 	templateData := map[string]interface{}{
 		"OutputFile":   outputFile,
 		"WorkspaceDir": workspaceDir,
 		"ConfigFile":   configFile,
 		"TmpDir":       tmpDir,
 		"LSPBinary":    lspBinary,
-		"TestName":     test.Name,
+		"TestName":     safeName,      // Use safe name in templates
+		"GenerateGIF":  r.generateGIF, // Control GIF generation
 	}
 
-	tapeFile, err := r.renderTemplate(test.Name, templateData, tmpDir)
+	tapeFile, err := r.renderTemplateFromPath(templatePath, test.Name, templateData, tmpDir)
 	if err != nil {
 		t.Fatalf("Failed to render template: %v", err)
 	}
@@ -123,30 +169,46 @@ func (r *NotedownVHSRunner) RunTest(t *testing.T, test VHSTest) {
 		t.Fatalf("VHS execution failed: %v", err)
 	}
 
-	// Assert golden file match
-	goldenFile := filepath.Join("golden", test.Name+".ascii")
+	// Assert golden file match - resolve golden file path based on structure
+	var goldenFile string
+	if useFeatureStructure {
+		featureDir := filepath.Join(test.Area, test.Feature)
+		goldenFile = filepath.Join(featureDir, "expected.ascii")
+	} else {
+		goldenFile = filepath.Join("golden", test.Name+".ascii")
+	}
 	r.assertGoldenMatch(t, goldenFile, result)
 
-	// Copy GIF to gifs directory for visual inspection
-	srcGif := filepath.Join(tmpDir, test.Name+".gif")
-	if fileExists(srcGif) {
-		if err := os.MkdirAll("gifs", 0750); err != nil {
-			t.Logf("Failed to create gifs directory: %v", err)
-			return
-		}
-		if err := copyFile(srcGif, gifFile); err != nil {
-			t.Logf("Failed to copy GIF file: %v", err)
+	// Copy GIF to appropriate location for visual inspection (only if generation enabled)
+	if r.generateGIF {
+		srcGif := filepath.Join(tmpDir, safeName+".gif")
+		if fileExists(srcGif) {
+			if useFeatureStructure {
+				// Copy to feature directory
+				if err := os.MkdirAll(filepath.Dir(gifFile), 0750); err != nil {
+					t.Logf("Failed to create feature directory: %v", err)
+					return
+				}
+			} else {
+				// Copy to gifs directory (legacy)
+				if err := os.MkdirAll("gifs", 0750); err != nil {
+					t.Logf("Failed to create gifs directory: %v", err)
+					return
+				}
+			}
+			if err := copyFile(srcGif, gifFile); err != nil {
+				t.Logf("Failed to copy GIF file: %v", err)
+			}
 		}
 	}
 }
 
-// renderTemplate renders a VHS template with the given data.
-func (r *NotedownVHSRunner) renderTemplate(name string, data map[string]interface{}, outputDir string) (string, error) {
-	templateFile := filepath.Join(r.templateDir, name+".tape.tmpl")
-	// #nosec G304 - templateFile path is controlled within test framework
-	templateContent, err := os.ReadFile(templateFile)
+// renderTemplateFromPath renders a VHS template from a specific path.
+func (r *NotedownVHSRunner) renderTemplateFromPath(templatePath string, name string, data map[string]interface{}, outputDir string) (string, error) {
+	// #nosec G304 - templatePath is controlled within test framework
+	templateContent, err := os.ReadFile(templatePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to read template %s: %w", templateFile, err)
+		return "", fmt.Errorf("failed to read template %s: %w", templatePath, err)
 	}
 
 	tmpl, err := template.New(name).Parse(string(templateContent))
@@ -154,7 +216,9 @@ func (r *NotedownVHSRunner) renderTemplate(name string, data map[string]interfac
 		return "", fmt.Errorf("failed to parse template: %w", err)
 	}
 
-	tapeFile := filepath.Join(outputDir, name+".tape")
+	// Create a safe filename for the tape file (avoid subdirectories)
+	safeName := strings.ReplaceAll(name, "/", "-")
+	tapeFile := filepath.Join(outputDir, safeName+".tape")
 	// #nosec G304 - tapeFile path is controlled within test framework
 	f, err := os.Create(tapeFile)
 	if err != nil {
@@ -171,6 +235,34 @@ func (r *NotedownVHSRunner) renderTemplate(name string, data map[string]interfac
 	}
 
 	return tapeFile, nil
+}
+
+// createWorkspaceFromPath creates a workspace from a specific path.
+func (r *NotedownVHSRunner) createWorkspaceFromPath(workspaceSrc string, outputDir string) error {
+	// Get current working directory to find workspaces
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	// Check if workspaceSrc is relative path or absolute
+	var srcWorkspace string
+	if filepath.IsAbs(workspaceSrc) {
+		srcWorkspace = workspaceSrc
+	} else {
+		// Try as relative path from current directory
+		candidate := filepath.Join(wd, workspaceSrc)
+		if _, err := os.Stat(candidate); err == nil {
+			srcWorkspace = candidate
+		} else {
+			return fmt.Errorf("workspace %s not found at %s", workspaceSrc, candidate)
+		}
+	}
+
+	// Copy workspace to output directory
+	// #nosec G204 - subprocess execution with controlled arguments for test framework
+	cmd := exec.Command("cp", "-r", srcWorkspace, outputDir)
+	return cmd.Run()
 }
 
 // executeVHS runs VHS on the given tape file.
@@ -199,8 +291,9 @@ func (r *NotedownVHSRunner) executeVHS(tapeFile string, timeout time.Duration) (
 		return nil, fmt.Errorf("vhs timed out after %v", timeout)
 	}
 
-	// Read the output file
-	outputFile := filepath.Join(filepath.Dir(tapeFile), filepath.Base(tapeFile[:len(tapeFile)-5])+".ascii")
+	// Read the output file (VHS creates it with same base name as tape file)
+	baseName := strings.TrimSuffix(filepath.Base(tapeFile), ".tape")
+	outputFile := filepath.Join(filepath.Dir(tapeFile), baseName+".ascii")
 	// #nosec G304 - outputFile path is controlled within test framework
 	return os.ReadFile(outputFile)
 }
@@ -209,23 +302,27 @@ func (r *NotedownVHSRunner) executeVHS(tapeFile string, timeout time.Duration) (
 func normalizeOutput(content string) string {
 	// Replace temporary directory paths with a normalized placeholder
 	// Handles multiple patterns:
-	// - macOS: /var/folders/.../T/vhs-test-...
-	// - macOS private: /private/tmp/vhs-test-...
-	// - nix-shell: /tmp/nix-shell.../vhs-test-...
-	// - nix develop: /tmp/nix-shell.../vhs-test-...
-	// - Linux CI: /home/runner/work/_temp/nix-shell.../vhs-test-...
-	// - generic tmp: /tmp/.../vhs-test-...
-	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|private/tmp|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/vhs-test-[^/]+/`)
-	content = re.ReplaceAllString(content, "/tmp/vhs-test-normalized/")
+	// - macOS: /var/folders/.../T/notedown...
+	// - macOS private: /private/tmp/notedown...
+	// - nix-shell: /tmp/nix-shell.../notedown...
+	// - nix develop: /tmp/nix-shell.../notedown...
+	// - Linux CI: /home/runner/work/_temp/nix-shell.../notedown...
+	// - generic tmp: /tmp/.../notedown...
+	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|private/tmp|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/notedown[^/]*/`)
+	content = re.ReplaceAllString(content, "/tmp/notedown-normalized/")
 
 	// Also handle /private/tmp directly since the above might not catch all cases
-	privateRe := regexp.MustCompile(`/private(/tmp/vhs-test-normalized/)`)
+	privateRe := regexp.MustCompile(`/private(/tmp/notedown-normalized/)`)
 	content = privateRe.ReplaceAllString(content, "$1")
 
 	// Remove shell prompts and terminal escape sequences that might be inconsistent
 	// These can appear differently between test runs
 	shellPromptRe := regexp.MustCompile(`\\\[\\\]> \\\[\\\]`)
 	content = shellPromptRe.ReplaceAllString(content, "")
+
+	// Remove standalone ">" characters that appear as shell prompts
+	standalonePromptRe := regexp.MustCompile(`(?m)^>\n`)
+	content = standalonePromptRe.ReplaceAllString(content, "\n")
 
 	// Normalize terminal escape sequences for colors/formatting
 	escapeRe := regexp.MustCompile(`\x1b\[[0-9;]*[mGKH]`)
@@ -235,6 +332,36 @@ func normalizeOutput(content string) string {
 	crRe := regexp.MustCompile(`\r`)
 	content = crRe.ReplaceAllString(content, "")
 
+	// Fix line wrapping differences in paths - join lines that end with truncated paths
+	// This handles cases like "workspac\ne" -> "workspace"
+	wrapRe := regexp.MustCompile(`([a-zA-Z0-9/_-]+)\n([a-zA-Z0-9])`)
+	content = wrapRe.ReplaceAllString(content, "$1$2")
+
+	// Normalize extra blank lines at the beginning and throughout the content
+	content = strings.TrimLeft(content, "\n")
+	content = strings.TrimRight(content, "\n") + "\n"
+
+	// Remove all starting separators completely - any initial whitespace followed by separators
+	startingSeparatorRe := regexp.MustCompile(`^[\s\n]*────────────────────────────────────────────────────────────────────────────────\n`)
+	content = startingSeparatorRe.ReplaceAllString(content, "")
+
+	// Remove truly empty screens (separator followed by only blank lines and another separator)
+	// This preserves separators between actual content screens
+	emptyScreenRe := regexp.MustCompile(`────────────────────────────────────────────────────────────────────────────────\n\n+────────────────────────────────────────────────────────────────────────────────\n`)
+	content = emptyScreenRe.ReplaceAllString(content, "")
+
+	// Remove blank lines immediately before separators
+	blankBeforeSeparatorRe := regexp.MustCompile(`\n+────────────────────────────────────────────────────────────────────────────────\n`)
+	content = blankBeforeSeparatorRe.ReplaceAllString(content, "\n────────────────────────────────────────────────────────────────────────────────\n")
+
+	// Normalize remaining multiple consecutive blank lines to exactly 2 newlines
+	multiBlankRe := regexp.MustCompile(`\n{3,}`)
+	content = multiBlankRe.ReplaceAllString(content, "\n\n")
+
+	// Normalize workspace status output - standardize spacing and indentation
+	workspaceStatusRe := regexp.MustCompile(`(Matched Workspace: [^\n]+)\n+\s*(Detection Method:)`)
+	content = workspaceStatusRe.ReplaceAllString(content, "$1\n  $2")
+
 	// Remove LSP server error messages that might be inconsistent across environments
 	lspErrorRe := regexp.MustCompile(`(?m)^.*language server.*failed.*The language server is either not installed.*$\n?`)
 	content = lspErrorRe.ReplaceAllString(content, "")
@@ -242,6 +369,9 @@ func normalizeOutput(content string) string {
 	// Remove any diagnostic print statements from VHS test
 	diagnosticRe := regexp.MustCompile(`(?m)^VHS Test: LSP Binary configured as:.*$\n?`)
 	content = diagnosticRe.ReplaceAllString(content, "")
+
+	// Final normalization - trim only leading and trailing blank lines
+	content = strings.Trim(content, "\n") + "\n"
 
 	return content
 }
@@ -306,13 +436,27 @@ func ensureLSPBinary() (string, error) {
 		}
 		sharedLSPBinary = filepath.Join(tmpDir, "notedown-language-server")
 
-		// Get project root (vhs directory)
+		// Get project root (find the directory containing language-server)
 		wd, err := os.Getwd()
 		if err != nil {
 			buildError = err
 			return
 		}
-		projectRoot := filepath.Dir(wd) // Go from vhs-tests to vhs
+
+		// Go up directories until we find language-server
+		projectRoot := wd
+		for {
+			lsPath := filepath.Join(projectRoot, "language-server")
+			if _, err := os.Stat(lsPath); err == nil {
+				break // Found language-server directory
+			}
+			parent := filepath.Dir(projectRoot)
+			if parent == projectRoot {
+				buildError = fmt.Errorf("could not find project root with language-server directory")
+				return
+			}
+			projectRoot = parent
+		}
 
 		// Build LSP server once
 		// #nosec G204 - subprocess execution with controlled arguments for test framework
@@ -344,13 +488,29 @@ func installPlugin(pluginDir string) error {
 
 // installPluginWithLSP installs the Notedown Neovim plugin with a specific LSP binary path.
 func installPluginWithLSP(pluginDir string, lspBinary string) error {
-	// Get project root (vhs directory)
+	// Get project root (find the directory containing neovim)
 	wd, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	projectRoot := filepath.Dir(wd) // Go from vhs-tests to vhs
+	// Go up directories until we find neovim (skip features/neovim, find actual neovim)
+	projectRoot := wd
+	for {
+		nvimPath := filepath.Join(projectRoot, "neovim")
+		// Make sure it's not the features/neovim directory by checking for lua/ subdirectory
+		luaPath := filepath.Join(nvimPath, "lua")
+		if _, err := os.Stat(nvimPath); err == nil {
+			if _, err := os.Stat(luaPath); err == nil {
+				break // Found neovim directory with lua subdirectory
+			}
+		}
+		parent := filepath.Dir(projectRoot)
+		if parent == projectRoot {
+			return fmt.Errorf("could not find project root with neovim directory containing lua files")
+		}
+		projectRoot = parent
+	}
 	neovimSrc := filepath.Join(projectRoot, "neovim")
 
 	// Create the neovim subdirectory in plugin dir
@@ -359,11 +519,34 @@ func installPluginWithLSP(pluginDir string, lspBinary string) error {
 		return err
 	}
 
-	// Copy plugin files to isolated directory
-	// #nosec G204 - subprocess execution with controlled arguments for test framework
-	cmd := exec.Command("sh", "-c", "cp -r "+neovimSrc+"/* "+neovimDest+"/")
-	if err := cmd.Run(); err != nil {
-		return err
+	// Copy plugin files to isolated directory using Go's filepath for safety
+	err = filepath.Walk(neovimSrc, func(srcPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Calculate destination path
+		relPath, err := filepath.Rel(neovimSrc, srcPath)
+		if err != nil {
+			return err
+		}
+		destPath := filepath.Join(neovimDest, relPath)
+
+		if info.IsDir() {
+			return os.MkdirAll(destPath, info.Mode())
+		}
+
+		// Copy file
+		return copyFile(srcPath, destPath)
+	})
+	if err != nil {
+		return fmt.Errorf("failed to copy neovim files from %s to %s: %w", neovimSrc, neovimDest, err)
+	}
+
+	// Verify the copy worked by checking for config.lua
+	configPath := filepath.Join(neovimDest, "lua", "notedown", "config.lua")
+	if _, err := os.Stat(configPath); err != nil {
+		return fmt.Errorf("config.lua not found at %s after copy: %w", configPath, err)
 	}
 
 	// Create minimal init.lua that properly loads the plugin for VHS testing
@@ -381,25 +564,27 @@ vim.opt.ttimeout = false
 vim.opt.columns = 120
 vim.opt.lines = 30
 
+-- Netrw settings for deterministic behavior
+vim.g.netrw_sort_by = "name"
+vim.g.netrw_sort_direction = "normal" 
+vim.g.netrw_banner = 1
+vim.g.netrw_browse_split = 0
+vim.g.netrw_winsize = 25
+vim.g.netrw_liststyle = 3
+vim.g.netrw_home = "/tmp"  -- Use /tmp for netrw state (avoid persistence)
+
 -- Add Lua package path for the plugin
 package.path = package.path .. ";` + pluginDir + `/neovim/lua/?.lua;` + pluginDir + `/neovim/lua/?/init.lua"
 
--- Load the notedown plugin with custom LSP binary path
-local ok, notedown = pcall(require, "notedown")
-if ok then
-    -- Override the default config to ensure our LSP binary path is used
-    local config = require("notedown.config")
-    config.defaults.server.cmd = { "` + lspBinary + `", "serve", "--log-level", "debug", "--log-file", "/tmp/notedown.log" }
-    
-    notedown.setup({
-        server = {
-            cmd = { "` + lspBinary + `", "serve", "--log-level", "debug", "--log-file", "/tmp/notedown.log" }
-        }
-    })
-    
-    -- Diagnostic output to verify the configuration
-    print("VHS Test: LSP Binary configured as: " .. "` + lspBinary + `")
-end
+-- Set up custom LSP binary path before loading plugin
+local notedown_config = require("notedown.config")
+notedown_config.defaults.server.cmd = { "` + lspBinary + `", "serve", "--log-level", "debug", "--log-file", "/tmp/notedown.log" }
+
+-- Load the plugin file which contains user commands and calls setup()
+pcall(dofile, "` + pluginDir + `/neovim/plugin/notedown.lua")
+
+-- Diagnostic output to verify the configuration
+print("VHS Test: LSP Binary configured as: " .. "` + lspBinary + `")
 `
 
 	initFile := filepath.Join(pluginDir, "init.lua")

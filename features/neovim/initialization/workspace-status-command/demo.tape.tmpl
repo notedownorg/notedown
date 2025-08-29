@@ -3,12 +3,13 @@
 
 # Output configuration
 Output "{{.OutputFile}}"
-Output "{{.TmpDir}}/{{.TestName}}.gif"
+{{if .GenerateGIF}}Output "{{.TmpDir}}/{{.TestName}}.gif"{{end}}
 Set FontSize 12
 Set Width 1200
 Set Height 800
 Set TypingSpeed 50ms
-Set PlaybackSpeed 0.5
+Set PlaybackSpeed 0.2
+Set Framerate 30
 
 # Hide all shell setup
 Hide
@@ -18,38 +19,20 @@ Type "cd '{{.WorkspaceDir}}'"
 Enter
 Sleep 1s
 
-# Clear any existing terminal content
-Type "clear"
-Enter
-Sleep 500ms
-
 # Start Neovim with clean environment in directory mode
 Type "nvim --clean -u '{{.ConfigFile}}' ."
 Enter
-
-# Show recording only after Neovim fully loads
 Sleep 4s
-Show
-
-# Wait for plugin to fully initialize
-Sleep 3s
 
 # Open the index.md file
 Type ":edit index.md"
 Enter
-Sleep 2s
+Sleep 3s
 
 # Test Notedown workspace status command
+Show
 Type ":NotedownWorkspaceStatus"
-Enter
-Sleep 3s
-Hide
-
-# Press enter to dismiss the status message
-Type ""
-Enter
 Sleep 1s
-
-# Exit cleanly
-Type ":qa!"
 Enter
+Sleep 8s
+

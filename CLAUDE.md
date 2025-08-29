@@ -5,10 +5,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Test Commands
 
 ### Core Development
-- `make test` - Run all tests (LSP, Neovim, and integration)
+- `make test` - Run all tests (LSP, Neovim, and feature tests)
 - `make test-lsp` - Run Go tests only (`go test ./...`)
 - `make test-nvim` - Run Neovim plugin tests only
-- `make test-vhs` - Run VHS end-to-end terminal tests
+- `make test-features` - Run feature tests (living documentation)
 - `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy
@@ -94,14 +94,19 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. VHS Testing Framework (`vhs-tests/`)
-- **Clean Architecture**: Refactored from monolithic tests to clean runner-based framework
+### 3. Feature Testing Framework (`features/neovim/`)
+- **Living Documentation**: Features documented through executable VHS tests with visual demonstrations
+- **Area/Feature Organization**: Hierarchical structure with areas (initialization, wikilinks) containing specific features
 - **NotedownVHSRunner**: Handles all boilerplate (LSP building, plugin installation, workspace setup, cleanup)
-- **Data-Driven Tests**: Tests defined as simple `VHSTest` structs with name, workspace, and timeout
+- **Documentation Structure**: 
+  - `README.md` files are **user-focused** explaining what features do and how to use them
+  - `DEVELOPMENT.md` files are **developer-focused** with technical implementation details and contribution guides
+  - Both types should be consulted when working on features or understanding the system
+- **Data-Driven Tests**: Features defined as simple structs with area, feature, workspace, and timeout
 - **Template Rendering**: Dynamic VHS tape generation from Go templates with test-specific data
 - **Parallel Execution**: Safe concurrent test execution with shared binary building via `sync.Once`
 - **Golden File Testing**: Automated comparison with auto-creation of missing golden files
-- **Visual Inspection**: Generates GIFs alongside ASCII output for debugging and documentation
+- **Visual Documentation**: Generates GIFs in feature directories for embedded documentation
 
 ### 4. Neovim Plugin (`neovim/`)
 - **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
@@ -114,15 +119,6 @@ Key files:
 - `lua/notedown/config.lua` - Configuration management and workspace detection
 - `plugin/notedown.lua` - Plugin bootstrapping
 - `tests/` - Mini.nvim-based test suite
-
-### 4. VHS Testing Framework (`vhs-tests/`)
-- **Clean Runner**: `pkg/notedown/runner.go` provides `NotedownVHSRunner` for all VHS testing boilerplate
-- **Test Definitions**: Simple `VHSTest` data structures define test cases (name, workspace, timeout)
-- **Template System**: Dynamic VHS template rendering from `testdata/templates/*.tape.tmpl`
-- **Golden File Testing**: Automated comparison with testify assertions and auto-creation of missing files
-- **Parallel Execution**: Tests run concurrently with shared LSP binary building using `sync.Once`
-- **Workspace Isolation**: Each test gets isolated temporary directories and workspaces
-- **Visual Output**: Generates both ASCII (for regression testing) and GIF (for visual inspection)
 
 ### 5. Shared Packages (`pkg/`)
 - **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
@@ -139,16 +135,19 @@ Key files:
 - **Integration Tests**: Logger tests with different output formats and levels, Notedownls tests cover completion, workspace management, and wikilink indexing
 - **Neovim Plugin Tests**: Mini.nvim framework for realistic scenarios with shared/dedicated LSP sessions
 - **End-to-End VHS Tests**: Terminal-based testing using VHS (Video Home System) for complete user workflows:
-  - Clean framework located at `vhs-tests/pkg/notedown/runner.go` with simple `NotedownVHSRunner`
-  - Tests defined as data structures in `vhs-tests/framework_test.go` with parallel execution
-  - VHS templates in `vhs-tests/testdata/templates/*.tape.tmpl` for dynamic rendering
-  - Test workspaces in `vhs-tests/workspaces/` and parent `workspaces/` directory
-  - Golden file comparison in `vhs-tests/golden/*.ascii` with auto-creation
-  - GIF generation in `vhs-tests/gifs/*.gif` for visual inspection
+  - Clean framework located at `features/neovim/pkg/notedown/runner.go` with simple `NotedownVHSRunner`
+  - Features defined as data structures in `features/neovim/framework_test.go` with parallel execution
+  - VHS templates in `features/neovim/{area}/{feature}/demo.tape.tmpl` for dynamic rendering
+  - Test workspaces in `features/neovim/{area}/{feature}/workspace/` directories
+  - Golden file comparison in `features/neovim/{area}/{feature}/expected.ascii` with auto-creation
+  - GIF generation in `features/neovim/{area}/{feature}/demo.gif` for embedded documentation
   - Parallel LSP binary building with `sync.Once` to avoid redundant builds
   - Per-test cleanup and isolated temporary directories
-- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files, VHS-specific test workspaces in `vhs-tests/workspaces/`
+- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files, feature-specific test workspaces in `features/neovim/{area}/{feature}/workspace/`
 - **Conventions**: Standard Go testing, focus on AST conversion accuracy and position tracking
+- **Key Documentation**: 
+  - `features/neovim/DEVELOPMENT.md` - Comprehensive guide for adding new features, debugging, and framework internals
+  - Area-specific development details in `features/neovim/{area}/DEVELOPMENT.md` (when present)
 
 ### Wikilink Index System
 The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
