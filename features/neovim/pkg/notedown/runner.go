@@ -370,6 +370,9 @@ func normalizeOutput(content string) string {
 	diagnosticRe := regexp.MustCompile(`(?m)^VHS Test: LSP Binary configured as:.*$\n?`)
 	content = diagnosticRe.ReplaceAllString(content, "")
 
+	// Final normalization - trim only leading and trailing blank lines
+	content = strings.Trim(content, "\n") + "\n"
+
 	return content
 }
 
