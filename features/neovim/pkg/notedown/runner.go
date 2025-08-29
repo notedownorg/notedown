@@ -341,19 +341,19 @@ func normalizeOutput(content string) string {
 	content = strings.TrimLeft(content, "\n")
 	content = strings.TrimRight(content, "\n") + "\n"
 
-	// Remove any leading blank lines before the first separator (CI vs local difference)
-	leadingSeparatorRe := regexp.MustCompile(`^\n*────────────────────────────────────────────────────────────────────────────────\n`)
-	content = leadingSeparatorRe.ReplaceAllString(content, "────────────────────────────────────────────────────────────────────────────────\n")
+	// Remove all starting separators completely - any initial whitespace followed by separators
+	startingSeparatorRe := regexp.MustCompile(`^[\s\n]*────────────────────────────────────────────────────────────────────────────────\n`)
+	content = startingSeparatorRe.ReplaceAllString(content, "")
 
 	// Remove truly empty screens (separator followed by only blank lines and another separator)
 	// This preserves separators between actual content screens
 	emptyScreenRe := regexp.MustCompile(`────────────────────────────────────────────────────────────────────────────────\n\n+────────────────────────────────────────────────────────────────────────────────\n`)
 	content = emptyScreenRe.ReplaceAllString(content, "")
-	
+
 	// Remove blank lines immediately before separators
 	blankBeforeSeparatorRe := regexp.MustCompile(`\n+────────────────────────────────────────────────────────────────────────────────\n`)
 	content = blankBeforeSeparatorRe.ReplaceAllString(content, "\n────────────────────────────────────────────────────────────────────────────────\n")
-	
+
 	// Normalize remaining multiple consecutive blank lines to exactly 2 newlines
 	multiBlankRe := regexp.MustCompile(`\n{3,}`)
 	content = multiBlankRe.ReplaceAllString(content, "\n\n")
@@ -361,8 +361,6 @@ func normalizeOutput(content string) string {
 	// Normalize workspace status output - standardize spacing and indentation
 	workspaceStatusRe := regexp.MustCompile(`(Matched Workspace: [^\n]+)\n+\s*(Detection Method:)`)
 	content = workspaceStatusRe.ReplaceAllString(content, "$1\n  $2")
-
-
 
 	// Remove LSP server error messages that might be inconsistent across environments
 	lspErrorRe := regexp.MustCompile(`(?m)^.*language server.*failed.*The language server is either not installed.*$\n?`)
