@@ -341,11 +341,16 @@ func normalizeOutput(content string) string {
 	content = strings.TrimLeft(content, "\n")
 	content = strings.TrimRight(content, "\n") + "\n"
 
-	// Normalize separator lines at beginning - remove duplicate separators
-	separatorStart := regexp.MustCompile(`^(────────────────────────────────────────────────────────────────────────────────\n)+`)
-	content = separatorStart.ReplaceAllString(content, "────────────────────────────────────────────────────────────────────────────────\n")
-
-	// Normalize multiple consecutive blank lines to exactly 2 newlines
+	// Remove truly empty screens (separator followed by only blank lines and another separator)
+	// This preserves separators between actual content screens
+	emptyScreenRe := regexp.MustCompile(`────────────────────────────────────────────────────────────────────────────────\n\n+────────────────────────────────────────────────────────────────────────────────\n`)
+	content = emptyScreenRe.ReplaceAllString(content, "")
+	
+	// Remove blank lines immediately before separators
+	blankBeforeSeparatorRe := regexp.MustCompile(`\n+────────────────────────────────────────────────────────────────────────────────\n`)
+	content = blankBeforeSeparatorRe.ReplaceAllString(content, "\n────────────────────────────────────────────────────────────────────────────────\n")
+	
+	// Normalize remaining multiple consecutive blank lines to exactly 2 newlines
 	multiBlankRe := regexp.MustCompile(`\n{3,}`)
 	content = multiBlankRe.ReplaceAllString(content, "\n\n")
 
