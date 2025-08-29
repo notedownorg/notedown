@@ -27,22 +27,7 @@
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :edit index.md
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -73,22 +58,7 @@ index.md                                                                        
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :NotedownWorkspaceStatus
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -119,22 +89,7 @@ index.md                                                                        
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                                  1,1            All
+index.md                                                                                              1,1            All
 :NotedownWorkspaceStatus
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -150,21 +105,6 @@ index.md                                                                        
  11 ## Wikilinks
  12
  13 This document contains a [[target]] wikilink to test basic functionality.
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
 ~
 ~
 ~
@@ -174,11 +114,11 @@ index.md                                                                        
 ~
 
 Notedown Workspace Status:
-  File: /tmp/vhs-test-normalized/workspace/index.md
+  File: /tmp/notedown-normalized/workspace/index.md
   In Notedown Workspace: Yes
   Should Use Notedown Parser: Yes
   LSP Server Status: Active (1 clients)
-    Matched Workspace: /tmp/vhs-test-normalized/workspace
+    Matched Workspace: /tmp/notedown-normalized/workspace
   Detection Method: Auto-detected (.notedown directory)
 
 Press ENTER or type command to continue
@@ -203,28 +143,13 @@ Press ENTER or type command to continue
 ~
 ~
 ~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
 
 Notedown Workspace Status:
-  File: /tmp/vhs-test-normalized/workspace/index.md
+  File: /tmp/notedown-normalized/workspace/index.md
   In Notedown Workspace: Yes
   Should Use Notedown Parser: Yes
   LSP Server Status: Active (1 clients)
-    Matched Workspace: /tmp/vhs-test-normalized/workspace
+    Matched Workspace: /tmp/notedown-normalized/workspace
   Detection Method: Auto-detected (.notedown directory)
 
 Press ENTER or type command to continue

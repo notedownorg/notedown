@@ -85,9 +85,9 @@ func (r *NotedownVHSRunner) runTestWithPaths(t *testing.T, test VHSTest, useFeat
 		cleanupVHSProcesses()
 	}
 
-	// Create temporary directory for test (replace slashes to avoid path issues)
+	// Create temporary directory for test with short name
 	safeName := strings.ReplaceAll(test.Name, "/", "-")
-	tmpDir, err := os.MkdirTemp("", "vhs-test-"+safeName)
+	tmpDir, err := os.MkdirTemp("", "notedown")
 	if err != nil {
 		t.Fatalf("Failed to create temp dir: %v", err)
 	}
@@ -302,17 +302,17 @@ func (r *NotedownVHSRunner) executeVHS(tapeFile string, timeout time.Duration) (
 func normalizeOutput(content string) string {
 	// Replace temporary directory paths with a normalized placeholder
 	// Handles multiple patterns:
-	// - macOS: /var/folders/.../T/vhs-test-...
-	// - macOS private: /private/tmp/vhs-test-...
-	// - nix-shell: /tmp/nix-shell.../vhs-test-...
-	// - nix develop: /tmp/nix-shell.../vhs-test-...
-	// - Linux CI: /home/runner/work/_temp/nix-shell.../vhs-test-...
-	// - generic tmp: /tmp/.../vhs-test-...
-	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|private/tmp|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/vhs-test-[^/]+/`)
-	content = re.ReplaceAllString(content, "/tmp/vhs-test-normalized/")
+	// - macOS: /var/folders/.../T/notedown...
+	// - macOS private: /private/tmp/notedown...
+	// - nix-shell: /tmp/nix-shell.../notedown...
+	// - nix develop: /tmp/nix-shell.../notedown...
+	// - Linux CI: /home/runner/work/_temp/nix-shell.../notedown...
+	// - generic tmp: /tmp/.../notedown...
+	re := regexp.MustCompile(`/(?:var/folders/[^/]+/[^/]+/T|private/tmp|tmp/[^/]*nix-shell[^/]*|home/runner/work/_temp/[^/]*nix-shell[^/]*|tmp)/notedown[^/]*/`)
+	content = re.ReplaceAllString(content, "/tmp/notedown-normalized/")
 
 	// Also handle /private/tmp directly since the above might not catch all cases
-	privateRe := regexp.MustCompile(`/private(/tmp/vhs-test-normalized/)`)
+	privateRe := regexp.MustCompile(`/private(/tmp/notedown-normalized/)`)
 	content = privateRe.ReplaceAllString(content, "$1")
 
 	// Remove shell prompts and terminal escape sequences that might be inconsistent
@@ -560,9 +560,9 @@ vim.opt.termguicolors = true
 vim.opt.timeout = false
 vim.opt.ttimeout = false
 
--- Force consistent terminal dimensions - wider and taller for stable rendering
-vim.opt.columns = 140
-vim.opt.lines = 45
+-- Force consistent terminal dimensions for status line consistency
+vim.opt.columns = 120
+vim.opt.lines = 30
 
 -- Netrw settings for deterministic behavior
 vim.g.netrw_sort_by = "name"
