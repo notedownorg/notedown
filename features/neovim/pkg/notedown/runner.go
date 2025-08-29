@@ -227,7 +227,6 @@ func (r *NotedownVHSRunner) renderTemplateFromPath(templatePath string, name str
 	return tapeFile, nil
 }
 
-
 // createWorkspaceFromPath creates a workspace from a specific path.
 func (r *NotedownVHSRunner) createWorkspaceFromPath(workspaceSrc string, outputDir string) error {
 	// Get current working directory to find workspaces

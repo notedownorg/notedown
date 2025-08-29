@@ -21,6 +21,20 @@ jobs:
     - name: Run Neovim tests
       run: make test-nvim
 
+  pkg:
+    name: pkg
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Install Nix
+      uses: cachix/install-nix-action@v31
+    
+    - name: Run pkg tests
+      run: make test-pkg
+
   language-server:
     name: language-server
     runs-on: ubuntu-latest
