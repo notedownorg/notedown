@@ -552,17 +552,17 @@ index.md                                                                        
 ~
 ~
 ~
-
-Notedown Workspace Status:
-  File: /tmp/vhs-test-normalized/workspace/index.md
-  In Notedown Workspace: Yes
-  Should Use Notedown Parser: Yes
-  LSP Server Status: Active (1 clients)
-    Matched Workspace: /tmp/vhs-test-normalized/workspac
-e
-  Detection Method: Auto-detected (.notedown directory)
-
-Press ENTER or type command to continue
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                              1,1            All
+:NotedownWorkspaceStatus
 
 
 
