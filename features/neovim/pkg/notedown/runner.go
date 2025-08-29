@@ -149,7 +149,7 @@ func (r *NotedownVHSRunner) runTestWithPaths(t *testing.T, test VHSTest, useFeat
 		"ConfigFile":   configFile,
 		"TmpDir":       tmpDir,
 		"LSPBinary":    lspBinary,
-		"TestName":     safeName, // Use safe name in templates
+		"TestName":     safeName,      // Use safe name in templates
 		"GenerateGIF":  r.generateGIF, // Control GIF generation
 	}
 
