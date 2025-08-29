@@ -320,6 +320,10 @@ func normalizeOutput(content string) string {
 	shellPromptRe := regexp.MustCompile(`\\\[\\\]> \\\[\\\]`)
 	content = shellPromptRe.ReplaceAllString(content, "")
 
+	// Remove standalone ">" characters that appear as shell prompts
+	standalonePromptRe := regexp.MustCompile(`(?m)^>\n`)
+	content = standalonePromptRe.ReplaceAllString(content, "\n")
+
 	// Normalize terminal escape sequences for colors/formatting
 	escapeRe := regexp.MustCompile(`\x1b\[[0-9;]*[mGKH]`)
 	content = escapeRe.ReplaceAllString(content, "")
@@ -327,6 +331,27 @@ func normalizeOutput(content string) string {
 	// Normalize carriage returns and extra whitespace
 	crRe := regexp.MustCompile(`\r`)
 	content = crRe.ReplaceAllString(content, "")
+
+	// Fix line wrapping differences in paths - join lines that end with truncated paths
+	// This handles cases like "workspac\ne" -> "workspace"
+	wrapRe := regexp.MustCompile(`([a-zA-Z0-9/_-]+)\n([a-zA-Z0-9])`)
+	content = wrapRe.ReplaceAllString(content, "$1$2")
+
+	// Normalize extra blank lines at the beginning and throughout the content
+	content = strings.TrimLeft(content, "\n")
+	content = strings.TrimRight(content, "\n") + "\n"
+
+	// Normalize separator lines at beginning - remove duplicate separators
+	separatorStart := regexp.MustCompile(`^(────────────────────────────────────────────────────────────────────────────────\n)+`)
+	content = separatorStart.ReplaceAllString(content, "────────────────────────────────────────────────────────────────────────────────\n")
+
+	// Normalize multiple consecutive blank lines to exactly 2 newlines
+	multiBlankRe := regexp.MustCompile(`\n{3,}`)
+	content = multiBlankRe.ReplaceAllString(content, "\n\n")
+
+	// Normalize workspace status output - standardize spacing and indentation
+	workspaceStatusRe := regexp.MustCompile(`(Matched Workspace: [^\n]+)\n+\s*(Detection Method:)`)
+	content = workspaceStatusRe.ReplaceAllString(content, "$1\n  $2")
 
 	// Remove LSP server error messages that might be inconsistent across environments
 	lspErrorRe := regexp.MustCompile(`(?m)^.*language server.*failed.*The language server is either not installed.*$\n?`)

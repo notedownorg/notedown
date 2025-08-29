@@ -61,7 +61,7 @@ test-features:
 	go test -v ./features/neovim/...
 
 test-features-fast:
-	go test -gif=false -v ./features/neovim/...
+	go test -v ./features/neovim/... -gif=false
 
 test-features-golden:
 	find features/neovim -name "expected.ascii" -delete
