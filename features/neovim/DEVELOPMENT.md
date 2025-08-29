@@ -38,21 +38,30 @@ The `NotedownVHSRunner` provides clean separation between test logic and boilerp
 
 ### All Features
 ```bash
-# Run all feature tests
+# Run all feature tests (with GIFs - full documentation generation)
 make test-features
 
-# Run with fresh golden files
+# Run all feature tests fast (no GIFs - development/CI mode)
+make test-features-fast
+
+# Run with fresh golden files (with GIFs)
 make test-features-golden
 
 # Run specific area/feature
 go test -v -run TestFeatures/initialization/workspace-status-command
+
+# Run specific test without GIF generation
+go test -gif=false -v -run TestFeatures/initialization/workspace-status-command
 ```
 
 ### Development Workflow
 ```bash
-# Run a single test during development
+# Run a single test during development (fast mode)
 cd features/neovim
-go test -v -run TestFeatures/initialization/workspace-status-command
+go test -gif=false -v -run TestFeatures/initialization/workspace-status-command
+
+# Run single test with GIF generation (for documentation updates)
+go test -gif=true -v -run TestFeatures/initialization/workspace-status-command
 
 # Regenerate golden file (delete and re-run)
 rm initialization/workspace-status-command/expected.ascii
@@ -69,9 +78,11 @@ go test -v -run TestFeatures/initialization/workspace-status-command
 - Enables automated CI testing without visual dependencies
 
 ### Visual Output
-- Generates GIFs automatically for manual inspection
-- Both ASCII and GIF outputs generated simultaneously
-- **Note**: GIF generation requires a graphics environment
+- GIF generation is configurable via `-gif` flag (default: true)
+- **With GIFs** (`-gif=true`): Full documentation generation with visual demonstrations
+- **Without GIFs** (`-gif=false`): Fast testing mode - ASCII only (70-80% faster)
+- Both ASCII and GIF outputs generated simultaneously when enabled
+- **Note**: GIF generation requires a graphics environment and is expensive (~40s per test)
 
 ### Parallel Execution
 - Tests run concurrently for faster feedback

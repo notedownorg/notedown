@@ -15,10 +15,16 @@
 package features
 
 import (
+	"flag"
 	"testing"
 	"time"
 
 	"github.com/notedownorg/notedown/features/neovim/pkg/notedown"
+)
+
+// Command line flags
+var (
+	generateGIF = flag.Bool("gif", true, "Generate GIF files during testing (default: true)")
 )
 
 // FeatureTest defines a test for a specific feature within an area.
@@ -36,8 +42,9 @@ var featureTests = []FeatureTest{
 
 // TestFeatures runs all feature tests using the area/feature structure.
 func TestFeatures(t *testing.T) {
-	t.Logf("=== Starting feature test suite with %d tests ===", len(featureTests))
+	t.Logf("=== Starting feature test suite with %d tests (GIF generation: %t) ===", len(featureTests), *generateGIF)
 	runner := notedown.NewNotedownVHSRunner()
+	runner.SetGenerateGIF(*generateGIF)
 
 	for _, test := range featureTests {
 		test := test // capture loop variable

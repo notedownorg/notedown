@@ -61,7 +61,7 @@ jobs:
       uses: cachix/install-nix-action@v31
     
     - name: Run feature tests
-      run: make test-features
+      run: make test-features-fast # no gif generation in CI
 
   release:
     name: release

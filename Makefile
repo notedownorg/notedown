@@ -60,6 +60,9 @@ test-nvim:
 test-features:
 	go test -v ./features/neovim/...
 
+test-features-fast:
+	go test -gif=false -v ./features/neovim/...
+
 test-features-golden:
 	find features/neovim -name "expected.ascii" -delete
 	go test -parallel 4 -v ./features/neovim/...

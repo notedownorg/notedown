@@ -48,6 +48,7 @@ type NotedownVHSRunner struct {
 	lspBuilder       func() (string, error)
 	pluginInstaller  func(string) error
 	workspaceCreator func(string, string) error
+	generateGIF      bool
 }
 
 // NewNotedownVHSRunner creates a new runner with default Notedown-specific setup.
@@ -57,7 +58,13 @@ func NewNotedownVHSRunner() *NotedownVHSRunner {
 		lspBuilder:       ensureLSPBinary,
 		pluginInstaller:  installPlugin,
 		workspaceCreator: createWorkspace,
+		generateGIF:      true, // Default to generating GIFs
 	}
+}
+
+// SetGenerateGIF configures whether GIF files should be generated during testing.
+func (r *NotedownVHSRunner) SetGenerateGIF(generate bool) {
+	r.generateGIF = generate
 }
 
 // RunFeatureTest executes a feature test with area/feature directory structure.
@@ -143,6 +150,7 @@ func (r *NotedownVHSRunner) runTestWithPaths(t *testing.T, test VHSTest, useFeat
 		"TmpDir":       tmpDir,
 		"LSPBinary":    lspBinary,
 		"TestName":     safeName, // Use safe name in templates
+		"GenerateGIF":  r.generateGIF, // Control GIF generation
 	}
 
 	tapeFile, err := r.renderTemplateFromPath(templatePath, test.Name, templateData, tmpDir)
@@ -171,24 +179,26 @@ func (r *NotedownVHSRunner) runTestWithPaths(t *testing.T, test VHSTest, useFeat
 	}
 	r.assertGoldenMatch(t, goldenFile, result)
 
-	// Copy GIF to appropriate location for visual inspection
-	srcGif := filepath.Join(tmpDir, safeName+".gif")
-	if fileExists(srcGif) {
-		if useFeatureStructure {
-			// Copy to feature directory
-			if err := os.MkdirAll(filepath.Dir(gifFile), 0750); err != nil {
-				t.Logf("Failed to create feature directory: %v", err)
-				return
+	// Copy GIF to appropriate location for visual inspection (only if generation enabled)
+	if r.generateGIF {
+		srcGif := filepath.Join(tmpDir, safeName+".gif")
+		if fileExists(srcGif) {
+			if useFeatureStructure {
+				// Copy to feature directory
+				if err := os.MkdirAll(filepath.Dir(gifFile), 0750); err != nil {
+					t.Logf("Failed to create feature directory: %v", err)
+					return
+				}
+			} else {
+				// Copy to gifs directory (legacy)
+				if err := os.MkdirAll("gifs", 0750); err != nil {
+					t.Logf("Failed to create gifs directory: %v", err)
+					return
+				}
 			}
-		} else {
-			// Copy to gifs directory (legacy)
-			if err := os.MkdirAll("gifs", 0750); err != nil {
-				t.Logf("Failed to create gifs directory: %v", err)
-				return
+			if err := copyFile(srcGif, gifFile); err != nil {
+				t.Logf("Failed to copy GIF file: %v", err)
 			}
-		}
-		if err := copyFile(srcGif, gifFile); err != nil {
-			t.Logf("Failed to copy GIF file: %v", err)
 		}
 	}
 }
