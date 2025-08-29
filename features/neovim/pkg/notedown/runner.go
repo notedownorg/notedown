@@ -341,6 +341,10 @@ func normalizeOutput(content string) string {
 	content = strings.TrimLeft(content, "\n")
 	content = strings.TrimRight(content, "\n") + "\n"
 
+	// Remove any leading blank lines before the first separator (CI vs local difference)
+	leadingSeparatorRe := regexp.MustCompile(`^\n*────────────────────────────────────────────────────────────────────────────────\n`)
+	content = leadingSeparatorRe.ReplaceAllString(content, "────────────────────────────────────────────────────────────────────────────────\n")
+
 	// Remove truly empty screens (separator followed by only blank lines and another separator)
 	// This preserves separators between actual content screens
 	emptyScreenRe := regexp.MustCompile(`────────────────────────────────────────────────────────────────────────────────\n\n+────────────────────────────────────────────────────────────────────────────────\n`)
@@ -357,6 +361,8 @@ func normalizeOutput(content string) string {
 	// Normalize workspace status output - standardize spacing and indentation
 	workspaceStatusRe := regexp.MustCompile(`(Matched Workspace: [^\n]+)\n+\s*(Detection Method:)`)
 	content = workspaceStatusRe.ReplaceAllString(content, "$1\n  $2")
+
+
 
 	// Remove LSP server error messages that might be inconsistent across environments
 	lspErrorRe := regexp.MustCompile(`(?m)^.*language server.*failed.*The language server is either not installed.*$\n?`)
