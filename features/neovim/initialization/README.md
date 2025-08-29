@@ -1,59 +1,48 @@
-# Initialization Area
+# Plugin Initialization
 
-This area covers plugin loading, setup, and workspace detection features for the Notedown Neovim plugin.
+This area covers how the Notedown Neovim plugin starts up, detects your workspace, and connects to the language server.
 
-## Features
+## Available Features
 
 ### [Workspace Status Command](./workspace-status-command/)
 ![Workspace Status Demo](./workspace-status-command/demo.gif)
 
-The `:NotedownWorkspaceStatus` command provides information about the current workspace status and LSP connection.
+The `:NotedownWorkspaceStatus` command helps you understand how Notedown is configured in your current workspace.
 
-**What it does:**
-- Displays current workspace detection status
-- Shows LSP server connection information
-- Provides diagnostic information for troubleshooting
+**What it shows:**
+- Whether you're in a Notedown workspace (has a `.notedown` directory)
+- Which parser Notedown will use for your files
+- Language server connection status
+- How the workspace was detected
 
-**Usage:**
+**How to use:**
 ```vim
 :NotedownWorkspaceStatus
 ```
 
-**Technical details:**
-- Implemented as a Neovim command that queries the LSP client
-- Shows workspace root detection results
-- Displays server capabilities and connection status
+This is particularly useful when troubleshooting why features aren't working as expected.
 
-## Area Overview
+## What Initialization Covers
 
-The initialization area ensures that users can:
-1. **Load the plugin** automatically when opening markdown files
-2. **Connect to LSP server** without manual configuration
-3. **Detect workspaces** correctly based on directory structure
-4. **Troubleshoot issues** using status commands
+When you open a Markdown file, the Notedown plugin:
 
-## Running Area Tests
+1. **Detects your workspace** by looking for a `.notedown` directory
+2. **Chooses the right parser** (Notedown or standard Markdown)
+3. **Connects to the language server** for advanced features
+4. **Provides status commands** to help you troubleshoot
 
-```bash
-# Run all initialization tests
-go test -run TestFeatures/initialization
+## Getting Started
 
-# Run specific feature
-go test -run TestFeatures/initialization/workspace-status-command
-```
+1. Make sure you have the Notedown plugin installed
+2. Create or open a directory with a `.notedown` folder (this makes it a Notedown workspace)
+3. Open any `.md` file in that workspace
+4. Try running `:NotedownWorkspaceStatus` to see the plugin in action
 
-## Adding New Features
+## Troubleshooting
 
-To add a new initialization feature:
+If the plugin isn't working as expected:
 
-1. Create feature directory: `mkdir initialization/my-new-feature`
-2. Add test workspace: `mkdir initialization/my-new-feature/workspace`
-3. Create VHS demo: `initialization/my-new-feature/demo.tape.tmpl`
-4. Document feature: `initialization/my-new-feature/README.md`
-5. Add to test suite in `framework_test.go`
-
-## Related Documentation
-
-- [Plugin Configuration](../../../neovim/README.md)
-- [LSP Server Documentation](../../../language-server/)
-- [Workspace Detection](../../../pkg/config/)
+- Run `:NotedownWorkspaceStatus` to see current status
+- Check if you're in a Notedown workspace (should show "Yes")
+- Verify the LSP server is running (should show "Active")
+- Look at the detection method to understand how workspace was found

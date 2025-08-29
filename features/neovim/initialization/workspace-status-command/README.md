@@ -2,89 +2,80 @@
 
 ![Demo](demo.gif)
 
-The `:NotedownWorkspaceStatus` command provides comprehensive information about the current workspace detection and LSP server status.
+The `:NotedownWorkspaceStatus` command helps you understand how Notedown sees your current workspace and whether everything is set up correctly.
 
-## Description
+## What This Command Does
 
-This feature allows users to quickly understand:
-- Whether a Notedown workspace has been detected
-- Current LSP server connection status  
-- Workspace root directory location
-- Any configuration issues or errors
+When you run `:NotedownWorkspaceStatus`, it shows you:
 
-## Usage
+- **Are you in a Notedown workspace?** - Whether the current directory has a `.notedown` folder
+- **Is the language server running?** - Connection status and number of active clients
+- **Which parser will be used?** - Notedown parser vs. standard Markdown parser
+- **How was the workspace detected?** - Auto-detection method used
 
-Run the command in any buffer:
-```vim
-:NotedownWorkspaceStatus
-```
+## How to Use It
 
-The command will display a status message showing:
-- **Workspace detected**: Whether the current directory is recognized as a Notedown workspace
-- **LSP status**: Connection status with the notedown-language-server
-- **Root directory**: The workspace root that was detected
-- **Configuration**: Any relevant configuration information
+1. Open any Markdown file in your workspace
+2. Run the command:
+   ```vim
+   :NotedownWorkspaceStatus
+   ```
+3. Read the status information displayed
 
 ## Example Output
 
 ```
 Notedown Workspace Status:
-  Workspace: Detected (/path/to/workspace)
-  LSP Server: Connected (notedown-language-server v1.0.0)
-  Root: /path/to/workspace
-  Files: 15 markdown files indexed
+  File: /path/to/your/workspace/document.md
+  In Notedown Workspace: Yes
+  Should Use Notedown Parser: Yes
+  LSP Server Status: Active (1 clients)
+    Matched Workspace: /path/to/your/workspace
+  Detection Method: Auto-detected (.notedown directory)
+
+Press ENTER or type command to continue
 ```
 
-## Technical Details
+## When to Use This Command
 
-### Implementation
-- Defined as a Neovim user command in the plugin initialization
-- Uses LSP client queries to gather server information
-- Accesses workspace detection logic from the configuration module
+### Getting Started
+- **After installing** the Notedown plugin to verify it's working
+- **When opening** a new workspace to confirm Notedown detects it correctly
+- **If features aren't working** as expected
 
-### Command Registration
-```lua
-vim.api.nvim_create_user_command('NotedownWorkspaceStatus', function()
-    -- Implementation queries LSP client and workspace detection
-end, { desc = 'Show Notedown workspace and LSP status' })
-```
+### Troubleshooting
+- **Plugin seems inactive** - Check if you're in a Notedown workspace
+- **Features not available** - Verify the language server is connected
+- **Wrong parser behavior** - See which parser Notedown is using
 
-### Error Handling
-- Gracefully handles cases where LSP server is not connected
-- Provides helpful error messages for troubleshooting
-- Shows configuration suggestions when workspace detection fails
+## Understanding the Output
 
-## Use Cases
+### Workspace Detection
+- **"Yes"** - You're in a directory with a `.notedown` folder (Notedown features active)
+- **"No"** - Standard Markdown directory (limited Notedown features)
 
-### Development and Debugging
-- Verify plugin loaded correctly after installation
-- Troubleshoot LSP connection issues
-- Confirm workspace detection is working as expected
+### Parser Selection  
+- **"Yes"** - Files will be parsed with Notedown-specific features
+- **"No"** - Files will be parsed as standard Markdown
 
-### User Onboarding  
-- Help new users understand plugin status
-- Provide clear feedback about setup requirements
-- Guide users to resolve configuration issues
+### LSP Server Status
+- **"Active"** - Language server is running and connected
+- **"Inactive"** - Language server issues (check installation)
 
-### CI/CD and Testing
-- Automated verification that plugin initializes correctly
-- Integration test validation of workspace detection
-- LSP server connection verification in test environments
+### Detection Method
+- **"Auto-detected"** - Found `.notedown` directory automatically
+- **"No .notedown directory found"** - Using standard Markdown mode
 
-## Related Features
+## Quick Fixes
 
-- [Plugin Loading](../plugin-loading/) - Initial plugin setup
-- [LSP Connection](../lsp-connection/) - Server communication setup
-- Workspace detection (configuration module)
+**If workspace shows "No":**
+1. Create a `.notedown` directory in your project root
+2. Restart Neovim or run `:NotedownReload`
 
-## Test Implementation
+**If LSP shows "Inactive":**
+1. Check that `notedown-language-server` is installed
+2. Try `:NotedownReload` to restart the plugin
 
-This feature is tested using VHS to simulate real terminal interactions:
-
-1. Open Neovim in a test workspace
-2. Wait for plugin initialization  
-3. Execute `:NotedownWorkspaceStatus`
-4. Verify expected output is displayed
-5. Capture both ASCII output for regression testing and GIF for documentation
-
-The test validates both successful status display and proper error handling when components are unavailable.
+**If wrong parser is selected:**
+1. Verify you're in the correct workspace directory
+2. Check that `.notedown` directory exists and is accessible
