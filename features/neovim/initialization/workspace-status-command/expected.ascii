@@ -27,7 +27,22 @@
 ~
 ~
 ~
-index.md                                                                                              1,1            All
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                  1,1            All
 :edit index.md
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -58,7 +73,22 @@ index.md                                                                        
 ~
 ~
 ~
-index.md                                                                                              1,1            All
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                  1,1            All
 :NotedownWorkspaceStatus
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -89,7 +119,22 @@ index.md                                                                        
 ~
 ~
 ~
-index.md                                                                                              1,1            All
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                                  1,1            All
 :NotedownWorkspaceStatus
 ────────────────────────────────────────────────────────────────────────────────
   1 # Plugin Initialization Test
@@ -105,6 +150,22 @@ index.md                                                                        
  11 ## Wikilinks
  12
  13 This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
 ~
 ~
 ~
@@ -135,6 +196,22 @@ Press ENTER or type command to continue
  11 ## Wikilinks
  12
  13 This document contains a [[target]] wikilink to test basic functionality.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
 ~
 ~
 ~

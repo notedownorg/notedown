@@ -560,9 +560,9 @@ vim.opt.termguicolors = true
 vim.opt.timeout = false
 vim.opt.ttimeout = false
 
--- Force consistent terminal dimensions for status line consistency
-vim.opt.columns = 120
-vim.opt.lines = 30
+-- Force consistent terminal dimensions - wider and taller for stable rendering
+vim.opt.columns = 140
+vim.opt.lines = 45
 
 -- Netrw settings for deterministic behavior
 vim.g.netrw_sort_by = "name"
