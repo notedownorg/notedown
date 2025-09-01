@@ -13,7 +13,7 @@
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -57,7 +57,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -102,52 +102,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
-   20
-   21 ## Valid Wikilinks (Should be clean)
-   22
-   23 These should show no diagnostic errors:
-   24
-   25 - [[valid-document]] - Points to existing file
-   26 - [[docs/guide]] - Valid path-based wikilink
-   27
-   28 ## Real-time Testing Area
-   29
-   30 Add new wikilinks below to test real-time diagnostic updates:
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-~
-index.md                                                                                                         1,1            All
-:lua vim.diagnostic.setloclist()
-────────────────────────────────────────────────────────────────────────────────
-    1 # Wikilink Diagnostics and Code Actions Test
-    2
-    3 This workspace demonstrates Notedown's comprehensive diagnostic system and disambiguation code actions.
-    4
-    5 ## Broken Wikilinks (Should show error diagnostics)
-    6
-    7 The following wikilinks point to non-existent files:
-    8
-    9 - [[missing-file]] - File doesn't exist, should show broken wikilink diagnostic
-   10 - [[nonexistent-document]] - Another missing file
-   11 - [[invalid/path]] - Path that doesn't exist
-   12
-   13 ## Ambiguous Wikilinks (Should show disambiguation options)
-   14
-   15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -164,16 +119,16 @@ index.md                                                                        
 ~
 ~
 index.md                                                                                                         1,1            All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.diagnostic.setloclist()
 ────────────────────────────────────────────────────────────────────────────────
@@ -192,7 +147,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -208,17 +163,17 @@ index.md                                                                        
 ~
 ~
 ~
-index.md                                                                                                         17,3           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+index.md                                                                                                         1,1            All
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.diagnostic.setloclist()
 ────────────────────────────────────────────────────────────────────────────────
@@ -237,7 +192,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -254,16 +209,16 @@ index.md                                                                        
 ~
 ~
 index.md                                                                                                         17,3           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.diagnostic.setloclist()
 ────────────────────────────────────────────────────────────────────────────────
@@ -282,7 +237,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -299,16 +254,61 @@ index.md                                                                        
 ~
 ~
 index.md                                                                                                         17,3           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
+[Location List] Diagnostics                                                                                     1,1             Top
+:lua vim.diagnostic.setloclist()
+────────────────────────────────────────────────────────────────────────────────
+    1 # Wikilink Diagnostics and Code Actions Test
+    2
+    3 This workspace demonstrates Notedown's comprehensive diagnostic system and disambiguation code actions.
+    4
+    5 ## Broken Wikilinks (Should show error diagnostics)
+    6
+    7 The following wikilinks point to non-existent files:
+    8
+    9 - [[missing-file]] - File doesn't exist, should show broken wikilink diagnostic
+   10 - [[nonexistent-document]] - Another missing file
+   11 - [[invalid/path]] - Path that doesn't exist
+   12
+   13 ## Ambiguous Wikilinks (Should show disambiguation options)
+   14
+   15 These wikilinks match multiple files and can be resolved with code actions:
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
+   20
+   21 ## Valid Wikilinks (Should be clean)
+   22
+   23 These should show no diagnostic errors:
+   24
+   25 - [[valid-document]] - Points to existing file
+   26 - [[docs/guide]] - Valid path-based wikilink
+   27
+   28 ## Real-time Testing Area
+   29
+   30 Add new wikilinks below to test real-time diagnostic updates:
+~
+~
+~
+~
+index.md                                                                                                         17,3           All
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
+  3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
+  5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.lsp.buf.code_action()
 ────────────────────────────────────────────────────────────────────────────────
@@ -327,7 +327,7 @@ index.md                                                                        
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -343,7 +343,7 @@ index.md                                                                        
 ~
 
 Code actions:
-1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to archive/meeting.md5: Link to meeting.md6: Link to meetings/meeting.md7: Link to meeting.md8: Link to meetings/meeting.md9: Link to archive/meeting.md10: Link to meeting.md11: Link to meetings/meeting.md12: Link to archive/meeting.mdType number and <Enter> or click with the mouse (q or empty cancels):
+1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to meeting.md5: Link to archive/meeting.md6: Link to meetings/meeting.md7: Link to archive/meeting.md8: Link to meetings/meeting.md9: Link to meeting.md10: Link to meetings/meeting.md11: Link to archive/meeting.md12: Link to meeting.mdType number and <Enter> or click with the mouse (q or empty cancels):
 ────────────────────────────────────────────────────────────────────────────────
     1 # Wikilink Diagnostics and Code Actions Test
     2
@@ -360,7 +360,7 @@ Code actions:
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -376,7 +376,7 @@ Code actions:
 ~
 
 Code actions:
-1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to archive/meeting.md5: Link to meeting.md6: Link to meetings/meeting.md7: Link to meeting.md8: Link to meetings/meeting.md9: Link to archive/meeting.md10: Link to meeting.md11: Link to meetings/meeting.md12: Link to archive/meeting.mdType number and <Enter> or click with the mouse (q or empty cancels):
+1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to meeting.md5: Link to archive/meeting.md6: Link to meetings/meeting.md7: Link to archive/meeting.md8: Link to meetings/meeting.md9: Link to meeting.md10: Link to meetings/meeting.md11: Link to archive/meeting.md12: Link to meeting.mdType number and <Enter> or click with the mouse (q or empty cancels):
 ────────────────────────────────────────────────────────────────────────────────
     1 # Wikilink Diagnostics and Code Actions Test
     2
@@ -393,7 +393,7 @@ Code actions:
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -409,7 +409,7 @@ Code actions:
 ~
 
 Code actions:
-1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to archive/meeting.md5: Link to meeting.md6: Link to meetings/meeting.md7: Link to meeting.md8: Link to meetings/meeting.md9: Link to archive/meeting.md10: Link to meeting.md11: Link to meetings/meeting.md12: Link to archive/meeting.mdType number and <Enter> or click with the mouse (q or empty cancels): 1
+1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to meeting.md5: Link to archive/meeting.md6: Link to meetings/meeting.md7: Link to archive/meeting.md8: Link to meetings/meeting.md9: Link to meeting.md10: Link to meetings/meeting.md11: Link to archive/meeting.md12: Link to meeting.mdType number and <Enter> or click with the mouse (q or empty cancels): 1
 ────────────────────────────────────────────────────────────────────────────────
     1 # Wikilink Diagnostics and Code Actions Test
     2
@@ -426,43 +426,7 @@ Code actions:
    13 ## Ambiguous Wikilinks (Should show disambiguation options)
    14
    15 These wikilinks match multiple files and can be resolved with code actions:
-   16W  17 - [[meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meeting' matches multiW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
-   20
-   21 ## Valid Wikilinks (Should be clean)
-   22
-   23 These should show no diagnostic errors:
-   24
-   25 - [[valid-document]] - Points to existing file
-   26 - [[docs/guide]] - Valid path-based wikilink
-   27
-   28 ## Real-time Testing Area
-   29
-   30 Add new wikilinks below to test real-time diagnostic updates:
-~
-~
-
-Code actions:
-1: Link to archive/meeting.md2: Link to meeting.md3: Link to meetings/meeting.md4: Link to archive/meeting.md5: Link to meeting.md6: Link to meetings/meeting.md7: Link to meeting.md8: Link to meetings/meeting.md9: Link to archive/meeting.md10: Link to meeting.md11: Link to meetings/meeting.md12: Link to archive/meeting.mdType number and <Enter> or click with the mouse (q or empty cancels): 1
-────────────────────────────────────────────────────────────────────────────────
-    1 # Wikilink Diagnostics and Code Actions Test
-    2
-    3 This workspace demonstrates Notedown's comprehensive diagnostic system and disambiguation code actions.
-    4
-    5 ## Broken Wikilinks (Should show error diagnostics)
-    6
-    7 The following wikilinks point to non-existent files:
-    8
-    9 - [[missing-file]] - File doesn't exist, should show broken wikilink diagnostic
-   10 - [[nonexistent-document]] - Another missing file
-   11 - [[invalid/path]] - Path that doesn't exist
-   12
-   13 ## Ambiguous Wikilinks (Should show disambiguation options)
-   14
-   15 These wikilinks match multiple files and can be resolved with code actions:
-   16
-   17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
-W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
-W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+   16W  17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)     ■ Ambiguous wikilink 'meetinW  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: project.md, archiveW  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -479,16 +443,16 @@ W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' m
 ~
 ~
 index.md [+]                                                                                                     17,3           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 ────────────────────────────────────────────────────────────────────────────────
     1 # Wikilink Diagnostics and Code Actions Test
@@ -509,7 +473,7 @@ index.md [+]                                                                    
    16
    17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
 W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
-W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -525,17 +489,17 @@ W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' m
 ~
 ~
 ~
-index.md [+]                                                                                                     17,1           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+index.md [+]                                                                                                     17,3           All
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 ────────────────────────────────────────────────────────────────────────────────
     1 # Wikilink Diagnostics and Code Actions Test
@@ -556,7 +520,7 @@ index.md [+]                                                                    
    16
    17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
 W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
-W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -573,16 +537,63 @@ W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' m
 ~
 ~
 index.md [+]                                                                                                     17,1           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
+[Location List] Diagnostics                                                                                     1,1             Top
+────────────────────────────────────────────────────────────────────────────────
+    1 # Wikilink Diagnostics and Code Actions Test
+    2
+    3 This workspace demonstrates Notedown's comprehensive diagnostic system and disambiguation code actions.
+    4
+    5 ## Broken Wikilinks (Should show error diagnostics)
+    6
+    7 The following wikilinks point to non-existent files:
+    8
+    9 - [[missing-file]] - File doesn't exist, should show broken wikilink diagnostic
+   10 - [[nonexistent-document]] - Another missing file
+   11 - [[invalid/path]] - Path that doesn't exist
+   12
+   13 ## Ambiguous Wikilinks (Should show disambiguation options)
+   14
+   15 These wikilinks match multiple files and can be resolved with code actions:
+   16
+   17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
+W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
+W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
+   20
+   21 ## Valid Wikilinks (Should be clean)
+   22
+   23 These should show no diagnostic errors:
+   24
+   25 - [[valid-document]] - Points to existing file
+   26 - [[docs/guide]] - Valid path-based wikilink
+   27
+   28 ## Real-time Testing Area
+   29
+   30 Add new wikilinks below to test real-time diagnostic updates:
+~
+~
+~
+~
+index.md [+]                                                                                                     17,1           All
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
+  3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
+  5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.diagnostic.setloclist()
 ────────────────────────────────────────────────────────────────────────────────
@@ -604,7 +615,7 @@ index.md [+]                                                                    
    16
    17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
 W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
-W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -621,16 +632,16 @@ W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' m
 ~
 ~
 index.md [+]                                                                                                     17,1           All
-  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
-  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, meetings/meeting.md, archive/mee
+  1 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meetings/meeting.md, mee
+  2 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meetings/meeting.md, archive/meeting.md, mee
   3 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
-  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: archive/meeting.md, meeting.md, meetings/mee
+  4 index.md|17 col 3-14 warning| Ambiguous wikilink 'meeting' matches multiple files: meeting.md, archive/meeting.md, meetings/mee
   5 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  6 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
+  7 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
   8 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: project.md, archive/project.md
-  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
- 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  9 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+ 10 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
 [Location List] Diagnostics                                                                                     1,1             Top
 :lua vim.diagnostic.setloclist()
 ────────────────────────────────────────────────────────────────────────────────
@@ -652,7 +663,7 @@ index.md [+]                                                                    
    16
    17 - [[archive/meeting|meeting]] - Matches current and archived meetings (can be disambiguated)
 W  18 - [[project]] - Matches multiple project files     ■ Ambiguous wikilink 'project' matches multiple files: archive/project.md,
-W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md     ■ Ambi
+W  19 - [[api]] - Matches different API files     ■ Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md     ■ Ambi
    20
    21 ## Valid Wikilinks (Should be clean)
    22
@@ -674,9 +685,9 @@ index.md [+]                                                                    
   3 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
   4 index.md|18 col 3-14 warning| Ambiguous wikilink 'project' matches multiple files: archive/project.md, project.md
   5 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
-  6 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
+  6 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
   7 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
-  8 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: docs/api.md, api.md
+  8 index.md|19 col 3-10 warning| Ambiguous wikilink 'api' matches multiple files: api.md, docs/api.md
 ~
 ~
 [Location List] Diagnostics                                                                                     1,1             All
