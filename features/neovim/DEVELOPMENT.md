@@ -11,7 +11,7 @@ features/neovim/
 ├── README.md                           # User-focused feature overview
 ├── DEVELOPMENT.md                      # This file - development guide
 ├── framework_test.go                   # Test runner for all features
-├── pkg/notedown/runner.go              # Clean testing framework
+├── pkg/notedown/container_runner.go    # Containerized testing framework
 ├── {area}/                             # AREA: Functional grouping
 │   ├── README.md                      # Area documentation
 │   └── {feature}/                      # FEATURE: Specific functionality
@@ -26,42 +26,45 @@ features/neovim/
 
 ### Test Framework
 
-The `NotedownVHSRunner` provides clean separation between test logic and boilerplate:
+The `ContainerVHSRunner` provides containerized testing with Docker:
 
-- **LSP Building**: Shared binary compilation with `sync.Once`
-- **Plugin Installation**: Isolated Neovim plugin setup per test
-- **Workspace Creation**: Dynamic test workspace generation
+- **Docker Image Building**: Shared build with `sync.Once` coordination
+- **Container Isolation**: Each test runs in a clean Docker environment  
+- **Volume Mounting**: Test workspaces mounted into containers
 - **Template Rendering**: Go template-based VHS tape generation
-- **Parallel Execution**: Concurrent test runs with proper isolation
+- **Parallel Execution**: Concurrent container runs with proper isolation
 
 ## Running Tests
 
+### Prerequisites
+```bash
+# Build the Docker image first (required for containerized testing)
+docker build -t notedown-vhs:latest -f features/neovim/Dockerfile .
+```
+
 ### All Features
 ```bash
-# Run all feature tests (with GIFs - full documentation generation)
+# Run all feature tests (containerized)
 make test-features
-
-# Run all feature tests fast (no GIFs - development/CI mode)
-make test-features-fast
-
-# Run with fresh golden files (with GIFs)
-make test-features-golden
 
 # Run specific area/feature
 go test -v -run TestFeatures/initialization/workspace-status-command
 
-# Run specific test without GIF generation
+# Run with GIF generation disabled
 go test -gif=false -v -run TestFeatures/initialization/workspace-status-command
 ```
 
 ### Development Workflow
 ```bash
-# Run a single test during development (fast mode)
-cd features/neovim
-go test -gif=false -v -run TestFeatures/initialization/workspace-status-command
+# Build Docker image (if not done already)
+docker build -t notedown-vhs:latest -f features/neovim/Dockerfile .
 
-# Run single test with GIF generation (for documentation updates)
-go test -gif=true -v -run TestFeatures/initialization/workspace-status-command
+# Run a single test during development 
+cd features/neovim
+go test -v -run TestFeatures/initialization/workspace-status-command
+
+# Run single test without GIF generation (faster)
+go test -gif=false -v -run TestFeatures/initialization/workspace-status-command
 
 # Regenerate golden file (delete and re-run)
 rm initialization/workspace-status-command/expected.ascii
@@ -80,15 +83,15 @@ go test -v -run TestFeatures/initialization/workspace-status-command
 ### Visual Output
 - GIF generation is configurable via `-gif` flag (default: true)
 - **With GIFs** (`-gif=true`): Full documentation generation with visual demonstrations
-- **Without GIFs** (`-gif=false`): Fast testing mode - ASCII only (70-80% faster)
+- **Without GIFs** (`-gif=false`): Fast testing mode - ASCII only (much faster)
 - Both ASCII and GIF outputs generated simultaneously when enabled
-- **Note**: GIF generation requires a graphics environment and is expensive (~40s per test)
+- **Note**: GIF generation happens inside Docker containers with virtual display
 
 ### Parallel Execution
 - Tests run concurrently for faster feedback
-- Shared LSP binary building avoids redundant compilation
-- Per-test cleanup and isolated temporary directories
-- Increased timeouts (300s) for stability
+- Shared Docker image building with `sync.Once` coordination
+- Per-test isolated containers with volume mounts
+- Container cleanup after each test
 
 ## Template System
 
@@ -106,8 +109,8 @@ Set TypingSpeed 50ms
 Type "cd '{{.WorkspaceDir}}'"
 Enter
 
-# Start Neovim with plugin
-Type "nvim --clean -u '{{.ConfigFile}}' ."
+# Start Neovim (plugin auto-loaded via ~/.config/nvim/init.lua)
+Type "nvim ."
 Enter
 Sleep 4s
 
@@ -118,12 +121,12 @@ Sleep 3s
 ```
 
 ### Available Template Data
-- `OutputFile` - Path for ASCII output
-- `WorkspaceDir` - Test workspace directory  
-- `ConfigFile` - Neovim configuration file path
-- `TmpDir` - Temporary directory for test files
-- `LSPBinary` - Path to built LSP server
+- `OutputFile` - Container path for ASCII output (`/vhs/{test}.ascii`)
+- `WorkspaceDir` - Container workspace directory (`/vhs/workspace`)
+- `TmpDir` - Container temporary directory (`/vhs`)
+- `LSPBinary` - Container LSP binary path (`/usr/local/bin/notedown-language-server`)
 - `TestName` - Safe test name for file operations
+- `GenerateGIF` - Boolean flag for GIF generation
 
 ## Writing New Features
 
@@ -166,8 +169,8 @@ Type "cd '{{.WorkspaceDir}}'"
 Enter
 Sleep 1s
 
-# Start Neovim
-Type "nvim --clean -u '{{.ConfigFile}}' index.md"
+# Start Neovim (plugin auto-loads)
+Type "nvim index.md"
 Enter
 Sleep 4s
 
@@ -199,9 +202,9 @@ go test -v -run TestFeatures/{area}/{feature}
 ```
 
 This will:
-- Build the LSP server
-- Install the plugin
-- Run your VHS template  
+- Build the Docker image (if needed)
+- Create a container with your workspace
+- Run your VHS template in the container
 - Generate the golden file
 - Create the demo GIF
 
@@ -235,31 +238,33 @@ Update `{area}/README.md` to include your new feature.
 
 ## Framework Internals
 
-### NotedownVHSRunner
+### ContainerVHSRunner
 
-The test runner handles:
+The containerized test runner handles:
 
-1. **LSP Binary Building**: Shared compilation using `sync.Once`
-2. **Plugin Installation**: Copies Neovim plugin files with correct directory detection
-3. **Workspace Creation**: Sets up isolated test workspaces
-4. **Template Rendering**: Processes Go templates with test data
-5. **VHS Execution**: Runs VHS with proper timeout handling
+1. **Docker Image Building**: Shared build using `sync.Once` coordination
+2. **Container Management**: Creates and manages test containers with testcontainers-go
+3. **Volume Mounting**: Mounts test workspaces into containers
+4. **Template Rendering**: Processes Go templates with container paths
+5. **VHS Execution**: Runs VHS inside containers with virtual displays
 6. **Asset Management**: Copies GIFs and manages golden files
 
-### Plugin Installation Process
+### Container Environment
 
-The runner:
-1. Finds the project root containing the `neovim/` directory
-2. Copies all plugin files to an isolated test directory
-3. Creates a custom `init.lua` with proper LSP configuration
-4. Verifies plugin files copied correctly
+The Docker container provides:
+1. **Debian bookworm-slim** base with essential tools
+2. **Neovim 0.10.2** installed from GitHub releases
+3. **VHS** and dependencies for terminal recording
+4. **LSP server binary** built and installed
+5. **Neovim plugin** pre-installed in `/opt/notedown/nvim/`
+6. **Configuration** auto-loaded from `~/.config/nvim/init.lua`
 
 ### Template Processing
 
 Templates are processed with:
 1. Safe filename generation (replacing `/` with `-`)
-2. Proper path resolution for area/feature structure
-3. Dynamic data injection for workspace and binary paths
+2. Container path resolution for mounted volumes
+3. Dynamic data injection for container paths
 4. Error handling for missing templates
 
 ## CI Integration
@@ -267,10 +272,11 @@ Templates are processed with:
 ### GitHub Actions
 
 Tests run in the `features` job in `.github/workflows/test.yml`:
-- Uses Nix development environment (VHS pre-installed)
+- Uses Docker for containerized VHS testing
+- Builds notedown-vhs image once per CI run
 - Runs in parallel with other test suites
 - Generates ASCII output for regression testing
-- GIFs may be empty in headless CI environments
+- GIFs generated in headless containers with virtual displays
 
 ### Quality Checks
 
@@ -284,11 +290,12 @@ make mod     # Go module tidying
 
 ### Common Issues
 
-1. **Plugin not loading**: Check that `neovim/lua/notedown/config.lua` exists
-2. **Template errors**: Verify all template variables are available
-3. **Golden file mismatches**: Delete and regenerate golden files
-4. **VHS timeouts**: Increase timeout in test definition
-5. **Path issues**: Use `safeName` for file operations, not raw test names
+1. **Docker image not found**: Run `docker build -t notedown-vhs:latest .` first
+2. **Container startup failures**: Check Docker daemon is running
+3. **Template errors**: Verify all template variables use container paths
+4. **Golden file mismatches**: Delete and regenerate golden files
+5. **VHS timeouts**: Increase timeout in test definition
+6. **Mount issues**: Ensure workspace directories exist before testing
 
 ### Debug Mode
 
@@ -300,11 +307,14 @@ t.Logf("DEBUG: Rendered template path: %s", templatePath)
 
 ### Manual Testing
 
-Test VHS templates manually:
+Test VHS templates manually with Docker:
 ```bash
+# Build image (from project root)
+docker build -t notedown-vhs:latest -f features/neovim/Dockerfile .
+
+# Run specific test manually
 cd features/neovim/{area}/{feature}
-# Edit demo.tape.tmpl to use absolute paths
-vhs demo.tape.tmpl
+docker run --rm -v "$PWD:/vhs" notedown-vhs:latest demo.tape.tmpl
 ```
 
 ## Dependencies

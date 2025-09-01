@@ -1,0 +1,72 @@
+# VHS tape for testing wikilink completion and file creation functionality
+# This test demonstrates LSP-powered completion inside wikilinks and automatic file creation
+
+# Output configuration
+Output "{{.OutputFile}}"
+{{if .GenerateGIF}}Output "{{.TmpDir}}/{{.TestName}}.gif"{{end}}
+Set FontSize 12
+Set Width 1200
+Set Height 800
+Set TypingSpeed 20ms
+Set PlaybackSpeed 0.5
+
+# Hide initial setup
+Hide
+
+# Setup workspace
+Type "cd '{{.WorkspaceDir}}'"
+Enter
+Sleep 1s
+
+# Start Neovim (plugin auto-loads)
+Type "nvim index.md"
+Enter
+Sleep 4s
+
+# Go to end of the incomplete wikilink
+Type "G"
+Type "A"
+
+# Show the recording
+Show
+
+# Start typing the target
+Type "proj"
+
+# Trigger LSP completion manually with Ctrl+X Ctrl+O
+Ctrl+X
+Ctrl+O
+Sleep 700ms
+
+# Navigate to a non-existent file (project-gamma) and accept it
+Ctrl+N
+Ctrl+N
+Ctrl+N
+Ctrl+N
+Sleep 500ms
+Ctrl+Y
+Sleep 500ms
+
+# Exit insert mode and position cursor on the wikilink
+Escape
+Left Left Left
+Sleep 500ms
+
+# Now follow the wikilink to create the new file using LSP definition
+Type ":lua vim.lsp.buf.definition()"
+Enter
+Sleep 1s
+
+# We should now be in a new buffer for project-gamma.md
+# Add some content to show the file was created
+Type "GA"
+Enter
+Enter
+Type "This file was created automatically when following a wikilink that doesn't yet have a file."
+Escape
+Sleep 1s
+
+# Hide cleanup
+Hide
+Type ":qa!"
+Enter

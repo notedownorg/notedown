@@ -273,8 +273,6 @@ func (s *Server) handleGetConcealRanges(arguments []any) (any, error) {
 		return nil, fmt.Errorf("first argument must be document URI (string)")
 	}
 
-	s.logger.Debug("getting conceal ranges", "uri", documentURI)
-
 	// Get the document
 	doc, exists := s.GetDocument(documentURI)
 	if !exists {
@@ -306,6 +304,5 @@ func (s *Server) handleGetConcealRanges(arguments []any) (any, error) {
 		Ranges: finder.concealRanges,
 	}
 
-	s.logger.Debug("found conceal ranges", "count", len(response.Ranges))
 	return response, nil
 }

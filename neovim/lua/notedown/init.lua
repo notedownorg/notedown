@@ -287,9 +287,10 @@ function M.setup_wikilink_concealment(bufnr)
 			return
 		end
 
+		local uri = vim.uri_from_bufnr(bufnr)
 		local params = {
 			command = "notedown.getConcealRanges",
-			arguments = { vim.uri_from_bufnr(bufnr) },
+			arguments = { uri },
 		}
 
 		-- Request conceal ranges from LSP
@@ -307,7 +308,7 @@ function M.setup_wikilink_concealment(bufnr)
 			vim.fn.clearmatches()
 
 			-- Apply each conceal range
-			for _, range in ipairs(result.ranges) do
+			for i, range in ipairs(result.ranges) do
 				if range.concealType == "wikilinkTarget" then
 					-- Convert LSP positions to Vim positions (1-based)
 					local start_line = range.start.line + 1
@@ -317,7 +318,7 @@ function M.setup_wikilink_concealment(bufnr)
 
 					-- Create a match pattern for this specific range
 					-- Use matchaddpos for precise character range concealment
-					vim.fn.matchaddpos("Conceal", {
+					local match_id = vim.fn.matchaddpos("Conceal", {
 						{ start_line, start_col, end_col - start_col + 1 },
 					})
 				end

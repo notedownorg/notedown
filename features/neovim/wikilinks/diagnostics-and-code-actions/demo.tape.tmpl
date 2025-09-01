@@ -1,0 +1,61 @@
+# VHS tape for testing wikilink diagnostics and disambiguation code actions
+# This test demonstrates comprehensive diagnostic detection and resolution
+
+# Output configuration
+Output "{{.OutputFile}}"
+{{if .GenerateGIF}}Output "{{.TmpDir}}/{{.TestName}}.gif"{{end}}
+Set FontSize 12
+Set Width 1200
+Set Height 800
+Set TypingSpeed 20ms
+Set PlaybackSpeed 0.5
+
+# Hide initial setup
+Hide
+
+# Setup workspace
+Type "cd '{{.WorkspaceDir}}'"
+Enter
+Sleep 1s
+
+# Start Neovim (plugin auto-loads)
+Type "nvim index.md"
+Enter
+Sleep 4s
+
+# Show the recording
+Show
+
+# Part 1: Show diagnostic list and navigate to first issue
+Type ":lua vim.diagnostic.setloclist()"
+Enter
+Sleep 1s
+
+# Navigate to first diagnostic (should be the ambiguous meeting wikilink)
+Enter
+Sleep 1s
+
+# Part 2: Apply code action to resolve the ambiguous wikilink
+# Trigger code actions
+Type ":lua vim.lsp.buf.code_action()"
+Enter
+Sleep 2s
+
+# Select the first option by typing "1" then Enter
+Type "1"
+Enter
+Sleep 3s
+
+# Move to beginning of line to see the resolved wikilink
+Type "0"
+
+# Part 3: Show that the diagnostic has been resolved
+# Refresh the diagnostic list to show the warning is gone
+Type ":lua vim.diagnostic.setloclist()"
+Enter
+Sleep 2s
+
+# Hide cleanup
+Hide
+Type ":qa!"
+Enter

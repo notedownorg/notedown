@@ -29,7 +29,14 @@
       "Bash(time nvim:*)",
       "Bash(git add:*)",
       "Bash(timeout 10s nvim:*)",
-      "Bash(vhs:*)"
+      "Bash(vhs:*)",
+      "Bash(touch:*)",
+      "Bash(docker build:*)",
+      "WebSearch",
+      "Bash(docker run:*)",
+      "Bash(cp:*)",
+      "Bash(true)",
+      "Bash(golangci-lint run:*)"
     ],
     "deny": [],
     "additionalDirectories": [

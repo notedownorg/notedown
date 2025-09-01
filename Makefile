@@ -57,19 +57,23 @@ test-lsp:
 test-nvim:
 	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
 
-test-features:
+# VHS Docker image targets
+build-vhs-image:
+	docker build -t notedown-vhs:latest -f features/neovim/Dockerfile .
+
+clean-vhs-image:
+	docker rmi notedown-vhs:latest || true
+
+# Feature testing targets (containerized VHS tests)
+test-features: build-vhs-image
 	go test -v ./features/neovim/...
 
-test-features-fast:
+test-features-fast: build-vhs-image
 	go test -v ./features/neovim/... -gif=false
 
-test-features-golden:
+test-features-golden: build-vhs-image
 	find features/neovim -name "expected.ascii" -delete
-	go test -parallel 4 -v ./features/neovim/...
-
-# Legacy VHS test support (deprecated)
-test-vhs: test-features
-test-vhs-golden: test-features-golden
+	go test -v ./features/neovim/...
 
 install: clean
 	go build -ldflags "\

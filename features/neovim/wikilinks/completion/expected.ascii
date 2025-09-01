@@ -1,0 +1,1244 @@
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md                                                                                                         26,27          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[proj
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,31          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[proj
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,31          All
+-- ^X mode (^]^D^E^F^I^K^L^N^O^Ps^U^V^Y)
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[proj
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,31          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[proj
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,31          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[proj
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,31          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-beta]]
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,41          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-legacy]]
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,43          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,42          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~                             project-alpha  File      Link to project-alpha.md
+~                             project-beta   File      Link to project-beta.md
+~                             project-legacy File      Link to archive/project-legacy.md
+~                             project-gamma  Reference Referenced in 1 file(s) (no file yet)
+~
+~
+~
+index.md [+]                                                                                                     26,42          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,42          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,42          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,42          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,41          All
+                                                                                                                        ~@k
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,39          All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,38          All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,38          All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,38          All
+:lua vim.lsp.buf.definition()
+────────────────────────────────────────────────────────────────────────────────
+  1 # Workspace Index
+  2
+  3 Welcome to the test workspace for wikilink completion.
+  4
+  5 ## Existing Files
+  6
+  7 Links to files that exist in the workspace:
+  8
+  9 - [[project-alpha]] - Exists in root directory
+ 10 - [[project-beta]] - Exists in root directory
+ 11 - [[meeting-notes]] - Exists in root directory
+ 12 - [[docs/api]] - Exists in docs subdirectory
+ 13 - [[archive/project-legacy]] - Exists in archive subdirectory
+ 14
+ 15 ## Non-Existent Files
+ 16
+ 17 Links to files that could be created (completion should suggest these):
+ 18
+ 19 - [[project-gamma]] - Referenced but doesn't exist yet
+ 20 - [[tasks]] - Another non-existent target
+ 21 - [[docs/guide]] - Non-existent file in docs directory
+ 22 - [[archive/old-project]] - Non-existent file in non-existent directory
+ 23
+ 24 ## Testing Completions
+ 25
+ 26 Complete this wikilink: [[project-gamma]]
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+index.md [+]                                                                                                     26,38          All
+:lua vim.lsp.buf.definition()
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md                                                                                  1,1            All
+:lua vim.lsp.buf.definition()
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md                                                                                  2,1            All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+  3
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md [+]                                                                              3,1            All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+  3
+  4
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md [+]                                                                              4,1            All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+  3
+  4 This file was created automatically when following a wikilink that doesn't yet have a file.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md [+]                                                                              4,92           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+  3
+  4 This file was created automatically when following a wikilink that doesn't yet have a file.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md [+]                                                                              4,92           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # project-gamma
+  2
+  3
+  4 This file was created automatically when following a wikilink that doesn't yet have a file.
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+~
+/vhs/workspace/project-gamma.md [+]                                                                              4,91           All
+────────────────────────────────────────────────────────────────────────────────

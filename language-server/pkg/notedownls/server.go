@@ -566,7 +566,7 @@ func (s *Server) getNonExistentTargetCompletions(prefix, currentDocURI string, n
 			}
 
 			kind := lsp.CompletionItemKindReference
-			detail := fmt.Sprintf("Referenced in %d file(s) (create new)", refCount)
+			detail := fmt.Sprintf("Referenced in %d file(s) (no file yet)", refCount)
 			sortKey := fmt.Sprintf("2_%s", target) // Lower priority than existing files
 
 			items = append(items, lsp.CompletionItem{

@@ -183,4 +183,42 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 - Uses `any` instead of `interface{}` throughout the codebase
 - Comprehensive LSP spec documentation comments on all capability structures
 
+### VHS Test and Golden File Management
+When dealing with VHS test failures and golden file mismatches:
+
+**ALWAYS investigate root causes before making changes:**
+
+1. **Analyze the Failure**: Compare expected vs actual output to understand what changed
+   - Are there timing differences?
+   - Did functionality change?
+   - Are there environmental differences?
+   - Is this a legitimate test improvement or regression?
+
+2. **Identify Root Causes**: Common sources of golden file differences:
+   - **Timing Issues**: VHS sleep durations may need adjustment for slower/faster systems
+   - **LSP Startup**: Language server may need more time to initialize
+   - **Cursor Position**: Navigation commands may land at different positions
+   - **Environment Variables**: Different paths, timestamps, or system-specific output
+   - **Race Conditions**: Parallel execution or resource contention
+   - **Content Changes**: Legitimate changes to workspace files or behavior
+
+3. **Fix the Underlying Issue**: Rather than regenerating golden files:
+   - **Timing**: Adjust sleep durations in VHS templates for more reliable results
+   - **Determinism**: Use consistent starting positions, screen sizes, and configurations
+   - **Filtering**: Improve output normalization to remove non-deterministic content
+   - **Test Design**: Simplify tests to focus on core functionality without fragile interactions
+   - **Environment**: Ensure consistent test environments and proper cleanup
+
+4. **Regenerate Golden Files Only When Appropriate**:
+   - After confirming the change represents legitimate improvement
+   - When test behavior is now correct but output format changed
+   - After fixing root causes that required output adjustments
+
+5. **Document Changes**: When golden files must be updated:
+   - Explain why the change was necessary
+   - Describe what was fixed at the root cause level
+   - Note if this affects other tests or areas
+
+**Never** simply delete and regenerate golden files without understanding why they differ. Each difference represents either a regression that needs fixing or an improvement that needs validation.
+
 The codebase follows standard Go project structure with clear separation between parsing logic and LSP server functionality. The LSP implementation uses a custom JSON-RPC layer rather than external LSP libraries for maximum control and customization.

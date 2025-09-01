@@ -16,6 +16,13 @@ Plugin loading, setup, and workspace detection features.
 
 - **[Workspace Status Command](./initialization/workspace-status-command/)** - Check your current workspace status with `:NotedownWorkspaceStatus`
 
+### [Wikilinks](./wikilinks/)
+Internal linking features for connecting documents within your workspace.
+
+- **[Completion](./wikilinks/completion/)** - Auto-complete wikilink targets as you type
+- **[Syntax](./wikilinks/syntax/)** - Comprehensive wikilink syntax including display text, path resolution, navigation, and concealment
+- **[Diagnostics and Code Actions](./wikilinks/diagnostics-and-code-actions/)** - Real-time feedback on wikilink validity and automated fixes
+
 ## How to Use These Features
 
 Each feature directory contains:
@@ -46,6 +53,6 @@ This command shows:
 Features are organized by functional area:
 
 - **Initialization** - Plugin setup and workspace detection
-- *More areas coming soon...*
+- **Wikilinks** - Internal linking and document navigation
 
 Each area contains multiple related features with comprehensive documentation and demonstrations.

@@ -1,0 +1,760 @@
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         1,1            All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         17,1           All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         17,1           All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         17,1           All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         17,1           All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         1,1            All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         1,1            All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+~
+~
+~
+~
+index.md                                                                                                         41,1           All
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42
+~
+~
+~
+index.md [+]                                                                                                     42,1           All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]
+~
+~
+~
+index.md [+]                                                                                                     42,39          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]
+~
+~
+~
+index.md [+]                                                                                                     42,39          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]F|
+~
+~
+~
+index.md [+]                                                                                                     42,41          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]F|
+~
+~
+~
+index.md [+]                                                                                                     42,41          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]F|gd
+~
+~
+~
+index.md [+]                                                                                                     42,43          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]F|gd
+~
+~
+~
+index.md [+]                                                                                                     42,43          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
+  1 # Wikilink Syntax Test Workspace
+  2
+  3 This workspace demonstrates comprehensive wikilink syntax including display text and path resolution.
+  4
+  5 ## Display Text Syntax
+  6
+  7 Examples of wikilinks using the `[[target|display]]` syntax:
+  8
+  9 - [[project-alpha|My Amazing Project]] - Target: `project-alpha`, Display: "My Amazing Project"
+ 10 - [[meeting-notes|Team Meeting 2024-01-15]] - Target: `meeting-notes`, Display: "Team Meeting 2024-01-15"
+ 11 - [[docs/api|API Reference Guide]] - Target: `docs/api`, Display: "API Reference Guide"
+ 12
+ 13 ## Directory-based Wikilinks
+ 14
+ 15 Test path-based wikilink resolution and navigation:
+ 16
+ 17 - [[docs/api]] - Navigate to documentation in `docs/` directory
+ 18 - [[projects/notedown]] - Navigate to project file in `projects/` directory
+ 19 - [[team/members]] - Navigate to team directory structure
+ 20
+ 21 ## Multi-level Paths with Display Text
+ 22
+ 23 Combining both features:
+ 24
+ 25 - [[projects/notedown|Notedown Project]] - Path with display text
+ 26 - [[team/members|Team Directory]] - Directory with custom display
+ 27
+ 28 ## Features Demonstrated
+ 29
+ 30 1. **Display Text**: `[[target|display]]` format for readable link text
+ 31 2. **Path Resolution**: Directory-based navigation with `[[path/to/file]]`
+ 32 3. **Completion Support**: Works on target portion, supports directories
+ 33 4. **Navigation**: Go-to-definition uses target for both syntax types
+ 34 5. **File Creation**: Missing directories and files created automatically
+ 35
+ 36 ## Testing Instructions
+ 37
+ 38 1. Test go-to-definition on existing wikilinks (both syntax types)
+ 39 2. Create new wikilinks with completion support
+ 40 3. Test navigation from both display text and target portions
+ 41 4. Verify directory structure creation for non-existent paths
+ 42 New link: [[project-alpha|My Project]]F|gd
+~
+~
+~
+index.md [+]                                                                                                     42,43          All
+-- INSERT --
+────────────────────────────────────────────────────────────────────────────────
