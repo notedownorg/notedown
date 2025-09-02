@@ -101,7 +101,7 @@ This will:
 1. **Make your changes** to the codebase
 2. **Test your changes** locally:
    ```bash
-   make test-features-fast  # Quick tests without GIF generation
+   make test-nvim           # Test Neovim plugin
    make test                # Full test suite
    ```
 3. **Install and test** your changes:
@@ -147,10 +147,9 @@ notedown-language-server --version
 - `make all` - Full build pipeline with hygiene checks
 
 ### Testing
-- `make test` - Run all tests (Go, Neovim, and feature tests)
-- `make test-features` - Run feature tests with GIF generation
-- `make test-features-fast` - Run feature tests without GIFs (faster)
-- `make test-features-golden` - Regenerate golden files for feature tests
+- `make test` - Run all tests (Go and Neovim tests)
+- `make test-lsp` - Run Go tests only
+- `make test-nvim` - Run Neovim plugin tests only
 
 ### Code Quality
 - `make format` - Format Go code and Lua files
@@ -166,7 +165,7 @@ notedown-language-server --version
 1. **Language Server** (`language-server/`) - LSP implementation for Notedown
 2. **Parser** (`pkg/parser/`) - Markdown parser with NFM extensions
 3. **Neovim Plugin** (`neovim/`) - Lua plugin for Neovim integration
-4. **Feature Tests** (`features/neovim/`) - End-to-end testing with VHS
+4. **Neovim Tests** (`neovim/tests/`) - Comprehensive plugin testing
 
 ### Installation Details
 

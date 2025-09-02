@@ -46,7 +46,7 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: test-pkg test-lsp test-nvim test-features
+test: test-pkg test-lsp test-nvim
 
 test-pkg:
 	go test ./pkg/...
@@ -55,21 +55,10 @@ test-lsp:
 	go test ./language-server/...
 
 test-nvim:
-	cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"
+	cd neovim && ./scripts/test
 
-test-features:
-	go test -v ./features/neovim/...
 
-test-features-fast:
-	go test -v ./features/neovim/... -gif=false
 
-test-features-golden:
-	find features/neovim -name "expected.ascii" -delete
-	go test -parallel 4 -v ./features/neovim/...
-
-# Legacy VHS test support (deprecated)
-test-vhs: test-features
-test-vhs-golden: test-features-golden
 
 install: clean
 	go build -ldflags "\

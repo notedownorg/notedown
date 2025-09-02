@@ -29,7 +29,11 @@
       "Bash(time nvim:*)",
       "Bash(git add:*)",
       "Bash(timeout 10s nvim:*)",
-      "Bash(vhs:*)"
+      "Bash(vhs:*)",
+      "Bash(./scripts/test:*)",
+      "Bash(timeout 5s nvim:*)",
+      "Bash(timeout:*)",
+      "Bash(lua:*)"
     ],
     "deny": [],
     "additionalDirectories": [
