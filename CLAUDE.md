@@ -5,10 +5,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Test Commands
 
 ### Core Development
-- `make test` - Run all tests (LSP, Neovim, and feature tests)
+- `make test` - Run all tests (LSP and Neovim tests)
 - `make test-lsp` - Run Go tests only (`go test ./...`)
 - `make test-nvim` - Run Neovim plugin tests only
-- `make test-features` - Run feature tests (living documentation)
 - `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy
@@ -24,7 +23,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `go test ./language-server/pkg/...` - Test LSP server packages
 - `go test ./language-server/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd neovim && nvim --headless --noplugin -u tests/helpers/minimal_init.lua -c "lua MiniTest.run()" -c "qall!"` - Test Neovim plugin
+- `cd neovim && nvim -l tests/minit.lua` - Test Neovim plugin
+- `cd neovim && ./scripts/test` - Alternative test runner
 
 ### Building
 - `go build -o bin/notedown-language-server ./language-server/` - Build LSP server binary
@@ -94,19 +94,15 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Feature Testing Framework (`features/neovim/`)
-- **Living Documentation**: Features documented through executable VHS tests with visual demonstrations
-- **Area/Feature Organization**: Hierarchical structure with areas (initialization, wikilinks) containing specific features
-- **NotedownVHSRunner**: Handles all boilerplate (LSP building, plugin installation, workspace setup, cleanup)
-- **Documentation Structure**: 
-  - `README.md` files are **user-focused** explaining what features do and how to use them
-  - `DEVELOPMENT.md` files are **developer-focused** with technical implementation details and contribution guides
-  - Both types should be consulted when working on features or understanding the system
-- **Data-Driven Tests**: Features defined as simple structs with area, feature, workspace, and timeout
-- **Template Rendering**: Dynamic VHS tape generation from Go templates with test-specific data
-- **Parallel Execution**: Safe concurrent test execution with shared binary building via `sync.Once`
-- **Golden File Testing**: Automated comparison with auto-creation of missing golden files
-- **Visual Documentation**: Generates GIFs in feature directories for embedded documentation
+### 3. Neovim Plugin Testing (`neovim/tests/`)
+- **Simplified Testing**: Uses simple assertion-based tests following folke/trouble.nvim patterns
+- **Spec Files**: Tests organized in `*_spec.lua` files with `run_tests()` functions
+- **No External Dependencies**: Pure Lua testing without mini.test or other frameworks
+- **LSP Integration**: Tests build and use real notedown-language-server for authentic behavior
+- **Test Runners**: 
+  - `minit.lua` - Main test runner with LSP binary building and comprehensive test execution
+  - `scripts/test` - Simple shell script wrapper for easy execution
+- **Comprehensive Coverage**: All notedown.nvim functionality tested including wikilinks, folding, completion, diagnostics
 
 ### 4. Neovim Plugin (`neovim/`)
 - **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
@@ -118,7 +114,7 @@ Key files:
 - `lua/notedown/init.lua` - Main plugin initialization and configuration
 - `lua/notedown/config.lua` - Configuration management and workspace detection
 - `plugin/notedown.lua` - Plugin bootstrapping
-- `tests/` - Mini.nvim-based test suite
+- `tests/` - Simplified test suite with spec files and test runners
 
 ### 5. Shared Packages (`pkg/`)
 - **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
@@ -133,21 +129,14 @@ Key files:
 ### Testing Strategy
 - **Unit Tests**: Parser components (`parser_test.go`), JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
 - **Integration Tests**: Logger tests with different output formats and levels, Notedownls tests cover completion, workspace management, and wikilink indexing
-- **Neovim Plugin Tests**: Mini.nvim framework for realistic scenarios with shared/dedicated LSP sessions
-- **End-to-End VHS Tests**: Terminal-based testing using VHS (Video Home System) for complete user workflows:
-  - Clean framework located at `features/neovim/pkg/notedown/runner.go` with simple `NotedownVHSRunner`
-  - Features defined as data structures in `features/neovim/framework_test.go` with parallel execution
-  - VHS templates in `features/neovim/{area}/{feature}/demo.tape.tmpl` for dynamic rendering
-  - Test workspaces in `features/neovim/{area}/{feature}/workspace/` directories
-  - Golden file comparison in `features/neovim/{area}/{feature}/expected.ascii` with auto-creation
-  - GIF generation in `features/neovim/{area}/{feature}/demo.gif` for embedded documentation
-  - Parallel LSP binary building with `sync.Once` to avoid redundant builds
-  - Per-test cleanup and isolated temporary directories
-- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files, feature-specific test workspaces in `features/neovim/{area}/{feature}/workspace/`
-- **Conventions**: Standard Go testing, focus on AST conversion accuracy and position tracking
-- **Key Documentation**: 
-  - `features/neovim/DEVELOPMENT.md` - Comprehensive guide for adding new features, debugging, and framework internals
-  - Area-specific development details in `features/neovim/{area}/DEVELOPMENT.md` (when present)
+- **Neovim Plugin Tests**: Simplified testing framework inspired by folke/trouble.nvim:
+  - **Spec Files**: Tests organized in `*_spec.lua` files with simple assertion functions
+  - **Test Runners**: `minit.lua` builds LSP binary and runs all tests, `scripts/test` provides shell wrapper
+  - **Real LSP Integration**: Tests use actual notedown-language-server for authentic behavior
+  - **Comprehensive Coverage**: All plugin functionality including wikilinks, folding, text objects, workspace detection
+  - **No External Dependencies**: Pure Lua testing without mini.test or other frameworks
+- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files
+- **Conventions**: Standard Go testing for server components, simple assertion-based testing for Neovim plugin
 
 ### Wikilink Index System
 The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
