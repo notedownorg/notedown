@@ -15,7 +15,6 @@
 package notedownls
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/notedownorg/notedown/language-server/pkg/lsp"
@@ -26,26 +25,6 @@ import (
 type ListItemFinder struct {
 	targetLine int // 0-based line number we're looking for
 	foundItem  *parser.ListItem
-}
-
-// handleExecuteCommand handles workspace/executeCommand requests for list boundaries
-func (s *Server) handleExecuteCommand(params json.RawMessage) (any, error) {
-	var executeParams lsp.ExecuteCommandParams
-	if err := json.Unmarshal(params, &executeParams); err != nil {
-		s.logger.Error("failed to unmarshal execute command params", "error", err)
-		return nil, err
-	}
-
-	s.logger.Debug("execute command request received", "command", executeParams.Command)
-
-	switch executeParams.Command {
-	case "notedown.getListItemBoundaries":
-		return s.handleGetListItemBoundaries(executeParams.Arguments)
-	case "notedown.getConcealRanges":
-		return s.handleGetConcealRanges(executeParams.Arguments)
-	default:
-		return nil, fmt.Errorf("unknown command: %s", executeParams.Command)
-	}
 }
 
 // Visit implements the Visitor interface to find list items at target position
