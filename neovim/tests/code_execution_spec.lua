@@ -156,9 +156,8 @@ local function test_simple_execution()
 	-- Wait for LSP to initialize
 	local lsp_ready = test_utils.wait_for_lsp(5000)
 	if not lsp_ready then
-		test_utils.print_assertion("Skipping test - LSP not available")
 		test_utils.cleanup_test_workspace(workspace)
-		return
+		error("CRITICAL: LSP did not initialize within timeout - code execution cannot be tested")
 	end
 
 	-- Sync document with LSP
@@ -206,9 +205,8 @@ local function test_multiple_blocks_execution()
 	-- Wait for LSP to initialize
 	local lsp_ready = test_utils.wait_for_lsp(5000)
 	if not lsp_ready then
-		test_utils.print_assertion("Skipping test - LSP not available")
 		test_utils.cleanup_test_workspace(workspace)
-		return
+		error("CRITICAL: LSP did not initialize within timeout - multiple blocks execution cannot be tested")
 	end
 
 	-- Sync document with LSP
@@ -257,9 +255,8 @@ local function test_existing_output_replacement()
 	-- Wait for LSP to initialize
 	local lsp_ready = test_utils.wait_for_lsp(5000)
 	if not lsp_ready then
-		test_utils.print_assertion("Skipping test - LSP not available")
 		test_utils.cleanup_test_workspace(workspace)
-		return
+		error("CRITICAL: LSP did not initialize within timeout - output replacement cannot be tested")
 	end
 
 	-- Count existing output blocks before execution
@@ -322,9 +319,8 @@ local function test_no_language_specified()
 	-- Wait for LSP to initialize
 	local lsp_ready = test_utils.wait_for_lsp(5000)
 	if not lsp_ready then
-		test_utils.print_assertion("Skipping test - LSP not available")
 		test_utils.cleanup_test_workspace(workspace)
-		return
+		error("CRITICAL: LSP did not initialize within timeout - multi-language execution cannot be tested")
 	end
 
 	-- Sync document with LSP
@@ -374,9 +370,8 @@ local function test_error_handling()
 	-- Wait for LSP to initialize
 	local lsp_ready = test_utils.wait_for_lsp(5000)
 	if not lsp_ready then
-		test_utils.print_assertion("Skipping test - LSP not available")
 		test_utils.cleanup_test_workspace(workspace)
-		return
+		error("CRITICAL: LSP did not initialize within timeout - error handling cannot be tested")
 	end
 
 	-- Sync document with LSP
