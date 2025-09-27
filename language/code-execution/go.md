@@ -117,9 +117,19 @@ func main() {
 
 ## Limitations
 
-- Only supports single-file Go programs (package main only)
-- No support for multiple files or complex project structures
-- No interactive input support
-- Code blocks must form a valid Go program when merged
-- Import statements must be syntactically correct Go code
-- Users must explicitly write `func main()` and any other required functions
+### Current Implementation
+- **Standard Library Only**: Currently only Go standard library packages are supported
+- **No External Dependencies**: No support for third-party modules or `go.mod` dependencies
+- **Single File Programs**: Only supports single-file Go programs (package main only)
+- **No Complex Projects**: No support for multiple files or complex project structures
+- **No Interactive Input**: No support for interactive input during execution
+- **Valid Go Structure**: Code blocks must form a valid Go program when merged
+- **Explicit Functions**: Users must explicitly write `func main()` and any other required functions
+
+### Future Extensions
+Future versions may include:
+- **Module Support**: Support for `go.mod` files and external dependencies
+- **Multi-file Projects**: Support for complex project structures with multiple Go files
+- **Package Development**: Support for creating and testing Go packages beyond package main
+- **Workspace Dependencies**: Ability to import local packages from the workspace
+- **Build Configuration**: Custom build flags and compilation options
