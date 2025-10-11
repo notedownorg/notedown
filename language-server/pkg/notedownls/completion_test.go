@@ -253,29 +253,19 @@ func TestGenerateWikilinkTargets(t *testing.T) {
 }
 
 func TestGetWikilinkCompletions(t *testing.T) {
+	workspace := NewWorkspaceManager(log.NewDefault())
+	// Add files to the workspace index using the public interface
+	workspace.AddFileToIndex("file:///workspace/readme.md")
+
+	// Add more files to the workspace index
+	workspace.AddFileToIndex("file:///workspace/docs/api.md")
+	workspace.AddFileToIndex("file:///workspace/projects/alpha.md")
+	workspace.AddFileToIndex("file:///workspace/projects/beta.md")
+
 	server := &Server{
 		logger:        log.NewDefault(),
 		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
-		workspace: &WorkspaceManager{
-			fileIndex: map[string]*FileInfo{
-				"file:///workspace/readme.md": {
-					URI:  "file:///workspace/readme.md",
-					Path: "readme.md",
-				},
-				"file:///workspace/docs/api.md": {
-					URI:  "file:///workspace/docs/api.md",
-					Path: "docs/api.md",
-				},
-				"file:///workspace/projects/alpha.md": {
-					URI:  "file:///workspace/projects/alpha.md",
-					Path: "projects/alpha.md",
-				},
-				"file:///workspace/projects/beta.md": {
-					URI:  "file:///workspace/projects/beta.md",
-					Path: "projects/beta.md",
-				},
-			},
-		},
+		workspace:     workspace,
 	}
 
 	tests := []struct {
@@ -418,17 +408,14 @@ func TestGetNonExistentTargetCompletionsInSameDocument(t *testing.T) {
 }
 
 func TestWikilinkCompletionWithClosingBrackets(t *testing.T) {
+	workspaceManager := NewWorkspaceManager(log.NewDefault())
+	// Add file to the index via the workspace manager
+	workspaceManager.manager.AddFileToIndex("file:///project-alpha.md")
+
 	server := &Server{
 		logger:        log.NewDefault(),
 		wikilinkIndex: indexes.NewWikilinkIndex(log.NewDefault()),
-		workspace: &WorkspaceManager{
-			fileIndex: map[string]*FileInfo{
-				"file:///project-alpha.md": {
-					URI:  "file:///project-alpha.md",
-					Path: "project-alpha.md",
-				},
-			},
-		},
+		workspace:     workspaceManager,
 	}
 
 	// Add a non-existent target

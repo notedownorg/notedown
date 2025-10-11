@@ -34,6 +34,7 @@
               vhs
               ttyd
               ffmpeg
+              buf
             ];
           };
         }

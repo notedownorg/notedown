@@ -22,6 +22,7 @@ import (
 
 	"github.com/notedownorg/notedown/pkg/log"
 	"github.com/notedownorg/notedown/pkg/parser"
+	"github.com/notedownorg/notedown/pkg/workspace"
 )
 
 // WikilinkTargetInfo contains information about a wikilink target
@@ -276,11 +277,8 @@ func (wi *WikilinkIndex) GetTargetsByPrefix(prefix string) map[string]*WikilinkT
 	return result
 }
 
-// WorkspaceFile represents basic file information for workspace operations
-type WorkspaceFile interface {
-	GetURI() string
-	GetPath() string
-}
+// Use WorkspaceFile from the workspace package
+type WorkspaceFile = workspace.WorkspaceFile
 
 // ExtractWikilinksFromDocument parses a document and extracts all wikilink targets using AST-based parsing
 func (wi *WikilinkIndex) ExtractWikilinksFromDocument(content, documentURI string, workspaceFiles map[string]WorkspaceFile) []string {
@@ -302,33 +300,24 @@ func (wi *WikilinkIndex) ExtractWikilinksFromDocument(content, documentURI strin
 	return targets
 }
 
-// extractWikilinksFromAST extracts wikilinks using AST traversal
+// extractWikilinksFromAST extracts wikilinks using shared extraction logic
 func (wi *WikilinkIndex) extractWikilinksFromAST(doc *parser.Document, documentURI string, workspaceFiles map[string]WorkspaceFile) []string {
-	var targets []string
+	// Use shared extraction logic
+	wikilinks := parser.ExtractWikilinks(doc)
+	targets := make([]string, len(wikilinks))
 
-	// Walk the AST to find all wikilink nodes
-	walker := parser.NewWalker(parser.WalkFunc(func(node parser.Node) error {
-		if wikilink, ok := node.(*parser.Wikilink); ok {
-			target := strings.TrimSpace(wikilink.Target)
-			targets = append(targets, target)
+	for i, wl := range wikilinks {
+		target := wl.Target
+		targets[i] = target
 
-			exists, matchingFiles := wi.targetExistsInWorkspace(target, workspaceFiles)
-			wi.AddTargetWithMatches(target, documentURI, exists, matchingFiles)
+		exists, matchingFiles := wi.targetExistsInWorkspace(target, workspaceFiles)
+		wi.AddTargetWithMatches(target, documentURI, exists, matchingFiles)
 
-			wi.logger.Debug("extracted wikilink from AST",
-				"target", target,
-				"display", wikilink.DisplayText,
-				"exists", exists,
-				"source", documentURI)
-		}
-		return nil
-	}))
-
-	if err := walker.Walk(doc); err != nil {
-		wi.logger.Error("failed to walk AST for wikilink extraction",
-			"uri", documentURI,
-			"error", err)
-		return targets
+		wi.logger.Debug("extracted wikilink from AST",
+			"target", target,
+			"display", wl.DisplayText,
+			"exists", exists,
+			"source", documentURI)
 	}
 
 	return targets

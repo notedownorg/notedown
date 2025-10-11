@@ -1,0 +1,159 @@
+// Copyright 2025 Notedown Authors
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package notedown.application_server.v1;
+
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/notedownorg/notedown/application-server/proto";
+
+// DocumentService provides document discovery and filtering functionality
+service DocumentService {
+  // ListDocuments returns documents matching the given filter criteria
+  rpc ListDocuments(ListDocumentsRequest) returns (ListDocumentsResponse);
+}
+
+// ListDocumentsRequest defines the request for listing documents
+message ListDocumentsRequest {
+  // Filter defines the criteria for filtering documents
+  FilterExpression filter = 1;
+}
+
+// ListDocumentsResponse contains the filtered documents
+message ListDocumentsResponse {
+  // Documents that match the filter criteria
+  repeated Document documents = 1;
+}
+
+// Document represents a Notedown Flavored Markdown document
+message Document {
+  // Path is the relative path from workspace root
+  string path = 1;
+
+  // Checksum is a hash of the document content for change detection
+  string checksum = 2;
+
+  // Metadata contains the frontmatter metadata as key-value pairs
+  google.protobuf.Struct metadata = 3;
+
+  // Wikilinks found in the document
+  repeated Wikilink wikilinks = 5;
+
+  // Tasks found in the document
+  repeated Task tasks = 6;
+}
+
+// FilterExpression represents a filtering expression for documents
+message FilterExpression {
+  oneof expression {
+    // MetadataFilter filters documents based on frontmatter metadata
+    MetadataFilter metadata_filter = 1;
+
+    // AndFilter combines multiple filters with AND logic
+    AndFilter and_filter = 2;
+
+    // OrFilter combines multiple filters with OR logic
+    OrFilter or_filter = 3;
+
+    // NotFilter negates a filter
+    NotFilter not_filter = 4;
+  }
+}
+
+// MetadataFilter filters documents based on frontmatter metadata
+message MetadataFilter {
+  // Field is the metadata field name to filter on
+  string field = 1;
+
+  // Operator defines how to compare the field value
+  MetadataOperator operator = 2;
+
+  // Value is the value to compare against (type depends on comparison)
+  google.protobuf.Value value = 3;
+}
+
+// MetadataOperator defines comparison operators for metadata filtering
+enum MetadataOperator {
+  METADATA_OPERATOR_UNSPECIFIED = 0;
+
+  // Equality operators
+  METADATA_OPERATOR_EQUALS = 1;
+  METADATA_OPERATOR_NOT_EQUALS = 2;
+
+  // String operators
+  METADATA_OPERATOR_CONTAINS = 3;
+  METADATA_OPERATOR_STARTS_WITH = 4;
+  METADATA_OPERATOR_ENDS_WITH = 5;
+
+  // Numeric operators
+  METADATA_OPERATOR_GREATER_THAN = 6;
+  METADATA_OPERATOR_GREATER_THAN_OR_EQUAL = 7;
+  METADATA_OPERATOR_LESS_THAN = 8;
+  METADATA_OPERATOR_LESS_THAN_OR_EQUAL = 9;
+
+  // Array operators
+  METADATA_OPERATOR_IN = 10;
+  METADATA_OPERATOR_NOT_IN = 11;
+
+  // Existence operators
+  METADATA_OPERATOR_EXISTS = 12;
+  METADATA_OPERATOR_NOT_EXISTS = 13;
+}
+
+// AndFilter combines multiple filters with AND logic
+message AndFilter {
+  repeated FilterExpression filters = 1;
+}
+
+// OrFilter combines multiple filters with OR logic
+message OrFilter {
+  repeated FilterExpression filters = 1;
+}
+
+// NotFilter negates a filter
+message NotFilter {
+  FilterExpression filter = 1;
+}
+
+// Wikilink represents a wikilink found in a document
+message Wikilink {
+  // Target is the wikilink target (e.g., "project-alpha", "docs/api")
+  string target = 1;
+
+  // DisplayText is the display text if pipe notation is used
+  string display_text = 2;
+
+  // Line is the 1-based line number where the wikilink appears
+  int32 line = 3;
+
+  // Column is the 1-based column number where the wikilink appears
+  int32 column = 4;
+}
+
+// Task represents a task found in a document
+message Task {
+  // State is the raw state value (e.g., " ", "x", "wip", "in-progress")
+  string state = 1;
+
+  // Text is the task description text
+  string text = 2;
+
+  // Line is the 1-based line number where the task appears
+  int32 line = 3;
+
+  // Column is the 1-based column number where the task appears
+  int32 column = 4;
+}

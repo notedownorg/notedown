@@ -381,17 +381,11 @@ func TestHandleDefinitionDeprecated(t *testing.T) {
 			logger := log.NewDefault()
 			server := NewServer("test", logger)
 
-			// Set up workspace files
-			// Set up workspace files using proper type
-			server.workspace.fileIndex = make(map[string]*FileInfo)
-			for key, fileInfo := range tt.workspaceFiles {
-				server.workspace.fileIndex[key] = fileInfo
-			}
-
-			// Set up workspace root
-			server.workspace.roots = []WorkspaceRoot{
+			// Set up workspace
+			roots := []WorkspaceRoot{
 				{URI: "file:///test", Path: "/test", Name: "test"},
 			}
+			server.workspace.SetupTestWorkspace(roots, tt.workspaceFiles)
 
 			// Add the test document if it exists
 			if tt.documentURI == "file:///test/document.md" {
@@ -454,7 +448,10 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 	logger := log.NewDefault()
 	server := NewServer("test", logger)
 
-	// Set up test workspace files
+	// Set up test workspace
+	roots := []WorkspaceRoot{
+		{URI: "file:///test", Path: "/test", Name: "test"},
+	}
 	workspaceFiles := map[string]*FileInfo{
 		"simple-file": {
 			Path: "simple-file.md",
@@ -469,12 +466,7 @@ func TestFindFileForTargetDeprecated(t *testing.T) {
 			URI:  "file:///test/projects/project-alpha.md",
 		},
 	}
-	server.workspace.fileIndex = workspaceFiles
-
-	// Set up workspace root
-	server.workspace.roots = []WorkspaceRoot{
-		{URI: "file:///test", Path: "/test", Name: "test"},
-	}
+	server.workspace.SetupTestWorkspace(roots, workspaceFiles)
 
 	tests := []struct {
 		name     string
@@ -553,9 +545,10 @@ func TestResolveTargetPathDeprecated(t *testing.T) {
 	server := NewServer("test", logger)
 
 	// Set up workspace root
-	server.workspace.roots = []WorkspaceRoot{
+	roots := []WorkspaceRoot{
 		{URI: "file:///test/workspace", Path: "/test/workspace", Name: "test"},
 	}
+	server.workspace.SetupTestWorkspace(roots, nil)
 
 	tests := []struct {
 		name         string

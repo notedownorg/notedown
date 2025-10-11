@@ -24,6 +24,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+	"go.abhg.dev/goldmark/frontmatter"
 )
 
 // Parser defines the interface for parsing markdown documents
@@ -51,6 +52,7 @@ func NewParser() Parser {
 				extension.Footnote,
 				extensions.NewWikilinkExtension(),
 				extensions.NewTaskListExtension(cfg),
+				&frontmatter.Extender{},
 			),
 			goldmark.WithParserOptions(
 				parser.WithAttribute(),
@@ -62,9 +64,19 @@ func NewParser() Parser {
 // Parse parses markdown source bytes into a document tree
 func (p *NotedownParser) Parse(source []byte) (*Document, error) {
 	reader := text.NewReader(source)
-	doc := p.goldmark.Parser().Parse(reader)
+	context := parser.NewContext()
+	doc := p.goldmark.Parser().Parse(reader, parser.WithContext(context))
 
-	return p.convertAST(doc, source), nil
+	// Extract frontmatter metadata
+	metadata := make(map[string]any)
+	if data := frontmatter.Get(context); data != nil {
+		if err := data.Decode(&metadata); err != nil {
+			// If decoding fails, keep empty metadata but don't return error
+			metadata = make(map[string]any)
+		}
+	}
+
+	return p.convertAST(doc, source, metadata), nil
 }
 
 // ParseString parses markdown source string into a document tree
@@ -73,11 +85,14 @@ func (p *NotedownParser) ParseString(source string) (*Document, error) {
 }
 
 // convertAST converts goldmark AST to our custom tree structure
-func (p *NotedownParser) convertAST(node ast.Node, source []byte) *Document {
+func (p *NotedownParser) convertAST(node ast.Node, source []byte, metadata map[string]any) *Document {
 	doc := NewDocument(Range{
 		Start: Position{Line: 1, Column: 1, Offset: 0},
 		End:   Position{Line: bytes.Count(source, []byte("\n")) + 1, Column: 1, Offset: len(source)},
 	})
+
+	// Set the metadata
+	doc.Metadata = metadata
 
 	p.convertNode(node, doc, source)
 	return doc

@@ -178,13 +178,15 @@ func (b *BaseNode) Accept(visitor Visitor) error {
 // Document represents the root document node
 type Document struct {
 	*BaseNode
-	Title string
+	Title    string
+	Metadata map[string]any
 }
 
 // NewDocument creates a new document node
 func NewDocument(rng Range) *Document {
 	return &Document{
 		BaseNode: NewBaseNode(NodeDocument, rng),
+		Metadata: make(map[string]any),
 	}
 }
 

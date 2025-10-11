@@ -29,13 +29,11 @@ func TestHandleCodeAction(t *testing.T) {
 	logger := log.NewDefault()
 	server := NewServer("test", logger)
 
-	// Mock workspace with ambiguous files
-	server.workspace.roots = []WorkspaceRoot{
+	// Setup test workspace with ambiguous files
+	roots := []WorkspaceRoot{
 		{URI: "file:///test", Path: "/test", Name: "test"},
 	}
-
-	// Add files with same base name to create ambiguity
-	server.workspace.fileIndex = map[string]*FileInfo{
+	files := map[string]*FileInfo{
 		"file:///test/config.md": {
 			URI:  "file:///test/config.md",
 			Path: "config.md",
@@ -49,6 +47,7 @@ func TestHandleCodeAction(t *testing.T) {
 			Path: "project/config.md",
 		},
 	}
+	server.workspace.SetupTestWorkspace(roots, files)
 
 	// Create test document with ambiguous wikilink
 	testDoc := &Document{

@@ -136,10 +136,10 @@ func TestHandleDefinition(t *testing.T) {
 			server := NewServer("test", logger)
 
 			// Set up workspace files and roots
-			server.workspace.fileIndex = tt.workspaceFiles
-			server.workspace.roots = []WorkspaceRoot{
+			roots := []WorkspaceRoot{
 				{URI: "file:///test", Path: "/test", Name: "test"},
 			}
+			server.workspace.SetupTestWorkspace(roots, tt.workspaceFiles)
 
 			// Add the test document if it exists
 			if tt.documentURI == "file:///test/document.md" {
@@ -202,8 +202,11 @@ func TestFindFileForTarget(t *testing.T) {
 	logger := log.NewDefault()
 	server := NewServer("test", logger)
 
-	// Set up test workspace files
-	server.workspace.fileIndex = map[string]*FileInfo{
+	// Set up test workspace
+	roots := []WorkspaceRoot{
+		{URI: "file:///test", Path: "/test", Name: "test"},
+	}
+	files := map[string]*FileInfo{
 		"file:///test/simple-file.md": {
 			Path: "simple-file.md",
 			URI:  "file:///test/simple-file.md",
@@ -217,11 +220,7 @@ func TestFindFileForTarget(t *testing.T) {
 			URI:  "file:///test/projects/project-alpha.md",
 		},
 	}
-
-	// Set up workspace root
-	server.workspace.roots = []WorkspaceRoot{
-		{URI: "file:///test", Path: "/test", Name: "test"},
-	}
+	server.workspace.SetupTestWorkspace(roots, files)
 
 	tests := []struct {
 		name     string
@@ -290,9 +289,10 @@ func TestResolveTargetPath(t *testing.T) {
 	server := NewServer("test", logger)
 
 	// Set up workspace root
-	server.workspace.roots = []WorkspaceRoot{
+	roots := []WorkspaceRoot{
 		{URI: "file:///test/workspace", Path: "/test/workspace", Name: "test"},
 	}
+	server.workspace.SetupTestWorkspace(roots, nil)
 
 	tests := []struct {
 		name         string
