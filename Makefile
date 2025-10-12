@@ -27,7 +27,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 COMMIT := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-check: clean format mod lint test
+check: clean generate format mod lint test
 
 all: hygiene test dirty
 
@@ -38,6 +38,9 @@ dirty:
 
 mod:
 	go mod tidy
+
+generate:
+	buf generate
 
 format: licenser
 	gofmt -w .

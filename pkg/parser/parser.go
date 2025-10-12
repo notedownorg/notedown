@@ -24,6 +24,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/text"
+	"go.abhg.dev/goldmark/frontmatter"
 )
 
 // Parser defines the interface for parsing markdown documents
@@ -51,6 +52,7 @@ func NewParser() Parser {
 				extension.Footnote,
 				extensions.NewWikilinkExtension(),
 				extensions.NewTaskListExtension(cfg),
+				&frontmatter.Extender{},
 			),
 			goldmark.WithParserOptions(
 				parser.WithAttribute(),
@@ -62,9 +64,21 @@ func NewParser() Parser {
 // Parse parses markdown source bytes into a document tree
 func (p *NotedownParser) Parse(source []byte) (*Document, error) {
 	reader := text.NewReader(source)
-	doc := p.goldmark.Parser().Parse(reader)
+	context := parser.NewContext()
+	astDoc := p.goldmark.Parser().Parse(reader, parser.WithContext(context))
 
-	return p.convertAST(doc, source), nil
+	// Convert AST to our tree structure
+	doc := p.convertAST(astDoc, source)
+
+	// Extract frontmatter if present
+	if data := frontmatter.Get(context); data != nil {
+		var metadata map[string]any
+		if err := data.Decode(&metadata); err == nil {
+			doc.Metadata = metadata
+		}
+	}
+
+	return doc, nil
 }
 
 // ParseString parses markdown source string into a document tree

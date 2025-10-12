@@ -211,12 +211,12 @@ func TestTaskStateValues(t *testing.T) {
 }
 
 func TestDefaultConfigurationTaskStates(t *testing.T) {
-	// Test with default configuration (should only support " " and "x")
+	// Test with default configuration (should support " ", "x", and "wip")
 	parser := NewParser()
 
 	markdown := `- [ ] Unchecked task
 - [x] Checked task
-- [wip] Should not be parsed as task
+- [wip] Work in progress task
 - [done] Should not be parsed as task`
 
 	doc, err := parser.ParseString(markdown)
@@ -226,15 +226,17 @@ func TestDefaultConfigurationTaskStates(t *testing.T) {
 	items := list.GetListItems()
 	require.Len(t, items, 4)
 
-	// Only first two should be task items
+	// First three should be task items
 	assert.True(t, items[0].TaskList)
 	assert.Equal(t, " ", items[0].TaskState)
 
 	assert.True(t, items[1].TaskList)
 	assert.Equal(t, "x", items[1].TaskState)
 
-	// Last two should not be task items (invalid states)
-	assert.False(t, items[2].TaskList)
+	assert.True(t, items[2].TaskList)
+	assert.Equal(t, "wip", items[2].TaskState)
+
+	// Last one should not be a task item (invalid state)
 	assert.False(t, items[3].TaskList)
 }
 

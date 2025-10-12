@@ -54,11 +54,11 @@ This is not a task.`,
 
 - [invalid] Invalid task state
 - [?] Another invalid state
-- [wip] Work in progress (invalid in default config)
+- [wip] Work in progress (now valid in default config)
 
 This is not a task.`,
-			expectedCount: 3,
-			expectedCodes: []string{"invalid-task-state", "invalid-task-state", "invalid-task-state"},
+			expectedCount: 2,
+			expectedCodes: []string{"invalid-task-state", "invalid-task-state"},
 			expectedRanges: []lsp.Range{
 				{
 					Start: lsp.Position{Line: 2, Character: 2},
@@ -67,10 +67,6 @@ This is not a task.`,
 				{
 					Start: lsp.Position{Line: 3, Character: 2},
 					End:   lsp.Position{Line: 3, Character: 5},
-				},
-				{
-					Start: lsp.Position{Line: 4, Character: 2},
-					End:   lsp.Position{Line: 4, Character: 7},
 				},
 			},
 		},
@@ -254,9 +250,11 @@ func TestIsValidTaskState(t *testing.T) {
 		{"x state valid", "x", defaultConfig, true},
 		{"X alias valid", "X", defaultConfig, true},
 		{"completed alias valid", "completed", defaultConfig, true},
+		{"wip valid in default", "wip", defaultConfig, true},
+		{"working alias valid", "working", defaultConfig, true},
+		{"in-progress alias valid", "in-progress", defaultConfig, true},
 		{"invalid state", "invalid", defaultConfig, false},
 		{"question mark invalid", "?", defaultConfig, false},
-		{"wip invalid in default", "wip", defaultConfig, false},
 	}
 
 	for _, tt := range tests {
@@ -276,7 +274,7 @@ func TestGetValidTaskStates(t *testing.T) {
 	validStates := server.getValidTaskStates(defaultConfig)
 
 	// Should contain the main values and all aliases
-	expectedStates := []string{" ", "x", "X", "completed"}
+	expectedStates := []string{" ", "x", "X", "completed", "wip", "working", "in-progress"}
 
 	assert.Equal(t, len(expectedStates), len(validStates), "Should have correct number of valid states")
 
@@ -402,7 +400,7 @@ func TestParserBasedTaskDiagnostics(t *testing.T) {
 - [ ] Valid todo task
 - [x] Valid done task  
 - [invalid] This should be invalid
-- [wip] This should also be invalid
+- [wip] This is now valid (added to default config)
 - [X] Valid done task with alias
 
 Some text in between.
@@ -412,8 +410,8 @@ Some text in between.
 
 	diagnostics := server.generateTaskDiagnostics("file:///test.md", content)
 
-	// Should find exactly 3 invalid task states
-	assert.Equal(t, 3, len(diagnostics), "Should find 3 invalid task states")
+	// Should find exactly 2 invalid task states
+	assert.Equal(t, 2, len(diagnostics), "Should find 2 invalid task states")
 
 	// Verify the specific invalid states were detected
 	invalidStates := make([]string, len(diagnostics))
@@ -424,7 +422,7 @@ Some text in between.
 		invalidStates[i] = diag.Message[start:end]
 	}
 
-	expectedInvalid := []string{"invalid", "wip", "bad"}
+	expectedInvalid := []string{"invalid", "bad"}
 	for _, expected := range expectedInvalid {
 		assert.Contains(t, invalidStates, expected, "Should detect invalid state: %s", expected)
 	}

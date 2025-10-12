@@ -82,7 +82,7 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 
 	// Parse target and display text
 	target := string(content)
-	displayText := target
+	displayText := ""
 	hasPipe := false
 	var concealStart, concealEnd int
 
@@ -99,6 +99,11 @@ func (p *wikilinkParser) Parse(parent ast.Node, block text.Reader, pc parser.Con
 	}
 	target = strings.TrimSpace(target)
 	displayText = strings.TrimSpace(displayText)
+
+	// If no pipe separator, display text defaults to target
+	if !hasPipe {
+		displayText = target
+	}
 
 	if target == "" {
 		return nil

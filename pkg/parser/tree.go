@@ -178,13 +178,15 @@ func (b *BaseNode) Accept(visitor Visitor) error {
 // Document represents the root document node
 type Document struct {
 	*BaseNode
-	Title string
+	Title    string
+	Metadata map[string]any // Frontmatter metadata
 }
 
 // NewDocument creates a new document node
 func NewDocument(rng Range) *Document {
 	return &Document{
 		BaseNode: NewBaseNode(NodeDocument, rng),
+		Metadata: make(map[string]any),
 	}
 }
 
@@ -239,6 +241,11 @@ func NewText(content string, rng Range) *Text {
 		BaseNode: NewBaseNode(NodeText, rng),
 		Content:  content,
 	}
+}
+
+// Accept implements the visitor pattern for Text
+func (t *Text) Accept(visitor Visitor) error {
+	return visitor.Visit(t)
 }
 
 // CodeBlock represents a code block node

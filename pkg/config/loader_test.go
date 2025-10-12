@@ -188,7 +188,7 @@ func TestGetDefaultConfig(t *testing.T) {
 	config := GetDefaultConfig()
 
 	require.NotNil(t, config)
-	require.Len(t, config.Tasks.States, 2)
+	require.Len(t, config.Tasks.States, 3)
 
 	// Check default todo state
 	todoState := config.Tasks.States[0]
@@ -201,6 +201,12 @@ func TestGetDefaultConfig(t *testing.T) {
 	assert.Equal(t, "x", doneState.Value)
 	assert.Equal(t, "done", doneState.Name)
 	assert.Nil(t, doneState.Conceal)
+
+	// Check default wip state
+	wipState := config.Tasks.States[2]
+	assert.Equal(t, "wip", wipState.Value)
+	assert.Equal(t, "work-in-progress", wipState.Name)
+	assert.Nil(t, wipState.Conceal)
 
 	// Ensure config is valid
 	err := config.Validate()
