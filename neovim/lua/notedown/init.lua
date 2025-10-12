@@ -224,10 +224,10 @@ local folding_ranges_cache = {}
 function M.notedown_foldexpr()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local line_num = vim.v.lnum - 1 -- Convert to 0-based for LSP
-	
+
 	-- Get current buffer version to check if cache is stale
 	local current_version = vim.api.nvim_buf_get_changedtick(bufnr)
-	
+
 	-- Refresh cache if stale or empty
 	if not folding_ranges_cache[bufnr] or folding_ranges_cache[bufnr].version ~= current_version then
 		-- Use simpler client detection like test utilities
@@ -235,30 +235,30 @@ function M.notedown_foldexpr()
 		if #clients == 0 then
 			return 0
 		end
-		
+
 		local client = clients[1]
 		local params = {
-			textDocument = { uri = vim.uri_from_bufnr(bufnr) }
+			textDocument = { uri = vim.uri_from_bufnr(bufnr) },
 		}
-		
+
 		-- Make synchronous request for folding ranges
 		local result, err = client.request_sync("textDocument/foldingRange", params, 1000)
 		if err or not result or not result.result then
 			return 0
 		end
-		
+
 		-- Cache the folding ranges with version
 		folding_ranges_cache[bufnr] = {
 			ranges = result.result,
-			version = current_version
+			version = current_version,
 		}
 	end
-	
+
 	local cache_entry = folding_ranges_cache[bufnr]
 	if not cache_entry or not cache_entry.ranges then
 		return 0
 	end
-	
+
 	-- Find the deepest fold level for this line
 	local fold_level = 0
 	for _, range in ipairs(cache_entry.ranges) do
@@ -266,7 +266,7 @@ function M.notedown_foldexpr()
 			fold_level = fold_level + 1
 		end
 	end
-	
+
 	return fold_level
 end
 
