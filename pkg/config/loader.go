@@ -76,6 +76,7 @@ func LoadConfigFromFile(configPath string) (*Config, error) {
 func GetDefaultConfig() *Config {
 	todoDesc := "A task that needs to be completed"
 	doneDesc := "A completed task"
+	wipDesc := "A task currently being worked on"
 
 	return &Config{
 		Tasks: TasksConfig{
@@ -91,6 +92,12 @@ func GetDefaultConfig() *Config {
 					Name:        "done",
 					Description: &doneDesc,
 					Aliases:     []string{"X", "completed"},
+				},
+				{
+					Value:       "wip",
+					Name:        "work-in-progress",
+					Description: &wipDesc,
+					Aliases:     []string{"working", "in-progress"},
 				},
 			},
 		},

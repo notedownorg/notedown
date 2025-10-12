@@ -17,6 +17,9 @@ jobs:
     
     - name: Install Nix
       uses: cachix/install-nix-action@v31
+
+    - name: Ensure generated files are up to date
+      run: make generate
     
     - name: Check code formatting
       run: make format

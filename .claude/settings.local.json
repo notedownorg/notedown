@@ -33,7 +33,9 @@
       "Bash(./scripts/test:*)",
       "Bash(timeout 5s nvim:*)",
       "Bash(timeout:*)",
-      "Bash(lua:*)"
+      "Bash(lua:*)",
+      "Bash(buf generate:*)",
+      "Bash(buf mod:*)"
     ],
     "deny": [],
     "additionalDirectories": [
