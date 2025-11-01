@@ -37,27 +37,21 @@ tasks:
       aliases: []
     - value: "x"
       name: "done"
-      conceal: "✅"
       aliases: ["X", "✓", "✔"]
     - value: "/"
       name: "in-progress"
-      conceal: "⏳"
       aliases: ["wip", "WIP", "working"]
     - value: "-"
       name: "cancelled"
-      conceal: "❌"
       aliases: ["~", "cancelled", "skip"]
     - value: "?"
       name: "question"
-      conceal: "❓"
       aliases: ["Q", "unclear"]
     - value: "waiting"
       name: "blocked"
-      conceal: "⏸️"
       aliases: ["blocked", "hold"]
     - value: "!"
       name: "urgent"
-      conceal: "🔥"
       aliases: ["urgent", "priority", "asap"]
 ```
 
@@ -75,19 +69,16 @@ tasks:
       {
         "value": "x",
         "name": "done",
-        "conceal": "✅",
         "aliases": ["X", "✓", "✔"]
       },
       {
         "value": "/",
-        "name": "in-progress", 
-        "conceal": "⏳",
+        "name": "in-progress",
         "aliases": ["wip", "WIP", "working"]
       },
       {
         "value": "-",
         "name": "cancelled",
-        "conceal": "❌",
         "aliases": ["~", "cancelled", "skip"]
       }
     ]
@@ -104,7 +95,6 @@ tasks:
 
 ### Optional Fields
 
-- `conceal`: Visual replacement text for compatible editors (emoji, symbol, or text)
 - `aliases`: Array of alternative values that map to the same state
 
 ### Validation Rules
@@ -121,14 +111,9 @@ tasks:
 - value: "x"
   name: "done"
 
-# Multi-character states  
+# Multi-character states
 - value: "in-progress"
   name: "work-in-progress"
-
-# States with concealment
-- value: "!"
-  name: "urgent"
-  conceal: "🔥"
 
 # States with aliases
 - value: "x"
@@ -142,7 +127,6 @@ tasks:
 # Word-based values
 - value: "waiting"
   name: "blocked"
-  conceal: "⏸️"
 ```
 
 ## Usage in Markdown
@@ -161,15 +145,6 @@ Once configured, task states can be used in any list context:
 ```
 
 ## Editor Integration
-
-### Concealment Support
-
-When `conceal` is specified, compatible editors can replace the bracket syntax with the conceal text:
-
-- Raw markdown: `- [x] Task completed`
-- Concealed display: `- ✅ Task completed`
-
-### Syntax Highlighting
 
 Editors can use the configuration to provide appropriate syntax highlighting and autocomplete for defined task states.
 
@@ -201,7 +176,6 @@ When removing a task state from configuration:
 1. **Keep Values Concise**: Short values are easier to type and read
 2. **Use Meaningful Names**: Names should clearly indicate the task state
 3. **Provide Useful Aliases**: Include common variations and shortcuts
-4. **Consider Visual Appeal**: Choose appropriate conceal characters
 
 ### Team Adoption
 
@@ -229,13 +203,10 @@ tasks:
       name: "backlog"
     - value: "/"
       name: "in-progress"
-      conceal: "⏳"
     - value: "r"
       name: "review"
-      conceal: "👁️"
     - value: "x"
       name: "done"
-      conceal: "✅"
 
 # Detailed workflow
 tasks:
@@ -244,17 +215,12 @@ tasks:
       name: "todo"
     - value: "/"
       name: "in-progress"
-      conceal: "⏳"
     - value: "r"
       name: "review"
-      conceal: "👁️"
     - value: "b"
       name: "blocked"
-      conceal: "🚫"
     - value: "x"
       name: "done"
-      conceal: "✅"
     - value: "-"
       name: "cancelled"
-      conceal: "❌"
 ```
