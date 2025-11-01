@@ -681,11 +681,8 @@ func (s *Server) getTaskStateCompletions(prefix string, cfg *config.Config, need
 
 				kind := lsp.CompletionItemKindEnum
 
-				// Build detail: name + conceal (if set)
+				// Build detail: name
 				detail := state.Name
-				if state.Conceal != nil && *state.Conceal != "" {
-					detail += fmt.Sprintf(" %s", *state.Conceal)
-				}
 
 				// Sort by config order, then group main value with its aliases
 				// Format: configOrder_aliasIndex_value

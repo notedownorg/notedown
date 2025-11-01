@@ -28,12 +28,11 @@ Try adding a new task here and trigger completion after typing `- [`:
 When you trigger completion (usually Ctrl+Space or similar), you should see:
 1. All available task states with their names
 2. Descriptions of what each state means
-3. Visual conceal characters if supported
-4. Alias indicators for alternative values
+3. Alias indicators for alternative values
 
 The completion should show entries like:
 - ` ` - Task state: todo - A task that needs to be completed
-- `x` - Task state: done - A completed task (✅)
-- `/` - Task state: in-progress - A task currently being worked on (⏳)
-- `X` - Task state: done - A completed task (✅) [alias for 'x']
+- `x` - Task state: done - A completed task
+- `/` - Task state: in-progress - A task currently being worked on
+- `X` - Task state: done - A completed task [alias for 'x']
 - etc.

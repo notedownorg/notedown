@@ -42,13 +42,12 @@ func TestLoadConfigFromFile(t *testing.T) {
     - value: " "
       name: "todo"
     - value: "x"
-      name: "done"
-      conceal: "✅"`,
+      name: "done"`,
 			expectedCfg: &Config{
 				Tasks: TasksConfig{
 					States: []TaskState{
 						{Value: " ", Name: "todo"},
-						{Value: "x", Name: "done", Conceal: stringPtr("✅")},
+						{Value: "x", Name: "done"},
 					},
 				},
 			},
@@ -60,7 +59,7 @@ func TestLoadConfigFromFile(t *testing.T) {
   "tasks": {
     "states": [
       {"value": " ", "name": "todo"},
-      {"value": "x", "name": "done", "conceal": "✅"}
+      {"value": "x", "name": "done"}
     ]
   }
 }`,
@@ -68,7 +67,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 				Tasks: TasksConfig{
 					States: []TaskState{
 						{Value: " ", Name: "todo"},
-						{Value: "x", Name: "done", Conceal: stringPtr("✅")},
+						{Value: "x", Name: "done"},
 					},
 				},
 			},
@@ -194,19 +193,16 @@ func TestGetDefaultConfig(t *testing.T) {
 	todoState := config.Tasks.States[0]
 	assert.Equal(t, " ", todoState.Value)
 	assert.Equal(t, "todo", todoState.Name)
-	assert.Nil(t, todoState.Conceal)
 
 	// Check default done state
 	doneState := config.Tasks.States[1]
 	assert.Equal(t, "x", doneState.Value)
 	assert.Equal(t, "done", doneState.Name)
-	assert.Nil(t, doneState.Conceal)
 
 	// Check default wip state
 	wipState := config.Tasks.States[2]
 	assert.Equal(t, "wip", wipState.Value)
 	assert.Equal(t, "work-in-progress", wipState.Name)
-	assert.Nil(t, wipState.Conceal)
 
 	// Ensure config is valid
 	err := config.Validate()
@@ -220,7 +216,7 @@ func TestSaveConfig(t *testing.T) {
 		Tasks: TasksConfig{
 			States: []TaskState{
 				{Value: " ", Name: "todo"},
-				{Value: "x", Name: "done", Conceal: stringPtr("✅")},
+				{Value: "x", Name: "done"},
 			},
 		},
 	}

@@ -25,7 +25,6 @@ type TaskState struct {
 	Name        string   `yaml:"name" json:"name"`
 	Description *string  `yaml:"description,omitempty" json:"description,omitempty"`
 	Aliases     []string `yaml:"aliases,omitempty" json:"aliases,omitempty"`
-	Conceal     *string  `yaml:"conceal,omitempty" json:"conceal,omitempty"`
 }
 
 // TasksConfig holds the configuration for task states
@@ -116,12 +115,4 @@ func (ts *TaskState) HasValue(value string) bool {
 	}
 
 	return false
-}
-
-// GetConcealText returns the conceal text or the value if conceal is not set
-func (ts *TaskState) GetConcealText() string {
-	if ts.Conceal != nil {
-		return *ts.Conceal
-	}
-	return "[" + ts.Value + "]"
 }

@@ -49,46 +49,6 @@ func TestTaskState_HasValue(t *testing.T) {
 	}
 }
 
-func TestTaskState_GetConcealText(t *testing.T) {
-	tests := []struct {
-		name     string
-		state    TaskState
-		expected string
-	}{
-		{
-			name: "with conceal",
-			state: TaskState{
-				Value:   "x",
-				Conceal: stringPtr("✅"),
-			},
-			expected: "✅",
-		},
-		{
-			name: "without conceal",
-			state: TaskState{
-				Value:   "todo",
-				Conceal: nil,
-			},
-			expected: "[todo]",
-		},
-		{
-			name: "empty conceal",
-			state: TaskState{
-				Value:   " ",
-				Conceal: stringPtr(""),
-			},
-			expected: "",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := tt.state.GetConcealText()
-			assert.Equal(t, tt.expected, result)
-		})
-	}
-}
-
 func TestTasksConfig_Validate(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -272,9 +232,4 @@ func TestConfig_Validate(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to create string pointers
-func stringPtr(s string) *string {
-	return &s
 }

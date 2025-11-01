@@ -84,23 +84,18 @@ tasks:
       aliases: []          # Optional aliases
     - value: "x"
       name: "done"
-      conceal: "✅"        # Optional: Visual replacement in editors
       aliases: ["X", "✓", "✔"]
     - value: "/"
       name: "in-progress"
-      conceal: "⏳"
       aliases: ["wip", "WIP"]
     - value: "-"
       name: "cancelled"
-      conceal: "❌"
       aliases: ["~", "cancelled"]
     - value: "?"
       name: "question"
-      conceal: "❓"
       aliases: ["Q"]
     - value: "important"
       name: "high-priority"
-      conceal: "⭐"
       aliases: ["!", "urgent"]
 ```
 
@@ -109,7 +104,7 @@ tasks:
 1. **Unique Values**: All `value` and `aliases` must be unique across all states
 2. **No Reserved Characters**: Values and aliases cannot contain `]`
 3. **Required Fields**: `value` and `name` are required for each state
-4. **Optional Fields**: `conceal` and `aliases` are optional
+4. **Optional Fields**: `aliases` are optional
 5. **Format Support**: Both YAML (`.yaml`) and JSON (`.json`) formats are supported, with YAML preferred
 
 ### Custom State Examples
@@ -122,20 +117,10 @@ With the configuration above, you can use any of these task state syntaxes:
 - [/] Work in progress task
 - [wip] Alternative in-progress syntax
 - [-] Cancelled task
-- [?] Question or needs clarification  
+- [?] Question or needs clarification
 - [important] High priority task
 - [!] Alternative high priority syntax
 ```
-
-### Visual Concealment
-
-When `conceal` is specified, compatible editors can replace the bracket syntax with the conceal text for improved readability:
-
-- `[x]` → `✅` (when conceal: "✅")
-- `[/]` → `⏳` (when conceal: "⏳")
-- `[-]` → `❌` (when conceal: "❌")
-
-If no `conceal` is specified, the original `[value]` syntax is displayed.
 
 ### Configuration Discovery
 
