@@ -44,24 +44,17 @@ generate:
 
 format: licenser
 	gofmt -w .
-	stylua neovim/
 
 lint:
 	golangci-lint run
 
-test: test-pkg test-lsp test-nvim
+test: test-pkg test-lsp
 
 test-pkg:
 	go test ./pkg/...
 
 test-lsp:
 	go test ./language-server/...
-
-test-nvim:
-	cd neovim && ./scripts/test
-
-
-
 
 install: clean
 	go build -ldflags "\
@@ -71,17 +64,9 @@ install: clean
 		-X github.com/notedownorg/notedown/pkg/version.date=$(DATE)" \
 		-o $(shell go env GOPATH)/bin/notedown-language-server \
 		./language-server/
-	mkdir -p ~/.config/notedown/nvim
-	cp -r neovim/* ~/.config/notedown/nvim/
 
 clean:
 	rm -f $(shell go env GOPATH)/bin/notedown-language-server
-	rm -rf ~/.config/notedown/nvim
 
 licenser:
 	licenser apply -r "Notedown Authors"
-
-dev: install
-	rm -rf /tmp/notedown_demo_workspace
-	cp -r demo_workspace /tmp/notedown_demo_workspace
-	cd /tmp/notedown_demo_workspace && nvim .

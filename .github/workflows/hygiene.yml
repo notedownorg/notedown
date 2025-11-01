@@ -20,9 +20,9 @@ jobs:
 
     - name: Ensure generated files are up to date
       run: make generate
-    
-    - name: Check code formatting
-      run: make format
+
+    - name: Check Go code formatting
+      run: gofmt -w .
 
     - name: Go mod tidy
       run: make mod
