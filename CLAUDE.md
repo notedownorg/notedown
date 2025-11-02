@@ -5,26 +5,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Build and Test Commands
 
 ### Core Development
-- `make test` - Run all tests (LSP and Neovim tests)
-- `make test-lsp` - Run Go tests only (`go test ./...`)
-- `make test-nvim` - Run Neovim plugin tests only
+- `make test` - Run all tests (parser and LSP tests)
+- `make test-pkg` - Run parser package tests only (`go test ./pkg/...`)
+- `make test-lsp` - Run LSP server tests only (`go test ./language-server/...`)
 - `make format` - Format code with gofmt
 - `make mod` - Tidy Go modules
 - `make hygiene` - Run format and mod tidy
 - `make all` - Full build pipeline: format, mod, test, and check for dirty working tree
 - `make dirty` - Check if working tree is clean (exit code 1 if dirty)
-- `make install` - Build and install `notedown-language-server` binary to GOPATH/bin with version info, also installs Neovim plugin to `~/.config/notedown/nvim/`
-- `make clean` - Remove installed binary and Neovim plugin files
+- `make install` - Build and install `notedown-language-server` binary to GOPATH/bin with version info
+- `make clean` - Remove installed binary
 - `make licenser` - Apply license headers to all files
-- `make dev` - Install and open test workspace in Neovim for development
 
 ### Testing Individual Components
 - `go test ./pkg/parser/...` - Test parser package
 - `go test ./language-server/pkg/...` - Test LSP server packages
 - `go test ./language-server/pkg/notedownls/...` - Test Notedown-specific LSP implementation
 - `go test -run TestSpecificFunction ./path/to/package` - Run specific test
-- `cd neovim && nvim -l tests/minit.lua` - Test Neovim plugin
-- `cd neovim && ./scripts/test` - Alternative test runner
 
 ### Building
 - `go build -o bin/notedown-language-server ./language-server/` - Build LSP server binary
@@ -33,14 +30,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Code Quality
 - Uses `licenser` tool for license header management (run `make licenser`)
-- All code must be gofmt formatted (Go) and stylua formatted (Lua)
+- All Go code must be gofmt formatted
 - Working tree must be clean after running hygiene tasks
 - Requires Go 1.24.4 or later
 - Optional Nix development environment available (flake.nix)
 
 ## Architecture Overview
 
-This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of five main components:
+This is a Go-based Language Server Protocol (LSP) implementation for Notedown Flavored Markdown (NFM), consisting of three main components:
 
 ### 1. Parser Package (`pkg/parser/`)
 - **Core Parser**: Built on `goldmark` with custom extensions for NFM
@@ -94,29 +91,7 @@ Key files in notedownls:
 - `handlers_workspace.go` - LSP workspace method handlers
 - `indexes/wikilink.go` - Advanced wikilink target indexing and resolution system
 
-### 3. Neovim Plugin Testing (`neovim/tests/`)
-- **Simplified Testing**: Uses simple assertion-based tests following folke/trouble.nvim patterns
-- **Spec Files**: Tests organized in `*_spec.lua` files with `run_tests()` functions
-- **No External Dependencies**: Pure Lua testing without mini.test or other frameworks
-- **LSP Integration**: Tests build and use real notedown-language-server for authentic behavior
-- **Test Runners**: 
-  - `minit.lua` - Main test runner with LSP binary building and comprehensive test execution
-  - `scripts/test` - Simple shell script wrapper for easy execution
-- **Comprehensive Coverage**: All notedown.nvim functionality tested including wikilinks, folding, completion, diagnostics
-
-### 4. Neovim Plugin (`neovim/`)
-- **Plugin System**: Lua-based Neovim plugin with intelligent workspace detection
-- **LSP Integration**: Automatic LSP server startup and configuration
-- **Parser Modes**: Configurable parser selection (auto/notedown/markdown)
-- **Workspace Detection**: Path-based workspace matching with tilde expansion
-
-Key files:
-- `lua/notedown/init.lua` - Main plugin initialization and configuration
-- `lua/notedown/config.lua` - Configuration management and workspace detection
-- `plugin/notedown.lua` - Plugin bootstrapping
-- `tests/` - Simplified test suite with spec files and test runners
-
-### 5. Shared Packages (`pkg/`)
+### 3. Shared Packages (`pkg/`)
 - **Logging**: Structured logging with multiple levels and formats (`pkg/log/`)
 - **Versioning**: Build-time version information (`pkg/version/`)
 
@@ -129,14 +104,7 @@ Key files:
 ### Testing Strategy
 - **Unit Tests**: Parser components (`parser_test.go`), JSON-RPC protocol tests with batch handling (`read_test.go`, `write_test.go`)
 - **Integration Tests**: Logger tests with different output formats and levels, Notedownls tests cover completion, workspace management, and wikilink indexing
-- **Neovim Plugin Tests**: Simplified testing framework inspired by folke/trouble.nvim:
-  - **Spec Files**: Tests organized in `*_spec.lua` files with simple assertion functions
-  - **Test Runners**: `minit.lua` builds LSP binary and runs all tests, `scripts/test` provides shell wrapper
-  - **Real LSP Integration**: Tests use actual notedown-language-server for authentic behavior
-  - **Comprehensive Coverage**: All plugin functionality including wikilinks, folding, text objects, workspace detection
-  - **No External Dependencies**: Pure Lua testing without mini.test or other frameworks
-- **Test Workspaces**: Demo workspace in `demo_workspace/` with sample files
-- **Conventions**: Standard Go testing for server components, simple assertion-based testing for Neovim plugin
+- **Conventions**: Standard Go testing with table-driven tests where appropriate
 
 ### Wikilink Index System
 The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
@@ -159,11 +127,8 @@ The `indexes/wikilink.go` implements a sophisticated wikilink tracking system:
 - **Language Specification**: Full language documentation available in `language/` directory
 
 ### Editor Integration
-- **Neovim Plugin**: Complete Neovim integration provided in `neovim/`
-  - Lua-based configuration and initialization (`lua/notedown/`)
-  - Plugin bootstrapping (`plugin/notedown.lua`)
-  - Automatically installed to `~/.config/notedown/nvim/` with `make install`
 - **LSP Integration**: Compatible with any LSP-capable editor through standard LSP protocol
+- **Editor Plugins**: Separate editor-specific plugins available in dedicated repositories
 
 ### Development Notes
 - All log messages should start with lowercase characters

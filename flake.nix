@@ -27,8 +27,6 @@
               go
               git
               licenser
-              stylua
-              neovim
               golangci-lint
               goreleaser
               vhs

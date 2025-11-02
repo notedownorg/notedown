@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  language-server:
+  goreleaser:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -23,6 +23,6 @@ jobs:
           github_access_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run GoReleaser
-        run: nix develop --command goreleaser release --config .goreleaser.notedown-language-server.yaml --clean --parallelism 2
+        run: nix develop --command goreleaser release --clean --parallelism 2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
