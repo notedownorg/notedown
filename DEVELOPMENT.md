@@ -71,8 +71,7 @@ make generate   # Generate Go code from .proto files
 │   ├── log/          # Logging utilities
 │   ├── parser/       # Markdown parser with Notedown extensions
 │   ├── server/       # Document server
-│   ├── testdata/     # Test fixtures
-│   └── version/      # Version information
+│   └── testdata/     # Test fixtures
 └── language/         # Language documentation
 ```
 
@@ -82,7 +81,6 @@ make generate   # Generate Go code from .proto files
 - **Config** (`pkg/config/`) - Configuration file discovery and loading
 - **Log** (`pkg/log/`) - Structured logging
 - **Server** (`pkg/server/`) - Document workspace and filtering
-- **Version** (`pkg/version/`) - Version information
 
 ## Related Projects
 

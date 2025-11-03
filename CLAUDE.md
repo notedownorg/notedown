@@ -61,10 +61,6 @@ Key files:
 - **Filtering**: Document filtering and discovery
 - **Loading**: Document content loading
 
-### 5. Version Package (`pkg/version/`)
-- **Build Info**: Version information embedded at build time
-- **Git Integration**: Version derived from git tags
-
 ### Dependencies
 - `goldmark` - Markdown parser foundation
 - `spf13/cobra` - CLI framework (for version info)
