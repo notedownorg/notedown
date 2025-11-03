@@ -27,7 +27,7 @@ VERSION := $(shell git describe --tags --always --dirty)
 COMMIT := $(shell git rev-parse HEAD)
 DATE := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 
-check: clean generate format mod lint test
+check: generate format mod lint test
 
 all: hygiene test dirty
 
@@ -48,25 +48,8 @@ format: licenser
 lint:
 	golangci-lint run
 
-test: test-pkg test-lsp
-
-test-pkg:
-	go test ./pkg/...
-
-test-lsp:
-	go test ./language-server/...
-
-install: clean
-	go build -ldflags "\
-		-w -s \
-		-X github.com/notedownorg/notedown/pkg/version.version=$(VERSION) \
-		-X github.com/notedownorg/notedown/pkg/version.commit=$(COMMIT) \
-		-X github.com/notedownorg/notedown/pkg/version.date=$(DATE)" \
-		-o $(shell go env GOPATH)/bin/notedown-language-server \
-		./language-server/
-
-clean:
-	rm -f $(shell go env GOPATH)/bin/notedown-language-server
+test:
+	go test ./...
 
 licenser:
 	licenser apply -r "Notedown Authors"

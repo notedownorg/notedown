@@ -7,46 +7,16 @@ on:
     branches: [ main ]
 
 jobs:
-  pkg:
-    name: pkg
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Install Nix
-      uses: cachix/install-nix-action@v31
-    
-    - name: Run pkg tests
-      run: make test-pkg
-
-  language-server:
-    name: language-server
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Install Nix
-      uses: cachix/install-nix-action@v31
-    
-    - name: Run Language Server tests
-      run: make test-lsp
-
-  release:
-    name: release
+  test:
+    name: test
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Install Nix
       uses: cachix/install-nix-action@v31
 
-    - name: Test release build
-      run: nix develop --command goreleaser release --snapshot --clean --parallelism 2
+    - name: Run tests
+      run: make test
