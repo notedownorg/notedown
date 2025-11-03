@@ -74,7 +74,6 @@ After releasing:
 - **GoReleaser Config**: `.goreleaser.*.yaml` - defines build matrix and release settings
 - **Release Workflow**: `.github/workflows/release.yml` - GitHub Actions automation
 - **Test Workflow**: `.github/workflows/test.yml` - includes release validation via snapshot builds
-- **Version Package**: `pkg/version/version.go` - version info injection
 
 ### 7. Branch Naming Convention
 
