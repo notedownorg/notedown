@@ -1,186 +1,90 @@
 # Notedown Development Guide
 
-This guide covers how to set up, develop, and test the Notedown project locally.
+Development guide for the Notedown core library and parser.
+
+## Prerequisites
+
+**Option 1: Nix (Recommended)**
+- Install [Nix](https://github.com/DeterminateSystems/nix-installer)
+- All dependencies provided automatically via `flake.nix`
+
+**Option 2: Manual Setup**
+- Go 1.24.4+
+- golangci-lint
+- licenser
+- buf (for protobuf generation)
 
 ## Quick Start
 
-### Prerequisites
-
-**Recommended: Nix Package Manager (preferred method)**
-- Install [Nix](https://github.com/DeterminateSystems/nix-installer) - provides all dependencies automatically
-- The project includes `flake.nix` with complete development environment
-
-**Manual setup (if not using Nix):**
-- Go 1.24.4 or later
-- Neovim with Lua support
-- Git
-- VHS (for feature testing)
-- golangci-lint (for linting)
-
-### Install Development Build
-
-To install the latest development version (HEAD) on your local machine:
-
 ```bash
-# Clone the repository
+# Clone and test
 git clone https://github.com/notedownorg/notedown.git
 cd notedown
-
-# Install development build
-make install
+make test
 ```
-
-This will:
-1. **Clean** any existing installation
-2. **Build** the LSP server with current version info from git
-3. **Install** the binary to `$GOPATH/bin/notedown-language-server`
-4. **Install** the Neovim plugin to `~/.config/notedown/nvim/`
-
-### Verify Installation
-
-Check that the installation worked:
-
-```bash
-# Verify LSP server binary
-which notedown-language-server
-notedown-language-server --version
-
-# Verify Neovim plugin files
-ls -la ~/.config/notedown/nvim/
-```
-
-### Configure Neovim Plugin
-
-After installation, you need to configure Neovim to load the plugin. The method depends on your plugin manager:
-
-#### Lazy.nvim
-
-Add to your Lazy plugin configuration:
-
-```lua
-return {
-    dir = "~/.config/notedown/nvim",
-    name = "notedown",
-    config = function()
-        vim.treesitter.language.register('markdown', 'notedown')
-        require("notedown").setup({})
-    end,
-}
-```
-
-#### Packer.nvim
-
-```lua
-use {
-    "~/.config/notedown/nvim",
-    as = "notedown",
-    config = function()
-        vim.treesitter.language.register('markdown', 'notedown')
-        require("notedown").setup({})
-    end,
-}
-```
-### Test with Development Environment
-
-Use the built-in development workspace:
-
-```bash
-# Launch development environment
-make dev
-```
-
-This will:
-1. Install the development build
-2. Copy the demo workspace to `/tmp/notedown_demo_workspace`
-3. Open Neovim in the demo workspace
 
 ## Development Workflow
 
-### Making Changes
-
-1. **Make your changes** to the codebase
-2. **Test your changes** locally:
-   ```bash
-   make test-nvim           # Test Neovim plugin
-   make test                # Full test suite
-   ```
-3. **Install and test** your changes:
-   ```bash
-   make install  # Reinstall with your changes
-   make dev      # Test in development environment
-   ```
-
-### Code Quality
-
-Before committing changes:
-
-```bash
-# Format and tidy code
-make hygiene
-
-# Run linter (if available)
-make lint
-
-# Run all tests
-make all
-```
-
-### Version Information
-
-The `make install` command embeds version information from git:
-
-- **Version**: `git describe --tags --always --dirty`
-- **Commit**: Current commit hash
-- **Date**: Build timestamp
-
-You can see this information with:
-```bash
-notedown-language-server --version
-```
-
-## Build Targets
-
-### Core Development
-- `make install` - Build and install development version (HEAD)
-- `make clean` - Remove installed binary and plugin files
-- `make dev` - Install and open test workspace in Neovim
-- `make all` - Full build pipeline with hygiene checks
-
 ### Testing
-- `make test` - Run all tests (Go and Neovim tests)
-- `make test-lsp` - Run Go tests only
-- `make test-nvim` - Run Neovim plugin tests only
+
+```bash
+make test       # Run all tests
+make check      # Full check: generate, format, mod, lint, test
+```
 
 ### Code Quality
-- `make format` - Format Go code and Lua files
-- `make mod` - Tidy Go modules
-- `make hygiene` - Format and mod tidy
-- `make lint` - Run golangci-lint (if available)
-- `make dirty` - Check if working tree is clean
 
-## Architecture Overview
+```bash
+make hygiene    # Format and tidy
+make lint       # Run linter
+make all        # Hygiene + test + dirty check
+```
+
+### Protobuf Generation
+
+```bash
+make generate   # Generate Go code from .proto files
+```
+
+## Make Targets
+
+| Target | Description |
+|--------|-------------|
+| `make test` | Run all tests |
+| `make check` | Generate + format + mod + lint + test |
+| `make hygiene` | Format and tidy modules |
+| `make generate` | Generate protobuf code |
+| `make format` | Format code and apply licenses |
+| `make mod` | Tidy Go modules |
+| `make lint` | Run golangci-lint |
+| `make dirty` | Check for uncommitted changes |
+| `make all` | Hygiene + test + dirty |
+
+## Architecture
+
+```
+├── apis/              # Protobuf API definitions
+│   ├── proto/        # .proto files
+│   └── go/           # Generated Go code
+├── pkg/
+│   ├── config/       # Configuration loading
+│   ├── log/          # Logging utilities
+│   ├── parser/       # Markdown parser with Notedown extensions
+│   ├── server/       # Document server
+│   ├── testdata/     # Test fixtures
+│   └── version/      # Version information
+└── language/         # Language documentation
+```
 
 ### Components
 
-1. **Language Server** (`language-server/`) - LSP implementation for Notedown
-2. **Parser** (`pkg/parser/`) - Markdown parser with NFM extensions
-3. **Neovim Plugin** (`neovim/`) - Lua plugin for Neovim integration
-4. **Neovim Tests** (`neovim/tests/`) - Comprehensive plugin testing
+- **Parser** (`pkg/parser/`) - Markdown parser with Notedown extensions (wikilinks, tasklists)
+- **Config** (`pkg/config/`) - Configuration file discovery and loading
+- **Log** (`pkg/log/`) - Structured logging
+- **Server** (`pkg/server/`) - Document workspace and filtering
+- **Version** (`pkg/version/`) - Version information
 
-### Installation Details
+## Related Projects
 
-When you run `make install`:
-
-1. **LSP Server**: Built with ldflags embedding version info, installed to `$GOPATH/bin`
-2. **Neovim Plugin**: All files from `neovim/` copied to `~/.config/notedown/nvim/`
-3. **Configuration**: Plugin detects the installed LSP server automatically
-
-### File Locations
-
-After installation:
-- **LSP Binary**: `$GOPATH/bin/notedown-language-server`
-- **Plugin Files**: `~/.config/notedown/nvim/`
-  - `lua/notedown/init.lua` - Main plugin code
-  - `lua/notedown/config.lua` - Configuration
-  - `plugin/notedown.lua` - Plugin bootstrapping
-
+- [language-server](https://github.com/notedownorg/language-server) - LSP server
+- [notedown.nvim](https://github.com/notedownorg/notedown.nvim) - Neovim plugin

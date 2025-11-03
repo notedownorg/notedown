@@ -35,7 +35,8 @@
       "Bash(timeout:*)",
       "Bash(lua:*)",
       "Bash(buf generate:*)",
-      "Bash(buf mod:*)"
+      "Bash(buf mod:*)",
+      "Bash(gh pr create:*)"
     ],
     "deny": [],
     "additionalDirectories": [
